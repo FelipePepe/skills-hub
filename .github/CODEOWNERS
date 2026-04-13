@@ -1,5 +1,5 @@
-# Replace @your-github-handle with the real owner before enforcing branch protection.
-* @your-github-handle
+# Repository ownership for required review enforcement.
+* @FelipePepe
 
 # Optional granular ownership examples:
 # /scripts/ @your-github-handle
