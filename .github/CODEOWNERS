@@ -1,0 +1,8 @@
+# Replace @your-github-handle with the real owner before enforcing branch protection.
+* @your-github-handle
+
+# Optional granular ownership examples:
+# /scripts/ @your-github-handle
+# /config/ @your-github-handle
+# /skills/ @your-github-handle
+# /prompts/ @your-github-handle
