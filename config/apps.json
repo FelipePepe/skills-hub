@@ -1,0 +1,107 @@
+{
+  "apps": [
+    {
+      "id": "copilot",
+      "description": "GitHub Copilot local skills directory",
+      "installPath": {
+        "linux": "~/.copilot/skills",
+        "windows": "%USERPROFILE%/.copilot/skills"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.copilot",
+          "~/.copilot/skills"
+        ],
+        "windows": [
+          "%USERPROFILE%/.copilot",
+          "%USERPROFILE%/.copilot/skills"
+        ]
+      },
+      "sources": [
+        "skills/common",
+        "skills/copilot-only"
+      ]
+    },
+    {
+      "id": "claude",
+      "description": "Claude local skills directory",
+      "installPath": {
+        "linux": "~/.claude/skills",
+        "windows": "%USERPROFILE%/.claude/skills"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.claude",
+          "~/.claude/skills"
+        ],
+        "windows": [
+          "%USERPROFILE%/.claude",
+          "%USERPROFILE%/.claude/skills"
+        ]
+      },
+      "sources": [
+        "skills/common",
+        "skills/claude-only"
+      ]
+    },
+    {
+      "id": "agents",
+      "description": "Generic agents local skills directory",
+      "installPath": {
+        "linux": "~/.agents/skills",
+        "windows": "%USERPROFILE%/.agents/skills"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.agents",
+          "~/.agents/skills"
+        ],
+        "windows": [
+          "%USERPROFILE%/.agents",
+          "%USERPROFILE%/.agents/skills"
+        ]
+      },
+      "sources": [
+        "skills/common"
+      ]
+    },
+    {
+      "id": "opencode",
+      "description": "OpenCode managed configuration",
+      "installPath": {
+        "linux": "~/.config/opencode",
+        "windows": "%USERPROFILE%/.config/opencode"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.config/opencode",
+          "~/.opencode"
+        ],
+        "windows": [
+          "%USERPROFILE%/.config/opencode",
+          "%USERPROFILE%/.opencode"
+        ]
+      },
+      "sources": [],
+      "configFiles": [
+        {
+          "source": "opencode/opencode.managed.json",
+          "target": {
+            "linux": "~/.config/opencode/opencode.json",
+            "windows": "%USERPROFILE%/.config/opencode/opencode.json"
+          },
+          "strategy": "json-merge"
+        },
+        {
+          "source": "opencode/AGENTS.md",
+          "target": {
+            "linux": "~/.opencode/AGENTS.md",
+            "windows": "%USERPROFILE%/.opencode/AGENTS.md"
+          },
+          "strategy": "markdown-managed-block",
+          "blockId": "opencode-routing"
+        }
+      ]
+    }
+  ]
+}

@@ -11,6 +11,7 @@ bash -n "$ROOT_DIR/scripts/lint.sh"
 bash -n "$ROOT_DIR/scripts/doctor.sh"
 bash -n "$ROOT_DIR/scripts/setup-branch-protection.sh"
 bash -n "$ROOT_DIR/config/sync-map.sh"
+node --check "$ROOT_DIR/scripts/link-skills.mjs"
 
 if command -v shellcheck >/dev/null 2>&1; then
   echo "[skills-hub] Lint: ejecutando shellcheck..."

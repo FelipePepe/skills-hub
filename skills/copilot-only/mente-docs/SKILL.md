@@ -10,6 +10,9 @@ metadata:
   author: Felipe Perez / SandMan Owl
   version: "1.0"
 ---
+> **🏠 CASA LAYER** — Only use this skill when working in a `.casa` intranet project.
+> **Detect context by**: presence of `.casa` file in project root, `*.casa` domain references (maya.casa, infisical.casa, pihole.casa), or user explicitly mentions "intranet" or "home project".
+> **Work/external projects**: do NOT suggest or use this skill. Skip silently.
 
 ## When to Use
 
@@ -252,3 +255,9 @@ curl -s http://mente.casa/api/notes | python3 -c "import json,sys; notes=json.lo
 | `pihole1.casa` | Panel Pi-hole 1 | pihole1 |
 | `clockwork.casa` | clockworkpi | clockwork |
 | `router.casa` | Router | 192.168.1.1 |
+
+## Model routing hints
+
+- preferred agent: documenter
+- preferred model: ollama/qwen3.6:27b
+- routing intent: hint only; the skill must not switch models directly

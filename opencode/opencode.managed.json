@@ -1,0 +1,251 @@
+{
+  "skills": {
+    "paths": [
+      "__COPILOT_SKILLS_DIR__"
+    ]
+  },
+  "enabled_providers": [
+    "ollama"
+  ],
+  "model": "ollama/qwen3.6:27b",
+  "small_model": "ollama/deepseek-coder-v2:16b",
+  "default_agent": "architect",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (192.168.1.60)",
+      "options": {
+        "baseURL": "http://192.168.1.60:11434/v1"
+      },
+      "models": {
+        "qwen3.6:27b": {
+          "id": "qwen3.6:27b",
+          "name": "Qwen 3.6 27B"
+        },
+        "qwen3-coder:30b": {
+          "id": "qwen3-coder:30b",
+          "name": "Qwen 3 Coder 30B"
+        },
+        "devstral:latest": {
+          "id": "devstral:latest",
+          "name": "Devstral Latest"
+        },
+        "deepseek-coder-v2:16b": {
+          "id": "deepseek-coder-v2:16b",
+          "name": "DeepSeek Coder V2 16B"
+        }
+      }
+    }
+  },
+  "agent": {
+    "architect": {
+      "mode": "primary",
+      "model": "ollama/qwen3.6:27b",
+      "temperature": 0.2,
+      "description": "Arquitectura, planificacion, riesgos, descomposicion y documentacion tecnica. No modifica codigo salvo peticion explicita.",
+      "prompt": "Actua como arquitecto senior. Lee antes de proponer. Prioriza arquitectura, planificacion, riesgos, supuestos, ADRs y descomposicion en pasos pequenos. No edites codigo salvo que el usuario lo pida de forma explicita.",
+      "steps": 6,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "skill": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "edit": "deny",
+        "bash": "ask",
+        "task": "ask",
+        "external_directory": "ask"
+      }
+    },
+    "coder": {
+      "mode": "all",
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.1,
+      "description": "Implementacion, refactor, fixes y generacion de codigo con cambios pequenos y revisables.",
+      "prompt": "Actua como implementador senior. Lee antes de editar. Haz cambios pequenos, revisables y compatibles con el codigo existente. Explica supuestos. Evita tocar mas alcance del necesario.",
+      "steps": 6,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "skill": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "edit": "ask",
+        "bash": "ask",
+        "task": "ask",
+        "external_directory": "ask"
+      }
+    },
+    "repo-agent": {
+      "mode": "all",
+      "model": "ollama/devstral:latest",
+      "temperature": 0.15,
+      "description": "Exploracion de repositorios, cambios multiarchivo y tareas agentic sobre la codebase. Lee antes de editar y planifica antes de cambios grandes.",
+      "prompt": "Actua como agente de repositorio. Primero inspecciona la codebase. Antes de cambios grandes o multiarchivo, produce un plan breve. Mantente cohesivo y evita editar sin haber entendido el contexto.",
+      "steps": 8,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "skill": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "edit": "ask",
+        "bash": "ask",
+        "task": "ask",
+        "external_directory": "ask"
+      }
+    },
+    "tester": {
+      "mode": "all",
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.05,
+      "description": "Unit, integration, BDD, TDD, Playwright, NUnit, JUnit y SpecFlow.",
+      "prompt": "Actua como test engineer. Prioriza pruebas automatizadas, TDD cuando sea viable y diagnostico reproducible. No borres tests para pasar builds. Si una herramienta falta, propon el siguiente mejor camino.",
+      "steps": 6,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "skill": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "edit": "ask",
+        "bash": "ask",
+        "task": "ask",
+        "external_directory": "ask"
+      }
+    },
+    "security": {
+      "mode": "all",
+      "model": "ollama/qwen3.6:27b",
+      "temperature": 0.05,
+      "description": "OWASP Top 10, secrets, validacion, autorizacion, logging y dependencias. Revisa y propone por defecto; no modifica codigo salvo peticion explicita.",
+      "prompt": "Actua como security reviewer. Busca fallos reales de seguridad, supuestos rotos y riesgos operativos. Por defecto solo revisa y propone. No edites codigo salvo peticion explicita.",
+      "steps": 5,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "skill": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "edit": "deny",
+        "bash": "ask",
+        "task": "ask",
+        "external_directory": "ask"
+      }
+    },
+    "documenter": {
+      "mode": "all",
+      "model": "ollama/qwen3.6:27b",
+      "temperature": 0.3,
+      "description": "README, ADRs, documentacion tecnica, onboarding y guias de uso.",
+      "prompt": "Actua como technical writer senior. Estructura la documentacion para mantenimiento real. Aclara supuestos, comandos y limites. Mantente alineado con el workflow actual.",
+      "steps": 5,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "skill": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "edit": "ask",
+        "bash": "ask",
+        "task": "ask",
+        "external_directory": "ask"
+      }
+    },
+    "fast": {
+      "mode": "all",
+      "model": "ollama/deepseek-coder-v2:16b",
+      "temperature": 0.1,
+      "description": "Tareas pequenas, scripts, errores simples y cambios menores.",
+      "prompt": "Actua como agente rapido para trabajo de poco riesgo. Prioriza velocidad, claridad y cambios minimos. Si el alcance crece, recomienda cambiar a coder o repo-agent.",
+      "steps": 3,
+      "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
+        "list": "allow",
+        "skill": "allow",
+        "question": "allow",
+        "todowrite": "allow",
+        "edit": "ask",
+        "bash": "ask",
+        "task": "ask",
+        "external_directory": "ask"
+      }
+    }
+  },
+  "command": {
+    "plan-refactor": {
+      "description": "Plan a refactor before implementation.",
+      "agent": "architect",
+      "model": "ollama/qwen3.6:27b",
+      "template": "Usa el agente architect. Si el usuario dio argumentos en el slash command, tomalos como scope. Analiza el refactor sin editar codigo salvo peticion explicita. Entrega objetivo, riesgos, archivos afectados, dependencias, pasos pequenos y rollback. Skills sugeridas si existen: sdd-explore, sdd-design, sdd-tasks, db-architect, project-workflow."
+    },
+    "implement": {
+      "description": "Implement or fix with small reviewable edits.",
+      "agent": "coder",
+      "model": "ollama/qwen3-coder:30b",
+      "template": "Usa el agente coder. Si el usuario dio argumentos en el slash command, tomalos como scope. Lee antes de editar. Implementa con cambios pequenos y revisables, sin inventar APIs. Skills sugeridas si existen: sdd-apply, branch-pr, test-runner."
+    },
+    "review-security": {
+      "description": "Run a conservative security review.",
+      "agent": "security",
+      "model": "ollama/qwen3.6:27b",
+      "template": "Usa el agente security. Si el usuario dio argumentos en el slash command, tomalos como scope. Revisa OWASP Top 10, secretos, autorizacion, validacion, logs y dependencias. Por defecto no edites codigo; propone findings priorizados. Skills sugeridas si existen: code-reviewer, red-team-offensive, infisical-vault."
+    },
+    "test-e2e": {
+      "description": "Design or run end-to-end tests.",
+      "agent": "tester",
+      "model": "ollama/qwen3-coder:30b",
+      "template": "Usa el agente tester. Si el usuario dio argumentos en el slash command, tomalos como scope. Prioriza E2E reproducible, Playwright cuando exista, y diagnostico claro. No borres tests para pasar builds. Skills sugeridas si existen: test-runner, sdd-verify."
+    },
+    "test-dotnet": {
+      "description": "Review or implement .NET test coverage.",
+      "agent": "tester",
+      "model": "ollama/qwen3-coder:30b",
+      "template": "Usa el agente tester. Si el usuario dio argumentos en el slash command, tomalos como scope. Trabaja sobre NUnit, SpecFlow o el stack de test .NET que exista. Si no hay skill dedicada, sigue las convenciones del repo y manten cambios pequenos. Skills sugeridas si existen: test-runner, sdd-verify."
+    },
+    "test-java": {
+      "description": "Review or implement Java test coverage.",
+      "agent": "tester",
+      "model": "ollama/qwen3-coder:30b",
+      "template": "Usa el agente tester. Si el usuario dio argumentos en el slash command, tomalos como scope. Trabaja sobre JUnit y pruebas de integracion segun el repo. Si no hay skill dedicada, sigue las convenciones del proyecto. Skills sugeridas si existen: test-runner, sdd-verify."
+    },
+    "docs": {
+      "description": "Write or update technical documentation.",
+      "agent": "documenter",
+      "model": "ollama/qwen3.6:27b",
+      "template": "Usa el agente documenter. Si el usuario dio argumentos en el slash command, tomalos como scope. Crea documentacion mantenible, con comandos, supuestos y limites. Skills sugeridas si existen: mente-docs, casa-atlas, skill-creator, project-workflow."
+    },
+    "adr": {
+      "description": "Draft or update an ADR.",
+      "agent": "documenter",
+      "model": "ollama/qwen3.6:27b",
+      "template": "Usa el agente documenter. Si el usuario dio argumentos en el slash command, tomalos como scope. Redacta una ADR con contexto, decision, consecuencias, riesgos y alternativas. Skills sugeridas si existen: sdd-design, mente-docs, project-workflow."
+    },
+    "analyze-legacy": {
+      "description": "Inspect legacy systems before changes.",
+      "agent": "repo-agent",
+      "model": "ollama/devstral:latest",
+      "template": "Usa el agente repo-agent. Si el usuario dio argumentos en el slash command, tomalos como scope. Lee antes de editar y planifica antes de cambios grandes. Preserva compatibilidad en .NET Framework y WebForms salvo peticion explicita. Skills sugeridas si existen: sdd-explore, sdd-design, project-workflow."
+    },
+    "sql-review": {
+      "description": "Review SQL schema, migrations and query risks.",
+      "agent": "architect",
+      "model": "ollama/qwen3.6:27b",
+      "template": "Usa el agente architect. Si el usuario dio argumentos en el slash command, tomalos como scope. Revisa esquema, migraciones, indices, seguridad y riesgos de queries. Por defecto entrega findings y plan; no edites salvo peticion explicita. Skills sugeridas si existen: db-architect, sdd-design, code-reviewer."
+    }
+  }
+}
