@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
+LINKER="$ROOT_DIR/scripts/link-skills.mjs"
 
 if [[ ! -f "$MAP_FILE" ]]; then
   echo "ERROR: No existe $MAP_FILE" >&2
@@ -31,7 +32,22 @@ if ! command -v rsync >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "[skills-hub] Iniciando sincronizacion..."
+if ! command -v node >/dev/null 2>&1; then
+  echo "ERROR: node no esta instalado." >&2
+  exit 1
+fi
+
+echo "[skills-hub] Iniciando instalacion de skills por enlaces..."
+linker_args=( install )
+if [[ "$DRY_RUN" == true ]]; then
+  linker_args+=( --dry-run )
+fi
+if ! node "$LINKER" "${linker_args[@]}"; then
+  echo "ERROR: fallo la instalacion por enlaces" >&2
+  exit 1
+fi
+
+echo "[skills-hub] Sincronizando contenido copiable legacy..."
 
 for pair in "${SYNC_PAIRS[@]}"; do
   src_rel="${pair%%::*}"
@@ -57,4 +73,4 @@ for pair in "${SYNC_PAIRS[@]}"; do
   rsync "${rsync_args[@]}" "$src_abs/" "$dst_abs/"
 done
 
-echo "[skills-hub] Sincronizacion finalizada."
+echo "[skills-hub] Instalacion/sincronizacion finalizada."

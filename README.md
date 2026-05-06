@@ -1,15 +1,24 @@
 # skills-hub
 
-Fuente unica de verdad para skills y prompts.
+Fuente unica de verdad para skills y tooling de sincronizacion.
 
 ## Objetivo
 
-Mantener contenido versionado en un solo repositorio y sincronizarlo hacia:
+Mantener contenido versionado en un solo repositorio y exponerlo hacia apps instaladas mediante enlaces simbolicos o junctions:
 
 - ~/.copilot/skills
 - ~/.claude/skills
-- ~/.agents/skills
 - ~/.config/Code/User/prompts
+
+## Estado actual
+
+- `skills/copilot-only` es la fuente principal para las skills activas de Copilot/OpenCode.
+- `skills/common` queda reservado para skills realmente portables entre plataformas.
+- `skills/claude-only` queda reservado para variantes especificas de Claude.
+- `~/.agents/skills` no se sincroniza automaticamente por ahora para evitar sobreescribir skills locales no modeladas aun en este repo.
+- `prompts`, `config` y `scripts` permanecen en el repo porque forman parte del tooling de sincronizacion y validacion.
+- `scripts/link-skills.mjs` es el instalador cross-platform recomendado para Linux y Windows.
+- `opencode/` contiene configuracion gestionada para OpenCode que se fusiona sin machacar la config local.
 
 ## Estructura
 
@@ -17,15 +26,25 @@ Mantener contenido versionado en un solo repositorio y sincronizarlo hacia:
 - `skills/copilot-only`: contenido exclusivo para Copilot.
 - `skills/claude-only`: contenido exclusivo para Claude.
 - `prompts`: prompts globales e instrucciones.
-- `config/sync-map.sh`: mapeos origen -> destino para sincronizacion.
-- `scripts/sync.sh`: aplica sincronizacion.
-- `scripts/check.sh`: valida drift y consistencia.
+- `config/apps.json`: manifiesto de apps detectables e instalables.
+- `config/sync-map.sh`: mapeos legacy para contenido copiable como `prompts`.
+- `opencode/opencode.managed.json`: fragmento gestionado de `opencode.json`.
+- `opencode/AGENTS.md`: bloque gestionado para `.opencode/AGENTS.md`.
+- `scripts/import-copilot-skills.sh`: bootstrap para importar skills locales existentes al repo.
+- `scripts/link-skills.mjs`: detecta apps instaladas y crea symlinks/junctions por skill.
+- `scripts/sync.sh`: ejecuta el instalador por enlaces y sincroniza contenido legacy copiable.
+- `scripts/check.sh`: valida el plan de instalacion por enlaces y el drift del contenido legacy.
 
 ## Uso rapido
 
 ```bash
+./scripts/import-copilot-skills.sh --dry-run
+./scripts/import-copilot-skills.sh
 ./scripts/doctor.sh
 ./scripts/lint.sh
+node ./scripts/link-skills.mjs status
+node ./scripts/link-skills.mjs install --dry-run
+node ./scripts/link-skills.mjs install
 ./scripts/sync.sh --dry-run
 ./scripts/sync.sh
 ./scripts/check.sh
@@ -48,6 +67,46 @@ Mantener contenido versionado en un solo repositorio y sincronizarlo hacia:
 
 - CI ejecuta `./scripts/lint.sh` en cada push y pull request.
 - El objetivo de CI es validar scripts y convenciones del repo sin depender de destinos locales.
+
+## Criterio de clasificacion
+
+- Si una skill depende de un workflow o plataforma concreta de Copilot/OpenCode, va a `skills/copilot-only`.
+- Si una skill no depende de Copilot y puede compartirse sin cambios, puede promocionarse despues a `skills/common`.
+- No mezclar configuracion de maquina dentro de `skills/`; eso debe quedarse en el tooling o fuera del repo.
+
+## Instalacion por enlaces
+
+El flujo recomendado es instalar skills mediante enlaces por skill, no copiando directorios completos:
+
+- En Linux se crean symlinks.
+- En Windows se crean junctions para directorios.
+- El instalador detecta si existen `~/.copilot`, `~/.claude` o sus equivalentes en `%USERPROFILE%`.
+- Para OpenCode, el instalador fusiona `opencode.json` y actualiza un bloque gestionado dentro de `.opencode/AGENTS.md`.
+- Si una app no esta instalada, se omite por defecto.
+- Si una ruta ya existe y no es un enlace del repo, se respeta y se marca como `skip`.
+- Antes de modificar ficheros de configuracion, crea backups `.bak-YYYYMMDD-HHMMSS`.
+
+Comandos:
+
+```bash
+node ./scripts/link-skills.mjs status
+node ./scripts/link-skills.mjs install --dry-run
+node ./scripts/link-skills.mjs install
+node ./scripts/link-skills.mjs install --app=copilot
+node ./scripts/link-skills.mjs install --replace
+```
+
+Flags:
+
+- `--app=<id>` limita a una app concreta
+- `--dry-run` muestra el plan sin tocar disco
+- `--replace` reemplaza enlaces existentes que apunten a otra ruta
+- `--include-missing` crea la ruta destino aunque la app no se detecte
+
+## Contenido legacy copiable
+
+No todo requiere enlaces. `prompts/` sigue tratandose como contenido copiable y se sincroniza con `rsync`.
+Por eso `sync.sh` mantiene un paso legacy adicional despues de la instalacion por enlaces.
 
 ## Historial de cambios
 

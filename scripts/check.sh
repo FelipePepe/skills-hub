@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
+LINKER="$ROOT_DIR/scripts/link-skills.mjs"
 
 if [[ ! -f "$MAP_FILE" ]]; then
   echo "ERROR: No existe $MAP_FILE" >&2
@@ -17,8 +18,24 @@ if ! command -v rsync >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v node >/dev/null 2>&1; then
+  echo "ERROR: node no esta instalado." >&2
+  exit 1
+fi
+
 echo "[skills-hub] Verificando drift..."
 errors=0
+
+echo "[skills-hub] Verificando instalacion por enlaces..."
+if ! node "$LINKER" status; then
+  echo "ERROR: fallo al inspeccionar apps instaladas con link-skills.mjs"
+  errors=1
+fi
+
+if ! node "$LINKER" install --dry-run; then
+  echo "ERROR: fallo al construir el plan de instalacion de skills"
+  errors=1
+fi
 
 for pair in "${SYNC_PAIRS[@]}"; do
   src_rel="${pair%%::*}"

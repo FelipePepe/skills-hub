@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
+APPS_FILE="$ROOT_DIR/config/apps.json"
 
 echo "[skills-hub] Doctor: verificando entorno local..."
 
@@ -11,8 +12,18 @@ if ! command -v rsync >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v node >/dev/null 2>&1; then
+  echo "ERROR: node no esta instalado." >&2
+  exit 1
+fi
+
 if [[ ! -f "$MAP_FILE" ]]; then
   echo "ERROR: No existe $MAP_FILE" >&2
+  exit 1
+fi
+
+if [[ ! -f "$APPS_FILE" ]]; then
+  echo "ERROR: No existe $APPS_FILE" >&2
   exit 1
 fi
 
