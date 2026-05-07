@@ -22,5 +22,4 @@ jobs:
       - name: Run repository lint
         run: |
           chmod +x scripts/lint.sh
-          chmod +x scripts/doctor.sh
           ./scripts/lint.sh

@@ -8,31 +8,25 @@
     "ollama"
   ],
   "model": "ollama/qwen3.6:27b",
-  "small_model": "ollama/deepseek-coder-v2:16b",
+  "small_model": "ollama/gemma4:31b",
   "default_agent": "architect",
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (192.168.1.60)",
-      "options": {
-        "baseURL": "http://192.168.1.60:11434/v1"
-      },
+      "options": {},
       "models": {
         "qwen3.6:27b": {
           "id": "qwen3.6:27b",
           "name": "Qwen 3.6 27B"
         },
-        "qwen3-coder:30b": {
-          "id": "qwen3-coder:30b",
-          "name": "Qwen 3 Coder 30B"
-        },
         "devstral:latest": {
           "id": "devstral:latest",
           "name": "Devstral Latest"
         },
-        "deepseek-coder-v2:16b": {
-          "id": "deepseek-coder-v2:16b",
-          "name": "DeepSeek Coder V2 16B"
+        "gemma4:31b": {
+          "id": "gemma4:31b",
+          "name": "Gemma 4 31B"
         }
       }
     }
@@ -61,7 +55,7 @@
     },
     "coder": {
       "mode": "all",
-      "model": "ollama/qwen3-coder:30b",
+      "model": "ollama/qwen3.6:27b",
       "temperature": 0.1,
       "description": "Implementacion, refactor, fixes y generacion de codigo con cambios pequenos y revisables.",
       "prompt": "Actua como implementador senior. Lee antes de editar. Haz cambios pequenos, revisables y compatibles con el codigo existente. Explica supuestos. Evita tocar mas alcance del necesario.",
@@ -103,7 +97,7 @@
     },
     "tester": {
       "mode": "all",
-      "model": "ollama/qwen3-coder:30b",
+      "model": "ollama/qwen3.6:27b",
       "temperature": 0.05,
       "description": "Unit, integration, BDD, TDD, Playwright, NUnit, JUnit y SpecFlow.",
       "prompt": "Actua como test engineer. Prioriza pruebas automatizadas, TDD cuando sea viable y diagnostico reproducible. No borres tests para pasar builds. Si una herramienta falta, propon el siguiente mejor camino.",
@@ -166,7 +160,7 @@
     },
     "fast": {
       "mode": "all",
-      "model": "ollama/deepseek-coder-v2:16b",
+      "model": "ollama/gemma4:31b",
       "temperature": 0.1,
       "description": "Tareas pequenas, scripts, errores simples y cambios menores.",
       "prompt": "Actua como agente rapido para trabajo de poco riesgo. Prioriza velocidad, claridad y cambios minimos. Si el alcance crece, recomienda cambiar a coder o repo-agent.",
@@ -196,7 +190,7 @@
     "implement": {
       "description": "Implement or fix with small reviewable edits.",
       "agent": "coder",
-      "model": "ollama/qwen3-coder:30b",
+      "model": "ollama/qwen3.6:27b",
       "template": "Usa el agente coder. Si el usuario dio argumentos en el slash command, tomalos como scope. Lee antes de editar. Implementa con cambios pequenos y revisables, sin inventar APIs. Skills sugeridas si existen: sdd-apply, branch-pr, test-runner."
     },
     "review-security": {
@@ -208,19 +202,19 @@
     "test-e2e": {
       "description": "Design or run end-to-end tests.",
       "agent": "tester",
-      "model": "ollama/qwen3-coder:30b",
+      "model": "ollama/qwen3.6:27b",
       "template": "Usa el agente tester. Si el usuario dio argumentos en el slash command, tomalos como scope. Prioriza E2E reproducible, Playwright cuando exista, y diagnostico claro. No borres tests para pasar builds. Skills sugeridas si existen: test-runner, sdd-verify."
     },
     "test-dotnet": {
       "description": "Review or implement .NET test coverage.",
       "agent": "tester",
-      "model": "ollama/qwen3-coder:30b",
+      "model": "ollama/qwen3.6:27b",
       "template": "Usa el agente tester. Si el usuario dio argumentos en el slash command, tomalos como scope. Trabaja sobre NUnit, SpecFlow o el stack de test .NET que exista. Si no hay skill dedicada, sigue las convenciones del repo y manten cambios pequenos. Skills sugeridas si existen: test-runner, sdd-verify."
     },
     "test-java": {
       "description": "Review or implement Java test coverage.",
       "agent": "tester",
-      "model": "ollama/qwen3-coder:30b",
+      "model": "ollama/qwen3.6:27b",
       "template": "Usa el agente tester. Si el usuario dio argumentos en el slash command, tomalos como scope. Trabaja sobre JUnit y pruebas de integracion segun el repo. Si no hay skill dedicada, sigue las convenciones del proyecto. Skills sugeridas si existen: test-runner, sdd-verify."
     },
     "docs": {

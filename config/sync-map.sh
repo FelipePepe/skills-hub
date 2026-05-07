@@ -8,6 +8,12 @@
 # Formato de cada item en SYNC_PAIRS:
 #   "<origen_relativo>::<destino_absoluto>"
 
+case "${OSTYPE:-}" in
+  msys* | cygwin*) _VSCODE_USER_DIR="${APPDATA}/Code/User" ;;
+  *)               _VSCODE_USER_DIR="${HOME}/.config/Code/User" ;;
+esac
+
+# shellcheck disable=SC2034
 SYNC_PAIRS=(
-  "prompts::/home/sandman/.config/Code/User/prompts"
+  "prompts::${_VSCODE_USER_DIR}/prompts"
 )

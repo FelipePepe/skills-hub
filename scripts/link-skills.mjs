@@ -73,6 +73,14 @@ function expandHome(value) {
     .replace(/\$HOME/g, home);
 }
 
+function buildTokenMap(apps) {
+  const copilot = apps.find((a) => a.id === "copilot");
+  const copilotSkillsDir = copilot?.installPath?.[platform]
+    ? expandHome(copilot.installPath[platform])
+    : expandHome("~/.copilot/skills");
+  return { __COPILOT_SKILLS_DIR__: copilotSkillsDir };
+}
+
 async function pathExists(target) {
   try {
     await fs.lstat(target);
@@ -263,14 +271,28 @@ async function installForApp(app, args) {
   };
 }
 
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((item, i) => deepEqual(item, b[i]));
+  }
+  if (isPlainObject(a) && isPlainObject(b)) {
+    const keysA = Object.keys(a).sort();
+    const keysB = Object.keys(b).sort();
+    if (keysA.length !== keysB.length) return false;
+    if (!keysA.every((k, i) => k === keysB[i])) return false;
+    return keysA.every((k) => deepEqual(a[k], b[k]));
+  }
+  return false;
+}
+
 function mergeValues(existing, incoming) {
   if (Array.isArray(existing) && Array.isArray(incoming)) {
     const result = [...existing];
-    const seen = new Set(existing.map((item) => JSON.stringify(item)));
     for (const item of incoming) {
-      const key = JSON.stringify(item);
-      if (!seen.has(key)) {
-        seen.add(key);
+      if (!result.some((ex) => deepEqual(ex, item))) {
         result.push(item);
       }
     }
@@ -296,21 +318,25 @@ function isPlainObject(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function replaceTokens(content) {
-  return content.replace(/__COPILOT_SKILLS_DIR__/g, expandHome("~/.copilot/skills"));
+function replaceTokens(content, tokenMap) {
+  let result = content;
+  for (const [token, value] of Object.entries(tokenMap)) {
+    result = result.replace(new RegExp(escapeRegExp(token), "g"), value);
+  }
+  return result;
 }
 
-async function loadJson(filePath) {
+async function loadJson(filePath, tokenMap) {
   const raw = await fs.readFile(filePath, "utf8");
-  return JSON.parse(replaceTokens(raw));
+  return JSON.parse(replaceTokens(raw, tokenMap));
 }
 
-async function loadText(filePath) {
+async function loadText(filePath, tokenMap) {
   const raw = await fs.readFile(filePath, "utf8");
-  return replaceTokens(raw);
+  return replaceTokens(raw, tokenMap);
 }
 
-async function installConfigFiles(app, args) {
+async function installConfigFiles(app, args, tokenMap) {
   const actions = [];
   const configFiles = Array.isArray(app.configFiles) ? app.configFiles : [];
 
@@ -324,11 +350,15 @@ async function installConfigFiles(app, args) {
     await ensureDir(path.dirname(targetPath), args.dryRun);
 
     if (item.strategy === "json-merge") {
-      const managed = await loadJson(sourcePath);
+      const managed = await loadJson(sourcePath, tokenMap);
       let existing = {};
       if (await pathExists(targetPath)) {
-        const rawExisting = await fs.readFile(targetPath, "utf8");
-        existing = JSON.parse(rawExisting);
+        try {
+          const rawExisting = await fs.readFile(targetPath, "utf8");
+          existing = JSON.parse(rawExisting);
+        } catch {
+          throw new Error(`JSON inválido en archivo destino: ${targetPath}`);
+        }
       }
       const merged = mergeValues(existing, managed);
       if (JSON.stringify(existing, null, 2) === JSON.stringify(merged, null, 2)) {
@@ -345,7 +375,7 @@ async function installConfigFiles(app, args) {
     }
 
     if (item.strategy === "markdown-managed-block") {
-      const managedContent = (await loadText(sourcePath)).trimEnd();
+      const managedContent = (await loadText(sourcePath, tokenMap)).trimEnd();
       const blockId = item.blockId ?? "skills-hub";
       const startMarker = `<!-- skills-hub:managed ${blockId} start -->`;
       const endMarker = `<!-- skills-hub:managed ${blockId} end -->`;
@@ -407,6 +437,7 @@ function printStatus(results) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const config = await loadConfig();
+  const tokenMap = buildTokenMap(config);
 
   const selectedApps = [];
   for (const app of config) {
@@ -426,7 +457,7 @@ async function main() {
   const results = [];
   for (const app of selectedApps) {
     const skillResult = await installForApp(app, args);
-    const configActions = await installConfigFiles(app, args);
+    const configActions = await installConfigFiles(app, args, tokenMap);
     skillResult.actions.push(...configActions);
     results.push(skillResult);
   }
