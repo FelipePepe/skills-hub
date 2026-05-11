@@ -1,35 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
+APPS_FILE="$ROOT_DIR/config/apps.json"
+COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
-echo "[skills-hub] Lint: validando sintaxis Bash..."
-bash -n "$ROOT_DIR/scripts/check.sh"
-bash -n "$ROOT_DIR/scripts/sync.sh"
-bash -n "$ROOT_DIR/scripts/lint.sh"
-bash -n "$ROOT_DIR/scripts/doctor.sh"
-bash -n "$ROOT_DIR/scripts/setup-branch-protection.sh"
-bash -n "$ROOT_DIR/config/sync-map.sh"
+source "$COMMON_LIB"
+
+skills_hub_info "Lint: validando sintaxis Bash..."
+while IFS= read -r -d '' file; do
+  bash -n "$file"
+done < <(find "$ROOT_DIR/scripts" "$ROOT_DIR/config" -type f \( -name '*.sh' \) -print0 | sort -z)
 node --check "$ROOT_DIR/scripts/link-skills.mjs"
+skills_hub_validate_json "$APPS_FILE"
 
 if command -v shellcheck >/dev/null 2>&1; then
-  echo "[skills-hub] Lint: ejecutando shellcheck..."
-  shellcheck "$ROOT_DIR/scripts/check.sh" "$ROOT_DIR/scripts/sync.sh" "$ROOT_DIR/scripts/lint.sh" "$ROOT_DIR/scripts/doctor.sh"
-  shellcheck "$ROOT_DIR/scripts/setup-branch-protection.sh"
+  skills_hub_info "Lint: ejecutando shellcheck..."
+  while IFS= read -r -d '' file; do
+    shellcheck "$file"
+  done < <(find "$ROOT_DIR/scripts" "$ROOT_DIR/config" -type f \( -name '*.sh' \) -print0 | sort -z)
 else
-  echo "WARN: shellcheck no esta instalado. Se omite este paso localmente."
+  skills_hub_warn "shellcheck no esta instalado. Se omite este paso localmente."
 fi
 
-if [[ ! -f "$MAP_FILE" ]]; then
-  echo "ERROR: No existe $MAP_FILE" >&2
-  exit 1
-fi
+skills_hub_require_file "$MAP_FILE"
+skills_hub_source_sync_map "$MAP_FILE"
 
-# shellcheck disable=SC1090
-source "$MAP_FILE"
-
-echo "[skills-hub] Lint: validando formato de SYNC_PAIRS..."
+skills_hub_info "Lint: validando formato de SYNC_PAIRS..."
 if [[ "${#SYNC_PAIRS[@]}" -eq 0 ]]; then
   echo "ERROR: SYNC_PAIRS esta vacio" >&2
   exit 1
@@ -62,4 +61,4 @@ for pair in "${SYNC_PAIRS[@]}"; do
   seen[$pair]=1
 done
 
-echo "[skills-hub] Lint OK."
+skills_hub_info "Lint OK."
