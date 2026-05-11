@@ -8,6 +8,7 @@ APPS_FILE="$ROOT_DIR/config/apps.json"
 LINKER="$ROOT_DIR/scripts/link-skills.mjs"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
+
 # shellcheck source=scripts/lib/common.sh
 source "$COMMON_LIB"
 
