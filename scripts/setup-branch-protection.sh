@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 POLICY_FILE="$ROOT_DIR/.github/branch-protection.main.json"
 REPO_SLUG="${1:-}"
 BRANCH="${2:-main}"
+COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
-if ! command -v gh >/dev/null 2>&1; then
-  echo "ERROR: gh no esta instalado." >&2
-  exit 1
-fi
+source "$COMMON_LIB"
+
+skills_hub_require_command gh
 
 if [[ -z "$REPO_SLUG" ]]; then
   echo "Uso: $0 <owner/repo> [branch]" >&2
@@ -17,12 +18,10 @@ if [[ -z "$REPO_SLUG" ]]; then
   exit 2
 fi
 
-if [[ ! -f "$POLICY_FILE" ]]; then
-  echo "ERROR: no existe $POLICY_FILE" >&2
-  exit 1
-fi
+skills_hub_require_file "$POLICY_FILE"
+skills_hub_validate_json "$POLICY_FILE"
 
-echo "[skills-hub] Aplicando branch protection en $REPO_SLUG:$BRANCH"
+skills_hub_info "Aplicando branch protection en $REPO_SLUG:$BRANCH"
 
 gh api \
   --method PUT \
@@ -30,4 +29,4 @@ gh api \
   "repos/$REPO_SLUG/branches/$BRANCH/protection" \
   --input "$POLICY_FILE" >/dev/null
 
-echo "[skills-hub] Branch protection aplicada correctamente."
+skills_hub_info "Branch protection aplicada correctamente."

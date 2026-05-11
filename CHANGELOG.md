@@ -31,5 +31,5 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/<org>/<repo>/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/<org>/<repo>/releases/tag/v0.1.0
+[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/FelipePepe/skills-hub/releases/tag/v0.1.0
