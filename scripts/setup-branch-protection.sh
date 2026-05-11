@@ -8,8 +8,7 @@ REPO_SLUG="${1:-}"
 BRANCH="${2:-main}"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
-
-# shellcheck source=scripts/lib/common.sh
+# shellcheck disable=SC1091 source=lib/common.sh
 source "$COMMON_LIB"
 
 skills_hub_require_command gh
