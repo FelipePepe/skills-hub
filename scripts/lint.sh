@@ -7,6 +7,7 @@ MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
+# shellcheck disable=SC1091 source=lib/common.sh
 source "$COMMON_LIB"
 
 skills_hub_info "Lint: validando sintaxis Bash..."

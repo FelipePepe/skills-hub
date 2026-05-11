@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
+# shellcheck disable=SC1091 source=lib/common.sh
 source "$COMMON_LIB"
 
 SRC_DIR="${SRC_DIR:-/home/sandman/.copilot/skills}"
