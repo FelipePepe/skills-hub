@@ -1,8 +1,8 @@
 ---
 name: branch-pr
 description: >
-  PR creation workflow for Agent Teams Lite following the issue-first enforcement system.
-  Trigger: When creating a pull request, opening a PR, or preparing changes for review.
+  PR creation workflow for this repository using GitFlow, branch policy, and conventional commits.
+  Trigger: When creating a pull request, opening a PR, or preparing a GitFlow branch for review.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
@@ -20,50 +20,46 @@ Use this skill when:
 
 ## Critical Rules
 
-1. **Every PR MUST link an approved issue** — no exceptions
-2. **Every PR MUST have exactly one `type:*` label**
+1. **Every PR MUST respect GitFlow base rules**
+2. **`main` and `develop` only receive reviewed PRs**
 3. **Automated checks must pass** before merge is possible
-4. **Blank PRs without issue linkage will be blocked** by GitHub Actions
+4. **Branch name must match the repo GitFlow policy**
 
 ---
 
 ## Workflow
 
 ```
-1. Verify issue has `status:approved` label
-2. Create branch: type/description (see Branch Naming below)
-3. Implement changes with conventional commits
-4. Run shellcheck on modified scripts
-5. Open PR using the template
-6. Add exactly one type:* label
-7. Wait for automated checks to pass
+1. Create the correct GitFlow branch from the correct base
+2. Implement changes with conventional commits
+3. Run repo validation
+4. Open PR against the allowed base branch
+5. Wait for automated checks to pass
 ```
 
 ---
 
 ## Branch Naming
 
-Branch names MUST match this regex:
+Branch names MUST match one of these patterns:
 
 ```
-^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)\/[a-z0-9._-]+$
+^feature\/[a-z0-9._-]+$
+^release\/v[0-9]+\.[0-9]+\.[0-9]+$
+^hotfix\/[a-z0-9._-]+$
 ```
 
-**Format:** `type/description` — lowercase, no spaces, only `a-z0-9._-` in description.
+| Branch type | Base branch | PR target |
+|-------------|-------------|-----------|
+| `feature/*` | `develop` | `develop` |
+| `release/*` | `develop` | `main` |
+| `hotfix/*` | `main` | `main` |
 
-| Type | Branch pattern | Example |
-|------|---------------|---------|
-| Feature | `feat/<description>` | `feat/user-login` |
-| Bug fix | `fix/<description>` | `fix/zsh-glob-error` |
-| Chore | `chore/<description>` | `chore/update-ci-actions` |
-| Docs | `docs/<description>` | `docs/installation-guide` |
-| Style | `style/<description>` | `style/format-scripts` |
-| Refactor | `refactor/<description>` | `refactor/extract-shared-logic` |
-| Performance | `perf/<description>` | `perf/reduce-startup-time` |
-| Test | `test/<description>` | `test/add-setup-coverage` |
-| Build | `build/<description>` | `build/update-shellcheck` |
-| CI | `ci/<description>` | `ci/add-branch-validation` |
-| Revert | `revert/<description>` | `revert/broken-setup-change` |
+Examples:
+
+- `feature/installer-cli`
+- `release/v0.2.0`
+- `hotfix/fix-opencode-merge`
 
 ---
 
@@ -71,33 +67,11 @@ Branch names MUST match this regex:
 
 The PR template is at `.github/PULL_REQUEST_TEMPLATE.md`. Every PR body MUST contain:
 
-### 1. Linked Issue (REQUIRED)
-
-```markdown
-Closes #<issue-number>
-```
-
-Valid keywords: `Closes #N`, `Fixes #N`, `Resolves #N` (case insensitive).
-The linked issue MUST have the `status:approved` label.
-
-### 2. PR Type (REQUIRED)
-
-Check exactly ONE in the template and add the matching label:
-
-| Checkbox | Label to add |
-|----------|-------------|
-| Bug fix | `type:bug` |
-| New feature | `type:feature` |
-| Documentation only | `type:docs` |
-| Code refactoring | `type:refactor` |
-| Maintenance/tooling | `type:chore` |
-| Breaking change | `type:breaking-change` |
-
-### 3. Summary
+### 1. Summary
 
 1-3 bullet points of what the PR does.
 
-### 4. Changes Table
+### 2. Changes Table
 
 ```markdown
 | File | Change |
@@ -105,24 +79,23 @@ Check exactly ONE in the template and add the matching label:
 | `path/to/file` | What changed |
 ```
 
-### 5. Test Plan
+### 3. Test Plan
 
 ```markdown
-- [x] Scripts run without errors: `shellcheck scripts/*.sh`
+- [x] `./scripts/lint.sh`
+- [x] `./scripts/check.sh` (si aplica localmente)
 - [x] Manually tested the affected functionality
-- [x] Skills load correctly in target agent
 ```
 
-### 6. Contributor Checklist
+### 4. Contributor Checklist
 
 All boxes must be checked:
-- Linked an approved issue
-- Added exactly one `type:*` label
-- Ran shellcheck on modified scripts
+- Opened PR against the correct GitFlow base branch
+- Branch name matches GitFlow policy
+- Ran repo validation
 - Skills tested in at least one agent
 - Docs updated if behavior changed
 - Conventional commit format
-- No `Co-Authored-By` trailers
 
 ---
 
@@ -130,10 +103,8 @@ All boxes must be checked:
 
 | Check | Job name | What it verifies |
 |-------|----------|-----------------|
-| PR Validation | `Check Issue Reference` | Body contains `Closes/Fixes/Resolves #N` |
-| PR Validation | `Check Issue Has status:approved` | Linked issue has `status:approved` |
-| PR Validation | `Check PR Has type:* Label` | PR has exactly one `type:*` label |
-| CI | `Shellcheck` | Shell scripts pass `shellcheck` |
+| Quality | `lint` | Scripts y convenciones del repo |
+| PR Branch Policy | `validate` | Branch naming y base permitida por GitFlow |
 
 ---
 
@@ -151,23 +122,6 @@ Commit messages MUST match this regex:
 - `(scope)` — optional, lowercase with `a-z0-9._-`
 - `!` — optional, indicates breaking change
 - `description` — required, starts after `: `
-
-Type-to-label mapping:
-
-| Commit type | PR label |
-|-------------|----------|
-| `feat` | `type:feature` |
-| `fix` | `type:bug` |
-| `docs` | `type:docs` |
-| `refactor` | `type:refactor` |
-| `chore` | `type:chore` |
-| `style` | `type:chore` |
-| `perf` | `type:feature` |
-| `test` | `type:chore` |
-| `build` | `type:chore` |
-| `ci` | `type:chore` |
-| `revert` | `type:bug` |
-| `feat!` / `fix!` | `type:breaking-change` |
 
 Examples:
 ```
@@ -190,17 +144,15 @@ feat!: redesign skill loading system
 
 ```bash
 # Create branch
-git checkout -b feat/my-feature main
+git checkout develop
+git checkout -b feature/my-change
 
-# Run shellcheck before pushing
-shellcheck scripts/*.sh
+# Validate before pushing
+./scripts/lint.sh
 
 # Push and create PR
-git push -u origin feat/my-feature
-gh pr create --title "feat(scope): description" --body "Closes #N"
-
-# Add type label to PR
-gh pr edit <pr-number> --add-label "type:feature"
+git push -u origin feature/my-change
+gh pr create --base develop --title "feat(scope): description"
 ```
 
 ## Model routing hints

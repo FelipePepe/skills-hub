@@ -149,6 +149,22 @@ Excepciones:
 - Si una skill no depende de Copilot y puede compartirse sin cambios, puede promocionarse despues a `skills/common`.
 - No mezclar configuracion de maquina dentro de `skills/`; eso debe quedarse en el tooling o fuera del repo.
 
+## GitFlow del repositorio
+
+Este repo usa un GitFlow pragmático:
+
+- `main` para releases
+- `develop` para integración
+- `feature/*` desde `develop`
+- `release/vX.Y.Z` desde `develop`
+- `hotfix/*` desde `main`
+
+Referencia completa:
+
+- `GITFLOW.md`
+- `BRANCH_PROTECTION.md`
+- `RELEASING.md`
+
 ## Instalacion por enlaces
 
 El flujo recomendado es instalar skills mediante enlaces por skill, no copiando directorios completos:

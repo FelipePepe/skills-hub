@@ -3,7 +3,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-POLICY_FILE="$ROOT_DIR/.github/branch-protection.main.json"
 REPO_SLUG="${1:-}"
 BRANCH="${2:-main}"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
@@ -19,6 +18,7 @@ if [[ -z "$REPO_SLUG" ]]; then
   exit 2
 fi
 
+POLICY_FILE="$ROOT_DIR/.github/branch-protection.$BRANCH.json"
 skills_hub_require_file "$POLICY_FILE"
 skills_hub_validate_json "$POLICY_FILE"
 

@@ -35,6 +35,19 @@ Mantener este repositorio como fuente unica de verdad para sincronizar skills y 
 4. Actualiza documentacion si cambias convenciones o estructura.
 5. Abre un Pull Request usando la plantilla.
 
+## GitFlow obligatorio
+
+- `feature/*` nace desde `develop` y hace PR a `develop`
+- `release/vX.Y.Z` nace desde `develop` y hace PR a `main`
+- `hotfix/*` nace desde `main` y hace PR a `main`
+- no abrir PRs arbitrarios entre ramas fuera de esa matriz
+
+Ver:
+
+- `GITFLOW.md`
+- `BRANCH_PROTECTION.md`
+- `RELEASING.md`
+
 ## Convenciones de cambios
 
 - `skills/common`: contenido compartido.

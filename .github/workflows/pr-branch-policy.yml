@@ -1,0 +1,38 @@
+name: PR Branch Policy
+
+on:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate source branch and base branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+
+          echo "HEAD_REF=$HEAD_REF"
+          echo "BASE_REF=$BASE_REF"
+
+          if [[ "$HEAD_REF" =~ ^feature/[a-z0-9._-]+$ ]]; then
+            [[ "$BASE_REF" == "develop" ]] || { echo "feature/* solo puede abrir PR contra develop"; exit 1; }
+            exit 0
+          fi
+
+          if [[ "$HEAD_REF" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            [[ "$BASE_REF" == "main" ]] || { echo "release/* solo puede abrir PR contra main"; exit 1; }
+            exit 0
+          fi
+
+          if [[ "$HEAD_REF" =~ ^hotfix/[a-z0-9._-]+$ ]]; then
+            [[ "$BASE_REF" == "main" ]] || { echo "hotfix/* solo puede abrir PR contra main"; exit 1; }
+            exit 0
+          fi
+
+          echo "Nombre de rama no permitido por GitFlow: $HEAD_REF"
+          echo "Patrones permitidos: feature/*, release/vX.Y.Z, hotfix/*"
+          exit 1
