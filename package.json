@@ -1,0 +1,25 @@
+{
+  "name": "skills-hub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI para instalar y exponer el catalogo de skills en las apps locales compatibles.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "bin": {
+    "skills-hub": "./bin/skills-hub.js"
+  },
+  "scripts": {
+    "skills-hub": "node ./bin/skills-hub.js",
+    "lint": "./scripts/lint.sh",
+    "doctor": "./scripts/doctor.sh",
+    "doctor:skills": "./scripts/doctor-skills.sh",
+    "check": "./scripts/check.sh",
+    "sync": "./scripts/sync.sh",
+    "install:skills": "node ./bin/skills-hub.js install",
+    "status:skills": "node ./bin/skills-hub.js status"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

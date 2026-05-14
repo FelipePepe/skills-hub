@@ -2,14 +2,18 @@
 
 # shellcheck shell=bash
 
-# Mapeos de sincronizacion para skills-hub.
+# Mapeos de sincronizacion legacy para contenido copiable.
+# Las skills y la configuracion de OpenCode se instalan con
+# `scripts/link-skills.mjs` para evitar duplicaciones en disco.
 # Formato de cada item en SYNC_PAIRS:
 #   "<origen_relativo>::<destino_absoluto>"
 
+case "${OSTYPE:-}" in
+  msys* | cygwin*) _VSCODE_USER_DIR="${APPDATA}/Code/User" ;;
+  *)               _VSCODE_USER_DIR="${HOME}/.config/Code/User" ;;
+esac
+
+# shellcheck disable=SC2034
 SYNC_PAIRS=(
-  "skills/common::/home/sandman/.copilot/skills"
-  "skills/copilot-only::/home/sandman/.copilot/skills"
-  "skills/common::/home/sandman/.claude/skills"
-  "skills/claude-only::/home/sandman/.claude/skills"
-  "prompts::/home/sandman/.config/Code/User/prompts"
+  "prompts::${_VSCODE_USER_DIR}/prompts"
 )

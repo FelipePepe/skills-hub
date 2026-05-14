@@ -1,23 +1,55 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
+APPS_FILE="$ROOT_DIR/config/apps.json"
+LINKER="$ROOT_DIR/scripts/link-skills.mjs"
+COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
+SKILLS_DOCTOR="$ROOT_DIR/scripts/doctor-skills.sh"
 
-echo "[skills-hub] Doctor: verificando entorno local..."
+# shellcheck disable=SC1091 source=lib/common.sh
+source "$COMMON_LIB"
 
-if ! command -v rsync >/dev/null 2>&1; then
-  echo "ERROR: rsync no esta instalado." >&2
-  exit 1
+APP_FILTER=""
+INCLUDE_MISSING=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --app=*) APP_FILTER="${arg#--app=}" ;;
+    --include-missing) INCLUDE_MISSING=true ;;
+    --help|-h)
+      cat <<EOF
+Uso: $0 [--app=<id>] [--include-missing]
+EOF
+      exit 0
+      ;;
+    *)
+      echo "Uso: $0 [--app=<id>] [--include-missing]" >&2
+      exit 2
+      ;;
+  esac
+done
+
+skills_hub_info "Doctor: verificando entorno local..."
+
+skills_hub_require_command rsync
+skills_hub_require_command node
+skills_hub_require_file "$MAP_FILE"
+skills_hub_require_file "$APPS_FILE"
+skills_hub_require_file "$SKILLS_DOCTOR"
+skills_hub_validate_json "$APPS_FILE"
+
+skills_hub_source_sync_map "$MAP_FILE"
+
+linker_args=( status )
+if [[ -n "$APP_FILTER" ]]; then
+  linker_args+=( "--app=$APP_FILTER" )
 fi
-
-if [[ ! -f "$MAP_FILE" ]]; then
-  echo "ERROR: No existe $MAP_FILE" >&2
-  exit 1
+if [[ "$INCLUDE_MISSING" == true ]]; then
+  linker_args+=( --include-missing )
 fi
-
-# shellcheck disable=SC1090
-source "$MAP_FILE"
 
 errors=0
 for pair in "${SYNC_PAIRS[@]}"; do
@@ -31,14 +63,20 @@ for pair in "${SYNC_PAIRS[@]}"; do
   fi
 
   if [[ ! -d "$dst_abs" ]]; then
-    echo "WARN: destino inexistente -> $dst_abs"
-    echo "      sync.sh lo creara automaticamente con mkdir -p"
+    skills_hub_warn "destino inexistente -> $dst_abs"
+    echo "      sync.sh lo creara automaticamente con mkdir -p" >&2
   fi
 done
 
+skills_hub_info "Doctor: estado de apps/configuracion enlazada..."
+node "$LINKER" "${linker_args[@]}"
+
+skills_hub_info "Doctor: auditoria del catalogo de skills..."
+bash "$SKILLS_DOCTOR"
+
 if [[ "$errors" -ne 0 ]]; then
-  echo "[skills-hub] Doctor detecto errores de configuracion local."
+  skills_hub_info "Doctor detecto errores de configuracion local."
   exit 1
 fi
 
-echo "[skills-hub] Doctor OK."
+skills_hub_info "Doctor OK."
