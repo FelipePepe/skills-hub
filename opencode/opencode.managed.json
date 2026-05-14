@@ -221,13 +221,13 @@
       "description": "Write or update technical documentation.",
       "agent": "documenter",
       "model": "ollama/qwen3.6:27b",
-      "template": "Usa el agente documenter. Si el usuario dio argumentos en el slash command, tomalos como scope. Crea documentacion mantenible, con comandos, supuestos y limites. Skills sugeridas si existen: mente-docs, casa-atlas, skill-creator, project-workflow."
+      "template": "Usa el agente documenter. Si el usuario dio argumentos en el slash command, tomalos como scope. Crea documentacion mantenible, con comandos, supuestos y limites. Skills sugeridas si existen: atlas-docs, casa-atlas, skill-creator, project-workflow."
     },
     "adr": {
       "description": "Draft or update an ADR.",
       "agent": "documenter",
       "model": "ollama/qwen3.6:27b",
-      "template": "Usa el agente documenter. Si el usuario dio argumentos en el slash command, tomalos como scope. Redacta una ADR con contexto, decision, consecuencias, riesgos y alternativas. Skills sugeridas si existen: sdd-design, mente-docs, project-workflow."
+      "template": "Usa el agente documenter. Si el usuario dio argumentos en el slash command, tomalos como scope. Redacta una ADR con contexto, decision, consecuencias, riesgos y alternativas. Skills sugeridas si existen: sdd-design, atlas-docs, project-workflow."
     },
     "analyze-legacy": {
       "description": "Inspect legacy systems before changes.",

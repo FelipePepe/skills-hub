@@ -24,7 +24,7 @@ metadata:
 |------|-------|
 | NAS montada en | `/mnt/nas/` en maya (192.168.1.55) |
 | Vault path | `/mnt/nas/Obsidian/` |
-| App | mente.casa / atlas.casa |
+| App | atlas.casa |
 
 ## Comando
 
@@ -55,7 +55,7 @@ Todo documento debe cumplir:
 3. Si es `proyecto`: enlazar tecnologías del stack usadas
 4. Si es `stack`: incluir `## Proyectos que lo usan`
 
-Ver skill `mente-docs` para templates completos.
+Ver skill `atlas-docs` para templates completos.
 
 ## Alternativa directa (para contenido largo)
 

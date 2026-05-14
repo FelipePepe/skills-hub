@@ -7,6 +7,7 @@ MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
 LINKER="$ROOT_DIR/scripts/link-skills.mjs"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
+SKILLS_DOCTOR="$ROOT_DIR/scripts/doctor-skills.sh"
 
 # shellcheck disable=SC1091 source=lib/common.sh
 source "$COMMON_LIB"
@@ -37,6 +38,7 @@ skills_hub_require_command rsync
 skills_hub_require_command node
 skills_hub_require_file "$MAP_FILE"
 skills_hub_require_file "$APPS_FILE"
+skills_hub_require_file "$SKILLS_DOCTOR"
 skills_hub_validate_json "$APPS_FILE"
 
 skills_hub_source_sync_map "$MAP_FILE"
@@ -68,6 +70,9 @@ done
 
 skills_hub_info "Doctor: estado de apps/configuracion enlazada..."
 node "$LINKER" "${linker_args[@]}"
+
+skills_hub_info "Doctor: auditoria del catalogo de skills..."
+bash "$SKILLS_DOCTOR"
 
 if [[ "$errors" -ne 0 ]]; then
   skills_hub_info "Doctor detecto errores de configuracion local."

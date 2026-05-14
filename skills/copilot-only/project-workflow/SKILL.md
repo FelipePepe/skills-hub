@@ -181,7 +181,7 @@ content: What/Why/Where/Learned
 | Dominios .casa | `casa-domain` |
 | Vault Infisical | `casa-vault` + `infisical-vault` |
 | Deploy producción | `casa-deploy` |
-| Documentación Atlas | `casa-atlas` + `mente-docs` |
+| Documentación Atlas | `casa-atlas` + `atlas-docs` |
 | SDD completo | skills `sdd-*` |
 | GitFlow | skill `gitflow` |
 

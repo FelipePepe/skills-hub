@@ -1,9 +1,9 @@
 ---
-name: mente-docs
+name: atlas-docs
 description: >
-  Crea y actualiza documentos en el vault de Mente (Obsidian) en la intranet .casa.
+  Crea y actualiza documentos en el vault de Atlas (Obsidian) en la intranet .casa.
   Garantiza que todos los documentos tengan wikilinks bidireccionales para el grafo de conocimiento.
-  Trigger: Cuando el usuario pide crear o actualizar documentos en mente.casa, el vault Obsidian,
+  Trigger: Cuando el usuario pide crear o actualizar documentos en atlas.casa, el vault Obsidian,
   o cuando se implementa algo nuevo en la intranet que debe quedar documentado.
 license: Apache-2.0
 metadata:
@@ -16,7 +16,7 @@ metadata:
 
 ## When to Use
 
-- El usuario dice "actualiza los documentos de mente.casa" o "documenta esto en mente"
+- El usuario dice "actualiza los documentos de atlas.casa" o "documenta esto en Atlas"
 - Se acaba de implementar algo nuevo en la intranet (nuevo servicio, dominio, feature)
 - El usuario pide crear una nueva nota en el vault
 - Se detecta que una nota no tiene enlaces a otras notas relacionadas
@@ -29,7 +29,7 @@ metadata:
 | **Máquina** | pihole2 — `192.168.1.54` |
 | **Ruta vault** | `/home/sandman/Obsidian/` |
 | **Usuario SSH** | `felipe` (usa `sudo tee` para escribir como `sandman`) |
-| **App** | `mente.casa` (React + obsidian-api backend) |
+| **App** | `atlas.casa` (React + obsidian-api backend) |
 
 ### Estructura de carpetas
 
@@ -124,9 +124,9 @@ Si creas `Proyectos/nueva-herramienta.md` que usa React y TypeScript:
 - Actualizar `Stack/Languages/TypeScript.md` → idem
 - Actualizar `Stack/_INDEX.md` → añadir en sección Proyectos
 
-### Paso 5 — Verificar en mente.casa
+### Paso 5 — Verificar en atlas.casa
 ```bash
-curl -s http://mente.casa/api/notes | python3 -c "import json,sys; notes=json.load(sys.stdin); print(f'{len(notes)} notas en el vault')"
+curl -s http://atlas.casa/api/notes | python3 -c "import json,sys; notes=json.load(sys.stdin); print(f'{len(notes)} notas en el vault')"
 ```
 
 ## Templates
@@ -245,8 +245,8 @@ curl -s http://mente.casa/api/notes | python3 -c "import json,sys; notes=json.lo
 
 | Dominio | Servicio | Máquina |
 |---------|---------|---------|
-| `mente.casa` | App de notas (Mente) | pihole2 |
-| `obsidian.casa` | Alias legacy Mente | pihole2 |
+| `atlas.casa` | App de notas (Atlas) | pihole2 |
+| `obsidian.casa` | Alias legacy Atlas | pihole2 |
 | `portal.casa` | Dashboard intranet | pihole2 |
 | `ha.casa` | Home Assistant | pihole2 |
 | `nas.casa` | FileBrowser NAS | maya |

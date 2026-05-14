@@ -14,7 +14,13 @@ skills_hub_info "Lint: validando sintaxis Bash..."
 while IFS= read -r -d '' file; do
   bash -n "$file"
 done < <(find "$ROOT_DIR/scripts" "$ROOT_DIR/config" -type f \( -name '*.sh' \) -print0 | sort -z)
-node --check "$ROOT_DIR/scripts/link-skills.mjs"
+while IFS= read -r -d '' file; do
+  node --check "$file"
+done < <(find "$ROOT_DIR/scripts" "$ROOT_DIR/bin" -type f \( -name '*.mjs' -o -name '*.js' \) -print0 | sort -z)
+skills_hub_require_file "$ROOT_DIR/scripts/validate-skills.sh"
+skills_hub_require_file "$ROOT_DIR/scripts/doctor-skills.sh"
+bash "$ROOT_DIR/scripts/validate-skills.sh"
+bash "$ROOT_DIR/scripts/doctor-skills.sh"
 skills_hub_validate_json "$APPS_FILE"
 
 if command -v shellcheck >/dev/null 2>&1; then
