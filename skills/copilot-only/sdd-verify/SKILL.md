@@ -6,363 +6,199 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "3.0"
+  version: "3.2"
 ---
 
 ## Purpose
 
-You are a sub-agent responsible for VERIFICATION. You are the quality gate. Your job is to prove — with real execution evidence — that the implementation is complete, correct, and behaviorally compliant with the specs.
+You are the verification quality gate. Your job is to prove — with execution evidence — that implementation is complete, correct, and behaviorally compliant with the specs.
 
 Static analysis alone is NOT enough. You must execute the code.
 
 ## What You Receive
 
 From the orchestrator:
-- Change name
-- Artifact store mode (`engram | openspec | hybrid | none`)
+- change name
+- artifact store mode (`engram | openspec | hybrid | none`)
 
 ## Execution and Persistence Contract
 
-> Follow **Section B** (retrieval) and **Section C** (persistence) from `skills/_shared/sdd-phase-common.md`.
+Follow:
+- **Section B** (retrieval) and **Section C** (persistence) from `skills/_shared/sdd-phase-common.md`
+- `openspec` conventions from `skills/_shared/openspec-convention.md` when mode requires it
 
-- **engram**: Read `sdd/{change-name}/proposal`, `sdd/{change-name}/spec` (required for compliance matrix), `sdd/{change-name}/design`, `sdd/{change-name}/tasks` (all required). Save as `sdd/{change-name}/verify-report`.
-- **openspec**: Read and follow `skills/_shared/openspec-convention.md`. Save to `openspec/changes/{change-name}/verify-report.md`.
-- **hybrid**: Follow BOTH conventions — persist to Engram AND write `verify-report.md` to filesystem.
-- **none**: Return the verification report inline only. Never write files.
+Persistence targets:
+- **engram** → save `sdd/{change-name}/verify-report`
+- **openspec** → write `openspec/changes/{change-name}/verify-report.md`
+- **hybrid** → do both
+- **none** → return inline only
 
 ## What to Do
 
 ### Step 1: Load Skills
 Follow **Section A** from `skills/_shared/sdd-phase-common.md`.
 
-### Step 2: Read Testing Capabilities and Resolve TDD Mode
+If the project is React (for example `react`, `next`, `vite` + React, or React Native is clearly present):
+- load `skills/common/react-doctor/SKILL.md`
+- apply its diagnostic checklist during verification
+- include its findings in the verification report
 
-Read the cached testing capabilities to determine if Strict TDD verification applies:
+### Step 2: Resolve TDD mode from testing capabilities
 
-```
-Read testing capabilities from:
-├── engram: mem_search("sdd/{project}/testing-capabilities") → mem_get_observation(id)
-├── openspec: openspec/config.yaml → strict_tdd + testing section
-└── Fallback: check project files directly
+Read cached testing capabilities and decide:
+- if `strict_tdd: true` **and** a test runner exists → load `strict-tdd-verify.md`
+- otherwise use standard verification only
 
-Resolve mode:
-├── IF strict_tdd: true AND test runner exists
-│   └── STRICT TDD VERIFY → Load strict-tdd-verify.md module
-│       (read the file: skills/sdd-verify/strict-tdd-verify.md)
-│       This adds Steps 5a, expanded 5/5d, 5e to the verification
-│
-├── IF strict_tdd: false OR no test runner
-│   └── STANDARD VERIFY → skip TDD-specific checks entirely
-│       (strict-tdd-verify.md is never loaded — zero tokens)
-│
-└── Cache the resolved mode for the report header
-```
+Read sources in this order:
+- engram → `sdd/{change-name}/testing-capabilities`
+- openspec → `openspec/config.yaml`
+- fallback → inspect project files directly
 
-### Step 3: Check Completeness
+### Step 3: Check completeness
 
-Verify ALL tasks are done:
+Read `tasks` and verify:
+- total tasks
+- completed tasks
+- incomplete tasks
 
-```
-Read tasks.md
-├── Count total tasks
-├── Count completed tasks [x]
-├── List incomplete tasks [ ]
-└── Flag: CRITICAL if core tasks incomplete, WARNING if cleanup tasks incomplete
-```
+Flag:
+- **CRITICAL** if core tasks are incomplete
+- **WARNING** if only cleanup tasks are incomplete
 
-### Step 4: Check Correctness (Static Specs Match)
+### Step 4: Check correctness (static)
 
-For EACH spec requirement and scenario, search the codebase for structural evidence:
+For each requirement and scenario in specs:
+- find structural implementation evidence in code
+- confirm the given/when/then path exists
+- flag missing requirements as **CRITICAL**
+- flag partial scenarios as **WARNING**
 
-```
-FOR EACH REQUIREMENT in specs/:
-├── Search codebase for implementation evidence
-├── For each SCENARIO:
-│   ├── Is the GIVEN precondition handled in code?
-│   ├── Is the WHEN action implemented?
-│   ├── Is the THEN outcome produced?
-│   └── Are edge cases covered?
-└── Flag: CRITICAL if requirement missing, WARNING if scenario partially covered
-```
+### Step 5: Check coherence (design)
 
-Note: This is static analysis only. Behavioral validation with real execution happens in Step 7.
+For each design decision:
+- verify the chosen approach was used
+- verify rejected alternatives were not accidentally implemented
+- compare file changes with the design's file-change table
 
-### Step 5: Check Coherence (Design Match)
+Flag deviations as **WARNING** unless they clearly break the design intent.
 
-Verify design decisions were followed:
+### Step 6: Check testing with real execution
 
-```
-FOR EACH DECISION in design.md:
-├── Was the chosen approach actually used?
-├── Were rejected alternatives accidentally implemented?
-├── Do file changes match the "File Changes" table?
-└── Flag: WARNING if deviation found (may be valid improvement)
-```
+#### 6a — Static test analysis
+Confirm tests exist for:
+- happy paths
+- edge cases
+- error states
+- each important spec scenario
 
-### Step 5a: TDD Compliance Check (Strict TDD only)
+#### 6b — Run tests
+Detect and execute the project test command from:
+- cached capabilities
+- `openspec/config.yaml` overrides
+- `package.json`, `pyproject.toml`, `go.mod`, `Makefile`
 
-> **Skip this step entirely if Strict TDD Mode is not active.**
-
-If Strict TDD is active, follow the instructions in `strict-tdd-verify.md` Step 5a.
-
-### Step 6: Check Testing
-
-#### Step 6a: Static Test Analysis
-
-Verify test files exist and cover the right scenarios:
-
-```
-Search for test files related to the change
-├── Do tests exist for each spec scenario?
-├── Do tests cover happy paths?
-├── Do tests cover edge cases?
-├── Do tests cover error states?
-└── Flag: WARNING if scenarios lack tests, SUGGESTION if coverage could improve
-```
-
-#### Step 6b: Run Tests (Real Execution)
-
-Detect the project's test runner and execute the tests:
-
-```
-Detect test runner from:
-├── Cached testing capabilities → test_runner.command (fastest)
-├── openspec/config.yaml → rules.verify.test_command (override)
-├── package.json → scripts.test
-├── pyproject.toml / pytest.ini → pytest
-├── Makefile → make test
-└── Fallback: ask orchestrator
-
-Execute: {test_command}
 Capture:
-├── Total tests run
-├── Passed
-├── Failed (list each with name and error)
-├── Skipped
-└── Exit code
+- total / passed / failed / skipped
+- failed test names and errors
+- exit code
 
-Flag: CRITICAL if exit code != 0 (any test failed)
-Flag: WARNING if skipped tests relate to changed areas
-```
+Any failed test is **CRITICAL**.
 
-#### Step 6c: Build & Type Check (Real Execution)
+#### 6c — Build and type check
+Detect and execute build/type-check commands using cached capabilities first.
 
-Detect and run the build/type-check command:
+Flag:
+- build failure → **CRITICAL**
+- type errors with otherwise passing build → **WARNING**
 
-```
-Detect build command from:
-├── Cached testing capabilities → quality_tools.type_checker (fastest)
-├── openspec/config.yaml → rules.verify.build_command (override)
-├── package.json → scripts.build → also run tsc --noEmit if tsconfig.json exists
-├── pyproject.toml → python -m build or equivalent
-├── Makefile → make build
-└── Fallback: skip and report as WARNING (not CRITICAL)
+#### 6d — Coverage
+If coverage is available:
+- run it
+- compare against configured threshold if any
+- if Strict TDD is active, also apply the expanded changed-file checks from `strict-tdd-verify.md`
 
-Execute: {build_command}
-Capture:
-├── Exit code
-├── Errors (if any)
-└── Warnings (if significant)
+If not available, report it cleanly.
 
-Flag: CRITICAL if build fails (exit code != 0)
-Flag: WARNING if there are type errors even with passing build
-```
+### Step 7: Spec compliance matrix
 
-#### Step 6d: Coverage Validation (Real Execution — if available)
+For each spec scenario:
+- find the test(s) that cover it
+- look up the real result from Step 6
+- classify as:
+  - ✅ COMPLIANT
+  - ❌ FAILING
+  - ❌ UNTESTED
+  - ⚠️ PARTIAL
 
-Run coverage if the tool is available (from cached capabilities or config):
+A scenario is only COMPLIANT if a real test passed proving the behavior at runtime.
 
-```
-IF coverage tool available (from cached capabilities or rules.verify.coverage_threshold set):
-├── Run: {test_command} --coverage (or equivalent for the test runner)
-├── Parse coverage report
-├── IF Strict TDD active → follow expanded Step 5d from strict-tdd-verify.md
-│   (per-file coverage for changed files, uncovered line ranges)
-├── IF Standard mode → report total coverage only
-│   ├── Compare total coverage % against threshold (if configured)
-│   └── Flag: WARNING if below threshold
-└── Report
+### Step 7a: Strict TDD additions
 
-IF coverage tool NOT available:
-└── Skip this step, report as "Not available"
-```
+If Strict TDD is active, execute the extra checks from:
+- `strict-tdd-verify.md`
+- `references/strict-tdd-tables.md`
 
-#### Step 6e: Quality Metrics (Strict TDD only)
+These include:
+- TDD evidence validation from apply-progress
+- test layer distribution
+- changed-file coverage detail
+- assertion quality audit
+- quality metrics for changed files
 
-> **Skip this step entirely if Strict TDD Mode is not active.**
+### Step 7b: Adversarial review
 
-If Strict TDD is active, follow the instructions in `strict-tdd-verify.md` Step 5e.
+Mandatory red-team review:
+- attack vectors
+- malformed input
+- concurrency and failure modes
+- data corruption risks
+- privilege escalation / injection risks
+- wrong or incomplete assumptions in specs
 
-### Step 7: Spec Compliance Matrix (Behavioral Validation)
+Classify findings as:
+- **CRITICAL**
+- **WARNING (real)**
+- **WARNING (theoretical)** → report as INFO
+- **SUGGESTION**
 
-This is the most important step. Cross-reference EVERY spec scenario against the actual test run results from Step 6b to build behavioral evidence.
+### Step 7c: React doctor review
 
-For each scenario from the specs, find which test(s) cover it and what the result was:
+If the project is React:
+- run the `react-doctor` review against changed React components, hooks, and related UI state flows
+- check for render loops, invalid effect dependencies, redundant derived state, unstable list keys, needless memoization, hydration risks, and oversized components
+- classify `react-doctor` findings using the same severity model as this verify phase
+- treat real React correctness or runtime risks as verification failures until they are corrected in apply
 
-```
-FOR EACH REQUIREMENT in specs/:
-  FOR EACH SCENARIO:
-  ├── Find tests that cover this scenario (by name, description, or file path)
-  ├── Look up that test's result from Step 6b output
-  ├── Assign compliance status:
-  │   ├── ✅ COMPLIANT   → test exists AND passed
-  │   ├── ❌ FAILING     → test exists BUT failed (CRITICAL)
-  │   ├── ❌ UNTESTED    → no test found for this scenario (CRITICAL)
-  │   └── ⚠️ PARTIAL    → test exists, passes, but covers only part of the scenario (WARNING)
-  └── Record: requirement, scenario, test file, test name, result
-```
+### Step 8: Persist verification report
 
-A spec scenario is only considered COMPLIANT when there is a test that passed proving the behavior at runtime. Code existing in the codebase is NOT sufficient evidence.
+Persist artifact `verify-report` using the mode rules above.
+Use topic key `sdd/{change-name}/verify-report` when Engram applies.
 
-### Step 7a: Test Layer Validation (Strict TDD only)
+### Step 9: Return summary
 
-> **Skip this step entirely if Strict TDD Mode is not active.**
+Return the same content you persist.
+Use the full report template from:
+- `references/report-template.md`
 
-If Strict TDD is active, follow the instructions in `strict-tdd-verify.md` (Step 5 Expanded: Test Layer Validation).
-
-### Step 7b: Adversarial Review (red-team)
-
-**MANDATORY — do NOT skip this step.**
-
-After the spec compliance matrix, apply red-team adversarial thinking to the change:
-
-```
-Think adversarially about the implementation:
-├── What attack vectors does this change introduce?
-├── What edge cases could cause silent failures or data corruption?
-├── What happens under concurrent access, network failure, or malformed input?
-├── Are there privilege escalation or injection risks in new code paths?
-├── What assumptions in the specs are wrong or incomplete?
-└── What could a motivated attacker do with these changes?
-```
-
-Classify each finding:
-- **CRITICAL** — exploitable in a realistic scenario, blocks archive
-- **WARNING (real)** — realistic risk requiring mitigation
-- **WARNING (theoretical)** — contrived or OS-edge-case, report as INFO
-- **SUGGESTION** — hardening recommendation, not blocking
-
-Add a `### Adversarial Review` section to the verification report with all findings.
-If no findings: `✅ No adversarial concerns found.`
-
-### Step 8: Persist Verification Report
-
-Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
-- artifact: `verify-report`
-- topic_key: `sdd/{change-name}/verify-report`
-- type: `architecture`
-
-### Step 9: Return Summary
-
-Return to the orchestrator the same content you wrote to `verify-report.md`:
-
-```markdown
-## Verification Report
-
-**Change**: {change-name}
-**Version**: {spec version or N/A}
-**Mode**: {Strict TDD | Standard}
-
----
-
-### Completeness
-| Metric | Value |
-|--------|-------|
-| Tasks total | {N} |
-| Tasks complete | {N} |
-| Tasks incomplete | {N} |
-
-{List incomplete tasks if any}
-
----
-
-### Build & Tests Execution
-
-**Build**: ✅ Passed / ❌ Failed
-```
-{build command output or error if failed}
-```
-
-**Tests**: ✅ {N} passed / ❌ {N} failed / ⚠️ {N} skipped
-```
-{failed test names and errors if any}
-```
-
-**Coverage**: {N}% / threshold: {N}% → ✅ Above threshold / ⚠️ Below threshold / ➖ Not available
-
----
-
-{IF Strict TDD Mode → include TDD Compliance table from strict-tdd-verify.md}
-{IF Strict TDD Mode → include Test Layer Distribution table from strict-tdd-verify.md}
-{IF Strict TDD Mode → include Changed File Coverage table from strict-tdd-verify.md}
-{IF Strict TDD Mode → include Quality Metrics from strict-tdd-verify.md}
-
-### Spec Compliance Matrix
-
-| Requirement | Scenario | Test | Result |
-|-------------|----------|------|--------|
-| {REQ-01: name} | {Scenario name} | `{test file} > {test name}` | ✅ COMPLIANT |
-| {REQ-01: name} | {Scenario name} | `{test file} > {test name}` | ❌ FAILING |
-| {REQ-02: name} | {Scenario name} | (none found) | ❌ UNTESTED |
-| {REQ-02: name} | {Scenario name} | `{test file} > {test name}` | ⚠️ PARTIAL |
-
-**Compliance summary**: {N}/{total} scenarios compliant
-
----
-
-### Correctness (Static — Structural Evidence)
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| {Req name} | ✅ Implemented | {brief note} |
-| {Req name} | ⚠️ Partial | {what's missing} |
-| {Req name} | ❌ Missing | {not implemented} |
-
----
-
-### Coherence (Design)
-| Decision | Followed? | Notes |
-|----------|-----------|-------|
-| {Decision name} | ✅ Yes | |
-| {Decision name} | ⚠️ Deviated | {how and why} |
-
----
-
-### Issues Found
-
-**CRITICAL** (must fix before archive):
-{List or "None"}
-
-**WARNING** (should fix):
-{List or "None"}
-
-**SUGGESTION** (nice to have):
-{List or "None"}
-
----
-
-### Verdict
-{PASS / PASS WITH WARNINGS / FAIL}
-
-{One-line summary of overall status}
-```
+When Strict TDD is active, include the extra tables from:
+- `references/strict-tdd-tables.md`
 
 ## Rules
 
-- ALWAYS read the actual source code — don't trust summaries
-- ALWAYS execute tests — static analysis alone is not verification
-- A spec scenario is only COMPLIANT when a test that covers it has PASSED
-- Compare against SPECS first (behavioral correctness), DESIGN second (structural correctness)
-- Be objective — report what IS, not what should be
-- CRITICAL issues = must fix before archive
-- WARNINGS = should fix but won't block
-- SUGGESTIONS = improvements, not blockers
-- DO NOT fix any issues — only report them. The orchestrator decides what to do.
-- In `openspec` mode, ALWAYS save the report to `openspec/changes/{change-name}/verify-report.md` — this persists the verification for sdd-archive and the audit trail
-- Apply any `rules.verify` from `openspec/config.yaml`
-- If Strict TDD is active, load `strict-tdd-verify.md` and execute ALL its additional steps — they are mandatory, not optional
-- If Strict TDD is NOT active, NEVER load `strict-tdd-verify.md` — zero tokens wasted on TDD checks
-- Use cached testing capabilities from Engram/config whenever possible — avoid re-detecting
-- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
+- ALWAYS read the actual source code — never trust summaries alone
+- ALWAYS execute tests — static analysis alone is insufficient
+- If the project is React, ALWAYS load and apply `react-doctor`
+- A scenario is COMPLIANT only when a covering test PASSES
+- Compare against specs first, design second
+- CRITICAL blocks archive
+- WARNINGS should be fixed but do not necessarily block
+- SUGGESTIONS are non-blocking improvements
+- DO NOT fix issues here — only report them
+- If `react-doctor` finds real issues, mark them clearly so they are corrected in `sdd-apply` before archive
+- If Strict TDD is active, load `strict-tdd-verify.md` and execute all extra checks
+- If Strict TDD is not active, do not load that module
+- Reuse cached testing capabilities whenever possible
+- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`
 
 ## Model routing hints
 

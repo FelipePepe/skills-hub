@@ -6,7 +6,7 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "3.0"
+  version: "3.1"
 ---
 
 ## Purpose
@@ -41,6 +41,7 @@ Before writing ANY code:
 2. Read the design — understand HOW to structure the code
 3. Read existing code in affected files — understand current patterns
 4. Check the project's coding conventions from `config.yaml`
+5. If the project is React, load `skills/common/react-doctor/SKILL.md` and use it as a guardrail while changing components, hooks, and client state flows
 
 ### Step 3: Read Testing Capabilities and Resolve Mode
 
@@ -75,6 +76,7 @@ FOR EACH TASK:
 ├── Read relevant spec scenarios (these are your acceptance criteria)
 ├── Read the design decisions (these constrain your approach)
 ├── Read existing code patterns (match the project's style)
+├── If React code is involved, correct any applicable `react-doctor` issues in the touched area
 ├── Write the code
 ├── Mark task as complete [x] in tasks.md
 └── Note any issues or deviations
@@ -145,6 +147,8 @@ If none, say "None."}
 - ALWAYS read specs before implementing — specs are your acceptance criteria
 - ALWAYS follow the design decisions — don't freelance a different approach
 - ALWAYS match existing code patterns and conventions in the project
+- If the project is React, use `react-doctor` as a required quality gate while implementing
+- If verify reported `react-doctor` findings, fix them in the affected code before considering the task complete
 - In `openspec` mode, mark tasks complete in `tasks.md` AS you go, not at the end
 - If you discover the design is wrong or incomplete, NOTE IT in your return summary — don't silently deviate
 - If a task is blocked by something unexpected, STOP and report back

@@ -21,7 +21,7 @@ FASE 2 — DISEÑO
   /sdd-new <nombre>   →  proposal → spec → design → tasks
 
 FASE 3 — DESARROLLO
-  gitflow feature branches + conventional commits
+  GitFlow (`feature/*`, `release/*`, `hotfix/*`) + conventional commits
   /sdd-apply          →  implementar tasks
   casa atlas add      →  documentar decisiones DURANTE el desarrollo
 
@@ -79,6 +79,7 @@ Esto crea:
 ```bash
 # Feature
 git checkout develop
+git pull
 git checkout -b feature/<nombre>
 
 # Commits convencionales
@@ -90,10 +91,14 @@ git commit -m "chore: update dependencies"
 gh pr create --base develop --title "feat: <descripción>"
 
 # Release
-git checkout -b release/v1.0.0 develop
-git checkout main && git merge --no-ff release/v1.0.0
+git checkout develop
+git pull
+git checkout -b release/v1.0.0
+gh pr create --base main --title "release: v1.0.0"
+
+# Tras merge a main
 git tag v1.0.0
-git checkout develop && git merge --no-ff release/v1.0.0
+git checkout develop && git merge --no-ff main
 ```
 
 ## Fase 3 — Infisical (si `--secrets`)
@@ -181,7 +186,7 @@ content: What/Why/Where/Learned
 | Dominios .casa | `casa-domain` |
 | Vault Infisical | `casa-vault` + `infisical-vault` |
 | Deploy producción | `casa-deploy` |
-| Documentación Atlas | `casa-atlas` + `mente-docs` |
+| Documentación Atlas | `casa-atlas` + `atlas-docs` |
 | SDD completo | skills `sdd-*` |
 | GitFlow | skill `gitflow` |
 

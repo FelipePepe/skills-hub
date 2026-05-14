@@ -1,6 +1,6 @@
 # Releasing Guide
 
-Este proyecto usa Semantic Versioning y Keep a Changelog.
+Este proyecto usa Semantic Versioning, Keep a Changelog y GitFlow.
 
 ## Checklist de release
 
@@ -18,31 +18,55 @@ git status --short
 ./scripts/check.sh
 ```
 
-3. Actualiza `CHANGELOG.md`:
+3. Corta rama de release desde `develop`:
+
+```bash
+git checkout develop
+git pull
+git checkout -b release/vX.Y.Z
+```
+
+4. Actualiza `CHANGELOG.md`:
 - Mueve cambios de `Sin publicar` a una nueva version `## [x.y.z] - YYYY-MM-DD`.
 - Deja `Sin publicar` como seccion vacia para cambios futuros.
 
-4. Crea commit de release:
+5. Crea commit de release:
 
 ```bash
 git add CHANGELOG.md README.md RELEASING.md
 git commit -m "chore(release): prepare vX.Y.Z"
 ```
 
-5. Crea tag anotado:
+6. Publica la rama de release y abre PR a `main`:
+
+```bash
+git push -u origin release/vX.Y.Z
+gh pr create --base main --title "release: vX.Y.Z"
+```
+
+7. Tras merge a `main`, crea tag anotado:
 
 ```bash
 git tag -a vX.Y.Z -m "release: vX.Y.Z"
 ```
 
-6. Publica rama y tag:
+8. Publica tag:
 
 ```bash
 git push
 git push origin vX.Y.Z
 ```
 
-7. Release automatica en GitHub:
+9. Sincroniza release de vuelta a `develop`:
+
+```bash
+git checkout develop
+git pull
+git merge --no-ff main
+git push
+```
+
+10. Release automatica en GitHub:
 - El workflow `.github/workflows/release.yml` se dispara al pushear tags `v*`.
 - Se publica un release con notas autogeneradas.
 
