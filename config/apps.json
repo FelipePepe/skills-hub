@@ -66,6 +66,28 @@
       ]
     },
     {
+      "id": "pi",
+      "description": "Pi agent (earendil-works/pi) local skills and extensions directory",
+      "installPath": {
+        "linux": "~/.pi/agent",
+        "windows": "%USERPROFILE%/.pi/agent"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.pi",
+          "~/.pi/agent"
+        ],
+        "windows": [
+          "%USERPROFILE%/.pi",
+          "%USERPROFILE%/.pi/agent"
+        ]
+      },
+      "sources": [
+        "skills/common"
+      ],
+      "adapterPath": "skills/adapters/pi"
+    },
+    {
       "id": "opencode",
       "description": "OpenCode managed configuration",
       "installPath": {
@@ -82,7 +104,10 @@
           "%USERPROFILE%/.opencode"
         ]
       },
-      "sources": [],
+      "sources": [
+        "skills/common"
+      ],
+      "adapterPath": "skills/adapters/opencode",
       "configFiles": [
         {
           "source": "opencode/opencode.managed.json",
@@ -103,5 +128,10 @@
         }
       ]
     }
-  ]
+  ],
+  "adapterSources": {
+    "pi": "skills/adapters/pi",
+    "opencode": "skills/adapters/opencode",
+    "claude": "skills/adapters/claude"
+  }
 }
