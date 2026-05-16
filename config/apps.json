@@ -85,7 +85,11 @@
       "sources": [
         "skills/common"
       ],
-      "adapterPath": "skills/adapters/pi"
+      "adapterPath": "skills/adapters/pi",
+      "adapterInstallPath": {
+        "linux": "~/.pi/agent/extensions/skills-hub",
+        "windows": "%USERPROFILE%/.pi/agent/extensions/skills-hub"
+      }
     },
     {
       "id": "opencode",

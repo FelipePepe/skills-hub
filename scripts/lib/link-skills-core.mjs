@@ -122,6 +122,58 @@ export async function createLink(sourcePath, targetPath, dirent, dryRun, platfor
   await fs.symlink(sourcePath, targetPath, type);
 }
 
+/**
+ * Install the harness adapter directory as a single symlink.
+ * app.adapterPath     → source directory relative to rootDir (e.g. "skills/adapters/pi")
+ * app.adapterInstallPath[platform] → symlink target (e.g. "~/.pi/agent/extensions/skills-hub")
+ *
+ * Strategy: one directory symlink so git pulls are reflected instantly.
+ * Skipped when app is not detected (unless --include-missing).
+ */
+export async function installAdapter(rootDir, app, args, platform) {
+  const actions = [];
+
+  if (!app.adapterPath || !app.adapterInstallPath?.[platform]) return actions;
+  if (!app.detected && !args.includeMissing) return actions;
+
+  const sourcePath = path.resolve(rootDir, app.adapterPath);
+  const targetPath = expandHome(app.adapterInstallPath[platform]);
+
+  if (!(await pathExists(sourcePath))) {
+    actions.push(`skip-adapter (origen inexistente: ${app.adapterPath})`);
+    return actions;
+  }
+
+  await ensureDir(path.dirname(targetPath), args.dryRun);
+
+  const targetInfo = await describeTarget(targetPath);
+
+  if (!targetInfo.exists) {
+    actions.push(`link-adapter ${app.adapterPath} -> ${app.adapterInstallPath[platform]}`);
+    if (!args.dryRun) await fs.symlink(sourcePath, targetPath, "dir");
+    return actions;
+  }
+
+  if (targetInfo.isLink) {
+    const normalized = normalizeLinkTarget(targetPath, targetInfo.linkTarget);
+    if (normalized === sourcePath) {
+      actions.push(`ok-adapter ${app.adapterInstallPath[platform]}`);
+      return actions;
+    }
+    if (!args.replace) {
+      actions.push(`skip-adapter (enlace existente a otra ruta)`);
+      return actions;
+    }
+    actions.push(`replace-adapter ${app.adapterInstallPath[platform]}`);
+    await removePath(targetPath, args.dryRun);
+    if (!args.dryRun) await fs.symlink(sourcePath, targetPath, "dir");
+    return actions;
+  }
+
+  actions.push(`skip-adapter (ruta real existente: ${app.adapterInstallPath[platform]})`);
+  return actions;
+}
+
 export async function installForApp(rootDir, app, args, platform) {
   const sourceEntries = await collectSourceEntries(rootDir, app.sources);
   const actions = [];
