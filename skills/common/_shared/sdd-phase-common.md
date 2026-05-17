@@ -56,6 +56,18 @@ mem_save(
 
 File was already written during the phase's main step. No additional action needed.
 
+### Delta Files
+
+Phase skills that produce artifacts for code review or HyperFrames video generation MAY write delta diffs:
+
+```
+openspec/changes/{change-name}/deltas/
+├── phase-slug/
+│   └── {task-id-or-step-name}.diff
+```
+
+Delta files are git-style unified diffs. Write them after the phase's main work is complete. The orchestrator uses these for video composition.
+
 ### Hybrid mode
 
 Do BOTH: write the file to the filesystem AND call `mem_save` as above.
