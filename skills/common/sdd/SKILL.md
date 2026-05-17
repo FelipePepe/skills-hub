@@ -41,6 +41,47 @@ Before acting on any request, classify it:
 - Writing a feature across multiple files inline → delegate apply
 - Running tests inline → delegate verify
 
+## Harness #3: Lite Path
+
+For simple, bounded changes that don't justify a full SDD cycle.
+
+### Detection — classify as Lite when ALL of these are true
+
+- Affects ≤ 3 files (determinable before starting)
+- Single concern: no cross-cutting changes, no schema migrations, no new public APIs
+- Not security-sensitive (auth, credentials, user input, file ops, destructive ops)
+- Task is unambiguous: the orchestrator can infer what to do without codebase exploration
+
+If ANY condition fails → use the full SDD path.
+
+### Lite Process (inline, no sub-agents)
+
+1. **Analyze inline** — read the affected files directly (≤ 3), confirm scope
+2. **Apply inline** — implement the change directly; delegate to ONE sub-agent only if multi-file writes require isolation
+3. **Verify inline** — run lint/tests if available; orchestrator judgment otherwise (no `red-team-offensive`)
+4. **Lite archive** — write to engram via `mem_save` (no `sdd-archive` sub-agent)
+
+### Lite Archive — mandatory, same invariant as full path
+
+Call `mem_save` directly:
+- **title**: verb + what (e.g. "Fixed null check in UserService")
+- **type**: `decision`
+- **topic_key**: `sdd/{change-name}/archive`
+- **content** (structured):
+  ```
+  **What**: [what was changed]
+  **Why**: [user request or motivation]
+  **Where**: [files changed]
+  **Mode**: lite
+  **Verified**: [lint/tests passed | orchestrator judgment | skipped — state reason]
+  ```
+
+Then update state:
+```sql
+UPDATE sdd_cycle SET phase = 'done', verify_pass = 1, updated_at = unixepoch('now') * 1000
+WHERE feature = '{feature}';
+```
+
 ## Harness #4: Execution Mode
 
 Ask the user ONCE per session on first `/sdd-new`, `/sdd-ff`, or `/sdd-continue`:
@@ -147,7 +188,7 @@ OpenSpec path: `openspec/changes/{change-name}/state.yaml`
 | `sdd init` | `sdd-init` | `init` |
 | `sdd onboard` | `sdd-onboard` | — |
 | `sdd explore <topic>` | `sdd-explore` | `explore` |
-| `sdd new <change>` | propose → spec → design → tasks | `tasks` |
+| `sdd new <change>` | lite: inline · full: propose → spec → design → tasks | `lite` or `tasks` |
 | `sdd status` | (inline) | — |
 | `sdd continue` | (gate check + next skill) | — |
 | `sdd apply [task-id]` | `sdd-apply` | `apply` |
@@ -230,11 +271,14 @@ VALUES ('{project}', 'init', '{mode}', '{exec_mode}');
 Invoke `sdd-explore`. Update state phase → `explore`.
 
 ### `sdd new <change>`
-1. Ask execution mode if not set for this session
-2. Insert state row with phase `propose`
-3. Invoke in sequence: `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`
-4. In interactive mode: pause and confirm between phases
-5. Update state phase → `tasks`
+1. **Classify** — does the change meet Lite Path criteria (Harness #3)?
+   - **Lite** → analyze inline → apply → lite archive. No sub-agents for planning phases.
+   - **Full** → continue with steps 2-5 below.
+2. Ask execution mode if not set for this session
+3. Insert state row with phase `propose` (full) or `lite` (lite)
+4. **Full path only**: invoke in sequence: `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`
+5. In interactive mode: pause and confirm between phases
+6. Update state phase → `tasks` (full) or proceed directly to apply (lite)
 
 ### `sdd status`
 ```sql
