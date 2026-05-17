@@ -15,6 +15,8 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Politica versionada de branch protection en `.github/branch-protection.main.json`.
 - Script `scripts/setup-branch-protection.sh` para aplicar branch protection con GitHub CLI.
 - Guia operativa en `BRANCH_PROTECTION.md`.
+- Skill `sdd-doc` — nueva fase del pipeline SDD para generar docs faltantes (C4, ADRs, API funcional, tech arch).
+- Delta tracking en `sdd-apply` — cada task genera un snapshot `.diff` para HyperFrames video.
 
 ## [0.1.0] - 2026-04-13
 

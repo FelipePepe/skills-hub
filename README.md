@@ -199,46 +199,6 @@ Flags:
 No todo requiere enlaces. `prompts/` sigue tratandose como contenido copiable y se sincroniza con `rsync`.
 Por eso `sync.sh` mantiene un paso legacy adicional despues de la instalacion por enlaces.
 
-## Criterio de clasificacion
-
-- Si una skill depende de un workflow o plataforma concreta de Copilot/OpenCode, va a `skills/copilot-only`.
-- Si una skill no depende de Copilot y puede compartirse sin cambios, puede promocionarse despues a `skills/common`.
-- No mezclar configuracion de maquina dentro de `skills/`; eso debe quedarse en el tooling o fuera del repo.
-
-## Instalacion por enlaces
-
-El flujo recomendado es instalar skills mediante enlaces por skill, no copiando directorios completos:
-
-- En Linux se crean symlinks.
-- En Windows se crean junctions para directorios.
-- El instalador detecta si existen `~/.copilot`, `~/.claude` o sus equivalentes en `%USERPROFILE%`.
-- Para OpenCode, el instalador fusiona `opencode.json` y actualiza un bloque gestionado dentro de `.opencode/AGENTS.md`.
-- Si una app no esta instalada, se omite por defecto.
-- Si una ruta ya existe y no es un enlace del repo, se respeta y se marca como `skip`.
-- Antes de modificar ficheros de configuracion, crea backups `.bak-YYYYMMDD-HHMMSS`.
-
-Comandos:
-
-```bash
-node ./scripts/link-skills.mjs status
-node ./scripts/link-skills.mjs install --dry-run
-node ./scripts/link-skills.mjs install
-node ./scripts/link-skills.mjs install --app=copilot
-node ./scripts/link-skills.mjs install --replace
-```
-
-Flags:
-
-- `--app=<id>` limita a una app concreta
-- `--dry-run` muestra el plan sin tocar disco
-- `--replace` reemplaza enlaces existentes que apunten a otra ruta
-- `--include-missing` crea la ruta destino aunque la app no se detecte
-
-## Contenido legacy copiable
-
-No todo requiere enlaces. `prompts/` sigue tratandose como contenido copiable y se sincroniza con `rsync`.
-Por eso `sync.sh` mantiene un paso legacy adicional despues de la instalacion por enlaces.
-
 ## Historial de cambios
 
 - Ver `CHANGELOG.md` para cambios notables del proyecto.
