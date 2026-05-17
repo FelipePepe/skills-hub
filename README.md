@@ -14,21 +14,56 @@ Mantener contenido versionado en un solo repositorio y exponerlo hacia apps inst
 
 ## Estado actual
 
-- `skills/copilot-only` es la fuente principal para las skills activas de Copilot/OpenCode.
-- `skills/common` queda reservado para skills realmente portables entre plataformas.
-- `skills/claude-only` queda reservado para variantes especificas de Claude.
+- `skills/common` es la **fuente principal** con 37+ skills harness-agnosticas que funcionan en Pi, OpenCode, Claude Code y cualquier agente compatible con SKILL.md.
+- `skills/copilot-only` contiene skills especificas de Copilot/OpenCode no portables.
+- `skills/claude-only` queda reservado para variantes especificas de Claude Code.
+- `skills/adapters/` contiene implementaciones harness-especificas: extensiones TypeScript para Pi, config para OpenCode, hooks para Claude.
 - `~/.agents/skills` no se sincroniza automaticamente por ahora para evitar sobreescribir skills locales no modeladas aun en este repo.
 - `prompts`, `config` y `scripts` permanecen en el repo porque forman parte del tooling de sincronizacion y validacion.
 - `scripts/link-skills.mjs` es el instalador cross-platform recomendado para Linux y Windows.
 - `opencode/` contiene configuracion gestionada para OpenCode que se fusiona sin machacar la config local.
 
+## Arquitectura de harnesses
+
+El sistema implementa los **20 Gentli Harnesses** del ecosistema Gentleman AI de forma harness-agnostica:
+
+| Capa | Contenido |
+|------|-----------|
+| `skills/common/` | Skills portables — WHAT (contrato de comportamiento) |
+| `skills/adapters/{harness}/` | Implementaciones harness-especificas — HOW (ejecucion) |
+| `skills/common/_shared/` | Contratos compartidos: engram-convention, openspec-convention, persistence-contract, sdd-phase-common, skill-resolver |
+
+### Skills del ciclo SDD (Spec-Driven Development)
+
+```
+init → explore → propose → spec ─┐
+                                  ├→ tasks → apply → verify → archive
+                               design ─┘
+```
+
+Cada fase es un sub-agente con contexto aislado. El orchestrador (`sdd`) coordina sin ejecutar.
+
+### Adaptador Pi (`skills/adapters/pi/`)
+
+Tres extensiones TypeScript para el agente Pi (`earendil-works/pi`):
+
+| Extension | Harnesses | Funcion |
+|-----------|-----------|---------|
+| `memory.ts` | #10 Memory | Inyecta contexto Engram al inicio; guarda resumen al cerrar sesion |
+| `skill-resolver.ts` | #14 #15 #16 | Lee skill registry y pre-inyecta compact rules en el system prompt |
+| `session-guard.ts` | #2 Delegation | Intercepta comandos destructivos y pide confirmacion |
+
 ## Estructura
 
-- `skills/common`: contenido compartido entre plataformas.
-- `skills/copilot-only`: contenido exclusivo para Copilot.
-- `skills/claude-only`: contenido exclusivo para Claude.
+- `skills/common/`: 37+ skills harness-agnosticas.
+- `skills/common/_shared/`: contratos y convenciones compartidas entre fases SDD.
+- `skills/adapters/pi/`: extensiones TypeScript para Pi agent.
+- `skills/adapters/opencode/`: configuracion y guia para OpenCode.
+- `skills/adapters/claude/`: hooks y guia para Claude Code.
+- `skills/copilot-only/`: skills exclusivas de Copilot/OpenCode.
+- `skills/claude-only/`: skills exclusivas de Claude Code.
 - `prompts`: prompts globales e instrucciones.
-- `config/apps.json`: manifiesto de apps detectables e instalables.
+- `config/apps.json`: manifiesto de apps detectables e instalables, incluyendo Pi.
 - `config/sync-map.sh`: mapeos legacy para contenido copiable como `prompts`.
 - `opencode/opencode.managed.json`: fragmento gestionado de `opencode.json`.
 - `opencode/AGENTS.md`: bloque gestionado para `.opencode/AGENTS.md`.
@@ -145,9 +180,12 @@ Excepciones:
 
 ## Criterio de clasificacion
 
-- Si una skill depende de un workflow o plataforma concreta de Copilot/OpenCode, va a `skills/copilot-only`.
-- Si una skill no depende de Copilot y puede compartirse sin cambios, puede promocionarse despues a `skills/common`.
+- **`skills/common/`**: skill harness-agnostica — define WHAT (comportamiento, contrato). Requiere `harness: agnostic` en frontmatter y cero referencias a plataformas concretas.
+- **`skills/adapters/{harness}/`**: implementacion HOW — codigo o config especifica del harness (TypeScript para Pi, JSON para OpenCode, hooks para Claude). No contiene logica de negocio.
+- **`skills/copilot-only/`**: skill que depende de un workflow o plataforma concreta de Copilot/OpenCode y no es portable sin cambios.
+- **`skills/claude-only/`**: variante especifica de Claude Code que no aplica a otros harnesses.
 - No mezclar configuracion de maquina dentro de `skills/`; eso debe quedarse en el tooling o fuera del repo.
+- Las skills de infraestructura especifica de entorno (`.casa`, intranet) van en `common/` si el protocolo es portable, con deteccion de contexto en la skill para activarse solo cuando aplica.
 
 ## GitFlow del repositorio
 

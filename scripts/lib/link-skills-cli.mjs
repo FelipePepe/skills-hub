@@ -1,6 +1,6 @@
 import path from "node:path";
 import process from "node:process";
-import { appStatus, buildTokenMap, installForApp } from "./link-skills-core.mjs";
+import { appStatus, buildTokenMap, installAdapter, installForApp } from "./link-skills-core.mjs";
 import { installConfigFiles, loadConfig } from "./link-skills-config.mjs";
 
 export function parseArgs(argv) {
@@ -76,8 +76,9 @@ export async function runLinkSkillsCli({ rootDir, configPath, argv = process.arg
   const results = [];
   for (const app of selectedApps) {
     const skillResult = await installForApp(rootDir, app, args, platform);
+    const adapterActions = await installAdapter(rootDir, app, args, platform);
     const configActions = await installConfigFiles(rootDir, app, args, tokenMap, platform);
-    skillResult.actions.push(...configActions);
+    skillResult.actions.push(...adapterActions, ...configActions);
     results.push(skillResult);
   }
 

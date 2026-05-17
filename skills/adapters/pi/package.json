@@ -1,0 +1,38 @@
+{
+  "name": "@skills-hub/pi-adapter",
+  "version": "1.0.0",
+  "description": "Pi agent extensions for the skills-hub harness-agnostic system",
+  "type": "module",
+  "pi": {
+    "extensions": [
+      {
+        "name": "memory",
+        "entry": "./memory.ts",
+        "description": "Injects Engram memory context at session start and saves session summaries on close",
+        "hooks": ["before_agent_start", "settled"],
+        "commands": ["memory-context", "memory-save"]
+      },
+      {
+        "name": "skill-resolver",
+        "entry": "./skill-resolver.ts",
+        "description": "Reads skill registry and injects compact rules into system prompt",
+        "hooks": ["before_agent_start", "message"],
+        "commands": ["skill-rules", "skill-reload"]
+      },
+      {
+        "name": "session-guard",
+        "entry": "./session-guard.ts",
+        "description": "Intercepts destructive shell commands and asks for user confirmation",
+        "hooks": ["before_tool_call", "before_user_message"],
+        "commands": ["guard-on", "guard-off", "guard-status"]
+      }
+    ]
+  },
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
