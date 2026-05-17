@@ -74,8 +74,10 @@ The installer (`scripts/link-skills.mjs` + `bin/skills-hub.js`) reads `config/ap
 
 ```
 init -> explore -> propose -> spec -> tasks -> apply -> verify -> archive
-                                    -> design
+                                    -> design -> doc
 ```
+
+`doc` — verifica y genera docs faltantes (C4, ADRs, API functional, tech arch) basandose en el stack detectado. Pregunta al usuario antes de generar.
 
 Each phase is a sub-agent with isolated context. The `sdd` orchestrator coordinates without executing.
 

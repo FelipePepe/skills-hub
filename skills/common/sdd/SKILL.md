@@ -53,7 +53,7 @@ Ask user ONCE on first `/sdd-new`/`/sdd-ff`/`/sdd-continue`:
 
 ```
 init → explore → propose → spec ─┐
-                      └→ design ─┤
+                      └→ design → doc ─┤
           └→ tasks ─→ apply → verify → archive
 ```
 
@@ -64,6 +64,7 @@ init → explore → propose → spec ─┐
 | `propose` | `proposal` exists |
 | `spec` | `spec` exists with Requirements |
 | `design` | `design` exists with File Changes |
+| `doc` | `docs` exists |
 | `tasks` | tasks generated and persisted |
 | `apply` | 0 tasks pending/in_progress |
 | `verify` | `verify_pass = true` |
@@ -77,7 +78,8 @@ init → explore → propose → spec ─┐
 | `propose` | `explore` (opt) | `proposal` |
 | `spec` | `proposal` (req) | `spec` |
 | `design` | `proposal` (req) | `design` |
-| `tasks` | `spec` + `design` (req) | `tasks` |
+| `doc` | `proposal` + `design` (req) | `docs` |
+| `tasks` | `spec` + `design` + `docs` (req) | `tasks` |
 | `apply` | `tasks` + `spec` + `design` | `apply-progress` |
 | `verify` | `spec` + `tasks` | `verify-report` |
 | `archive` | all artifacts | `archive-report` |
@@ -122,6 +124,7 @@ Engram topic key: `sdd/{change-name}/state`
 | `sdd new <change>` | lite: inline / full: propose→spec→design→tasks | — |
 | `sdd status` | (inline) | — |
 | `sdd continue` | gate check + next skill | — |
+| `sdd doc` | `sdd-doc` | `doc` |
 | `sdd apply [task-id]` | `sdd-apply` | `apply` |
 | `sdd verify` | `sdd-verify` + `red-team-offensive` | `verify` |
 | `sdd archive` | `sdd-archive` | `done` |
@@ -139,7 +142,7 @@ VALUES ('{project}', 'init', '{mode}', '{exec_mode}');
 1. Classify as Lite (inline) or Full (sub-agents)
 2. Ask execution mode if not set
 3. Insert state row
-4. Full path: invoke `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`
+4. Full path: invoke `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-doc` → `sdd-tasks`
 5. Interactive mode: pause + confirm between phases
 
 ### `sdd status`
@@ -194,6 +197,7 @@ Sub-agents do NOT get: orchestrator conversation, raw SKILL.md paths, inline art
 | apply | coder/specialized | Implementation |
 | verify | architect | Validation |
 | archive | fast/cheap | Close |
+| doc | architect | Documentation |
 
 ## Golden Rules
 
