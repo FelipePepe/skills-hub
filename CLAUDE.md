@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-Single source of truth for managing AI assistant skills and synchronizing them to local directories of installed apps (Copilot, Claude, VS Code/OpenCode). Skills are exposed via symlinks/junctions, not copied.
+Single source of truth (a GitHub repo) for managing AI assistant skills and distributing them across multiple machines. On each machine you clone the repo to a LOCAL disk and copy the skills into the local directories of installed apps (Copilot, Claude, agents, VS Code/OpenCode). Skills are copied (rsync), not symlinked. Hard invariant: nothing — neither the clone nor any install target — may live on a network filesystem (NAS); the scripts abort on NFS/CIFS/SMB/sshfs.
 
 ## Architecture
 
@@ -12,8 +12,10 @@ Single source of truth for managing AI assistant skills and synchronizing them t
 - `skills/copilot-only` - skills exclusive to GitHub Copilot / OpenCode
 - `skills/claude-only` - skills exclusive to Claude
 - `config/apps.json` - manifest defining target apps, their detect paths, install paths, and which skill sources they consume
-- `config/sync-map.sh` - legacy copy sync pairs in format `<rel_path>::<abs_path>` for content that cannot use symlinks (e.g., VS Code prompts)
-- `scripts/link-skills.mjs` + `scripts/lib/` - cross-platform symlink/junction installer (Linux=symlinks, Windows=junctions)
+- `config/sync-map.sh` - legacy copy sync pairs in format `<rel_path>::<abs_path>` for copyable content (e.g., VS Code prompts)
+- `scripts/sync.sh` - copy-based installer (rsync) that copies skills from sources to each detected app's installPath; enforces the local-only invariant via `skills_hub_assert_local`
+- `scripts/install-opencode-config.mjs` - installs OpenCode managed config (json-merge + markdown managed block); the only piece that needs Node merge logic
+- `scripts/lib/common.sh` - shared bash helpers, including `skills_hub_assert_local` (NAS guard)
 - `bin/skills-hub.js` - official CLI wrapping the installer and all validation scripts
 - `opencode/` - managed fragments for OpenCode (`opencode.managed.json` for JSON merge, `AGENTS.md` for markdown managed block)
 - `prompts/` - legacy copyable content synced via rsync in `sync.sh`
@@ -34,7 +36,7 @@ Pre-PR local validation (in order):
 
 Sync operations:
 ```bash
-pnpm skills-hub install          # install skills via symlinks to all detected apps
+pnpm skills-hub install          # copy skills to all detected apps
 pnpm skills-hub install --dry-run
 pnpm skills-hub install --app=copilot
 pnpm skills-hub status
@@ -47,8 +49,9 @@ pnpm skills-hub sync [--dry-run]
 
 Direct script invocation:
 ```bash
-node ./scripts/link-skills.mjs install --dry-run
 ./scripts/sync.sh --dry-run
+./scripts/sync.sh --app=claude
+./scripts/check.sh
 ```
 
 ## Conventions
@@ -61,7 +64,10 @@ node ./scripts/link-skills.mjs install --dry-run
 - Naming: use `atlas`/`atlas.casa`, never `mente`/`mente.casa`
 - Naming: use `sdd-propose` as canonical, `sdd-proposal` is legacy alias only
 - Use `pnpm` in JS/TS skill examples; document `minimumReleaseAge: 10080` for bootstrap/setup skills
-- If changing installer logic, keep `bin/skills-hub.js` and `scripts/link-skills.mjs` aligned
+- Default placement for a skill is `skills/common` (consumed by all apps); use `copilot-only`/`claude-only` only when it truly depends on that platform
+- Skills are installed by COPY (rsync), never symlinks; after editing a skill, re-run `pnpm skills-hub sync` to propagate
+- Never let the clone or any install target live on a network filesystem (NAS); `skills_hub_assert_local` enforces this
+- If changing installer logic, keep `bin/skills-hub.js` and `scripts/sync.sh` aligned
 
 ## GitFlow
 

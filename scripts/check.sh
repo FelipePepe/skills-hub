@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Detecta drift entre el repo (fuente) y las copias instaladas en cada app.
+# Como las skills se instalan por COPIA, comparamos contenido con rsync -ani.
+# Cualquier diferencia (o un destino que sea symlink) cuenta como drift.
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
-LINKER="$ROOT_DIR/scripts/link-skills.mjs"
 APPS_FILE="$ROOT_DIR/config/apps.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
@@ -38,65 +41,101 @@ skills_hub_require_command node
 skills_hub_validate_json "$APPS_FILE"
 skills_hub_source_sync_map "$MAP_FILE"
 
-skills_hub_info "Verificando drift..."
+skills_hub_assert_local "$ROOT_DIR" "clon del repo"
+
+skills_hub_info "Verificando drift (repo -> copias instaladas)..."
 errors=0
 
-linker_status_args=( status )
-linker_install_args=( install --dry-run )
-if [[ -n "$APP_FILTER" ]]; then
-  linker_status_args+=( "--app=$APP_FILTER" )
-  linker_install_args+=( "--app=$APP_FILTER" )
-fi
-if [[ "$INCLUDE_MISSING" == true ]]; then
-  linker_status_args+=( --include-missing )
-  linker_install_args+=( --include-missing )
-fi
+while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
+  [[ -n "$app_id" ]] || continue
+  [[ -n "$sources_csv" ]] || continue
+  [[ -n "$APP_FILTER" && "$app_id" != "$APP_FILTER" ]] && continue
 
-skills_hub_info "Verificando instalacion por enlaces..."
-if ! node "$LINKER" "${linker_status_args[@]}"; then
-  echo "ERROR: fallo al inspeccionar apps instaladas con link-skills.mjs"
-  errors=1
-fi
+  install_path="$(eval echo "$install_path")"
 
-if ! node "$LINKER" "${linker_install_args[@]}"; then
-  echo "ERROR: fallo al construir el plan de instalacion de skills"
-  errors=1
-fi
+  detected=false
+  IFS=',' read -r -a detect_list <<< "$detect_csv"
+  for dp in "${detect_list[@]}"; do
+    [[ -n "$dp" ]] || continue
+    dp="$(eval echo "$dp")"
+    if [[ -e "$dp" ]]; then detected=true; break; fi
+  done
+  if [[ "$detected" == false && "$INCLUDE_MISSING" == false ]]; then
+    echo "SKIP: $app_id (no detectada)"
+    continue
+  fi
+
+  IFS=',' read -r -a source_list <<< "$sources_csv"
+  for source_dir in "${source_list[@]}"; do
+    [[ -n "$source_dir" ]] || continue
+    abs_source="$ROOT_DIR/$source_dir"
+    [[ -d "$abs_source" ]] || { echo "ERROR: source inexistente -> $abs_source"; errors=1; continue; }
+
+    while IFS= read -r -d '' skill_dir; do
+      skill_name="$(basename "$skill_dir")"
+      [[ "$skill_name" == _* || "$skill_name" == .* ]] && continue
+      dst="$install_path/$skill_name"
+
+      if [[ -L "$dst" ]]; then
+        echo "DRIFT: $app_id/$skill_name es un symlink (debe ser copia) -> $(readlink "$dst")"
+        errors=1
+        continue
+      fi
+      if [[ ! -d "$dst" ]]; then
+        echo "DRIFT: $app_id/$skill_name falta en destino ($dst)"
+        errors=1
+        continue
+      fi
+
+      tmp_out="$(mktemp)"
+      if ! rsync -ani --delete "$skill_dir/" "$dst/" > "$tmp_out" 2>/dev/null; then
+        echo "ERROR: fallo rsync al comparar $skill_dir con $dst"
+        errors=1
+      elif [[ -s "$tmp_out" ]]; then
+        echo "DRIFT: $app_id/$skill_name"
+        sed 's/^/    /' "$tmp_out"
+        errors=1
+      fi
+      rm -f "$tmp_out"
+    done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+  done
+done < <(
+  node -e '
+    const fs = require("node:fs");
+    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const P = "linux";
+    for (const app of data.apps) {
+      const sources = Array.isArray(app.sources) ? app.sources.join(",") : "";
+      if (!sources) continue;
+      const install = app.installPath?.[P] ?? "";
+      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
+      console.log([app.id, install, detect, sources].join("\t"));
+    }
+  ' "$APPS_FILE"
+)
 
 for pair in "${SYNC_PAIRS[@]}"; do
   src_rel="${pair%%::*}"
   dst_abs="${pair##*::}"
   src_abs="$ROOT_DIR/$src_rel"
 
-  if [[ ! -d "$src_abs" ]]; then
-    echo "ERROR: origen inexistente -> $src_abs"
-    errors=1
-    continue
-  fi
-
+  [[ -d "$src_abs" ]] || { echo "ERROR: origen inexistente -> $src_abs"; errors=1; continue; }
   if [[ ! -d "$dst_abs" ]]; then
-    echo "WARN: destino inexistente -> $dst_abs"
-    echo "      sync.sh lo creara automaticamente con mkdir -p"
-    echo "PLAN: se copiaria $src_abs/ -> $dst_abs/"
+    echo "WARN: destino inexistente -> $dst_abs (sync.sh lo creara)"
     continue
   fi
 
   tmp_out="$(mktemp)"
   if ! rsync -ani --delete "$src_abs/" "$dst_abs/" > "$tmp_out"; then
     echo "ERROR: fallo rsync al comparar $src_abs con $dst_abs"
-    rm -f "$tmp_out"
     errors=1
-    continue
-  fi
-
-  if [[ -s "$tmp_out" ]]; then
+  elif [[ -s "$tmp_out" ]]; then
     echo "DRIFT: $src_abs -> $dst_abs"
-    cat "$tmp_out"
+    sed 's/^/    /' "$tmp_out"
     errors=1
   else
     echo "OK: $src_abs -> $dst_abs"
   fi
-
   rm -f "$tmp_out"
 done
 
