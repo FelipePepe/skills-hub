@@ -7,7 +7,7 @@ description: >
   "move card", "add card", "trello new", "mover tarjeta".
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.1"
 ---
 

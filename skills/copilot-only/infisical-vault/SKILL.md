@@ -8,7 +8,7 @@ description: >
   de conexiones (DB, JWT, API keys) o se mencione .env en cualquier proyecto.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.1"
 ---
 > **🏠 CASA LAYER** — Only use this skill when working in a `.casa` intranet project.

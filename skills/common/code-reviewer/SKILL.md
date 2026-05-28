@@ -6,7 +6,7 @@ description: >
   audit, "revisa este código", o antes de un PR merge.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.0"
 ---
 
