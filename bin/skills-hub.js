@@ -4,7 +4,6 @@ import path from "node:path";
 import process from "node:process";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { defaultConfigPath, runLinkSkillsCli } from "../scripts/lib/link-skills-cli.mjs";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -12,20 +11,21 @@ const argv = process.argv.slice(2);
 function printHelp() {
   console.log(`skills-hub
 
-CLI del catalogo de skills y su exposicion local.
+CLI del catalogo de skills y su instalacion local por copia.
 
 Uso:
-  skills-hub status [--app=<id>] [--include-missing]
-  skills-hub install [--app=<id>] [--dry-run] [--replace] [--include-missing]
+  skills-hub install [--app=<id>] [--dry-run] [--include-missing] [--verbose]
+  skills-hub sync    [--app=<id>] [--dry-run] [--include-missing] [--verbose]
+  skills-hub status  [--app=<id>] [--include-missing]
   skills-hub doctor
   skills-hub doctor-skills
   skills-hub lint
   skills-hub check
-  skills-hub sync [--dry-run]
 
 Notas:
-  - status/install usan la CLI nativa del instalador
-  - doctor/lint/check/sync reutilizan los scripts del repo
+  - install y sync son equivalentes: copian las skills del repo a cada app local.
+  - Las skills se COPIAN (no symlinks) y todo debe vivir en disco local (sin NAS).
+  - status/doctor reutilizan la deteccion de doctor.sh.
 `);
 }
 
@@ -49,41 +49,27 @@ async function main() {
     return;
   }
 
-  if (command === "status" || command === "install") {
-    await runLinkSkillsCli({
-      rootDir,
-      configPath: defaultConfigPath(rootDir),
-      argv
-    });
-    return;
+  switch (command) {
+    case "install":
+    case "sync":
+      await runRepoScript("sync.sh", rest);
+      return;
+    case "status":
+    case "doctor":
+      await runRepoScript("doctor.sh", rest);
+      return;
+    case "doctor-skills":
+      await runRepoScript("doctor-skills.sh", rest);
+      return;
+    case "lint":
+      await runRepoScript("lint.sh", rest);
+      return;
+    case "check":
+      await runRepoScript("check.sh", rest);
+      return;
+    default:
+      throw new Error(`Comando no soportado: ${command}`);
   }
-
-  if (command === "doctor") {
-    await runRepoScript("doctor.sh", rest);
-    return;
-  }
-
-  if (command === "doctor-skills") {
-    await runRepoScript("doctor-skills.sh", rest);
-    return;
-  }
-
-  if (command === "lint") {
-    await runRepoScript("lint.sh", rest);
-    return;
-  }
-
-  if (command === "check") {
-    await runRepoScript("check.sh", rest);
-    return;
-  }
-
-  if (command === "sync") {
-    await runRepoScript("sync.sh", rest);
-    return;
-  }
-
-  throw new Error(`Comando no soportado: ${command}`);
 }
 
 main().catch((error) => {

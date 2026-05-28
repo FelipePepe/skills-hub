@@ -1,128 +1,143 @@
 # skills-hub
 
-Fuente unica de verdad para skills y tooling de sincronizacion.
+Fuente única de verdad para tus skills de asistentes de IA, pensada para **instalarlas en cualquiera de tus máquinas** desde un único repositorio en GitHub.
 
-Incluye una CLI instalable para exponer el catalogo en las apps locales compatibles.
+Incluye una CLI instalable que copia el catálogo a las apps locales compatibles.
 
 ## Objetivo
 
-Mantener contenido versionado en un solo repositorio y exponerlo hacia apps instaladas mediante enlaces simbolicos o junctions:
+Mantener todas las skills versionadas en un solo repositorio y **distribuirlas a varias máquinas**: clonas el repo en disco local de cada equipo y copias las skills a los directorios de cada app.
 
 - ~/.copilot/skills
 - ~/.claude/skills
-- ~/.config/Code/User/prompts
+- ~/.agents/skills
+- ~/.config/Code/User/prompts (contenido legacy)
+- OpenCode (config gestionada)
 
-## Estado actual
+### Principios
 
-- `skills/copilot-only` es la fuente principal para las skills activas de Copilot/OpenCode.
-- `skills/common` queda reservado para skills realmente portables entre plataformas.
-- `skills/claude-only` queda reservado para variantes especificas de Claude.
-- `~/.agents/skills` no se sincroniza automaticamente por ahora para evitar sobreescribir skills locales no modeladas aun en este repo.
-- `prompts`, `config` y `scripts` permanecen en el repo porque forman parte del tooling de sincronizacion y validacion.
-- `scripts/link-skills.mjs` es el instalador cross-platform recomendado para Linux y Windows.
-- `opencode/` contiene configuracion gestionada para OpenCode que se fusiona sin machacar la config local.
+- **Fuente única en GitHub.** El repo es la verdad; cada máquina lo clona.
+- **Todo local, sin NAS.** Ni el clon ni los destinos pueden vivir en un filesystem de red. Los scripts abortan si detectan NFS/CIFS/SMB/sshfs.
+- **Copia, no symlinks.** Las skills se copian a cada app, de modo que quedan dentro de la máquina e independientes del clon. Tras editar una skill, re-ejecuta `sync` para propagar.
 
 ## Estructura
 
-- `skills/common`: contenido compartido entre plataformas.
-- `skills/copilot-only`: contenido exclusivo para Copilot.
-- `skills/claude-only`: contenido exclusivo para Claude.
-- `prompts`: prompts globales e instrucciones.
-- `config/apps.json`: manifiesto de apps detectables e instalables.
+- `skills/common`: skills compartidas por todas las plataformas (el caso por defecto).
+- `skills/copilot-only`: skills exclusivas de Copilot/OpenCode (excepción).
+- `skills/claude-only`: skills exclusivas de Claude (excepción).
+- `prompts`: prompts globales e instrucciones (contenido copiable legacy).
+- `config/apps.json`: manifiesto de apps detectables, sus rutas y qué fuentes consume cada una.
 - `config/sync-map.sh`: mapeos legacy para contenido copiable como `prompts`.
-- `opencode/opencode.managed.json`: fragmento gestionado de `opencode.json`.
+- `opencode/opencode.managed.json`: fragmento gestionado de `opencode.json` (json-merge).
 - `opencode/AGENTS.md`: bloque gestionado para `.opencode/AGENTS.md`.
-- `scripts/import-copilot-skills.sh`: bootstrap para importar skills locales existentes al repo.
 - `bin/skills-hub.js`: CLI instalable del repo.
-- `scripts/link-skills.mjs`: detecta apps instaladas y crea symlinks/junctions por skill.
-- `scripts/sync.sh`: ejecuta el instalador por enlaces y sincroniza contenido legacy copiable.
-- `scripts/check.sh`: valida el plan de instalacion por enlaces y el drift del contenido legacy.
+- `scripts/sync.sh`: instalador por **copia** (rsync) + config gestionada de OpenCode.
+- `scripts/install-opencode-config.mjs`: instala la config gestionada de OpenCode (merge).
+- `scripts/check.sh`: detecta drift entre el repo y las copias instaladas.
+- `scripts/import-copilot-skills.sh`: bootstrap para importar skills locales existentes al repo.
 
-## Uso rapido
+## Uso rápido
 
 ```bash
 pnpm install
-pnpm skills-hub status
-pnpm skills-hub install --dry-run
-pnpm skills-hub install
-./scripts/import-copilot-skills.sh --dry-run
-./scripts/import-copilot-skills.sh
-./scripts/doctor-skills.sh
-./scripts/doctor.sh
-./scripts/lint.sh
-node ./scripts/link-skills.mjs status
-node ./scripts/link-skills.mjs install --dry-run
-node ./scripts/link-skills.mjs install
+pnpm skills-hub status            # apps detectadas + auditoría del catálogo
+pnpm skills-hub install --dry-run # plan de copia sin tocar disco
+pnpm skills-hub install           # copia las skills a las apps locales
+pnpm skills-hub check             # ¿hay drift entre repo y copias?
+```
+
+Equivalentes directos:
+
+```bash
 ./scripts/sync.sh --dry-run
 ./scripts/sync.sh
+./scripts/sync.sh --app=claude
 ./scripts/check.sh
-```
-
-## Flujo profesional recomendado
-
-- Lee la guia de contribucion: `CONTRIBUTING.md`
-- Valida cambios locales antes de abrir PR:
-
-```bash
-./scripts/doctor-skills.sh
 ./scripts/doctor.sh
+./scripts/doctor-skills.sh
 ./scripts/lint.sh
-./scripts/check.sh
+./scripts/import-copilot-skills.sh --dry-run
 ```
 
-- Usa templates de issue y pull request en `.github/`.
-
-## CLI de instalacion
-
-La app/CLI oficial del repo es `skills-hub`.
-
-Comandos:
+## Instalación en una máquina nueva
 
 ```bash
-pnpm skills-hub status
+git clone <repo> ~/sources/skills-hub   # en disco LOCAL, nunca en un NAS
+cd ~/sources/skills-hub
+pnpm install
 pnpm skills-hub install
-pnpm skills-hub install --dry-run
-pnpm skills-hub install --app=copilot
-pnpm skills-hub install --replace
+```
+
+`sync.sh` detecta qué apps existen (`~/.copilot`, `~/.claude`, `~/.agents`, OpenCode) y copia a cada una las fuentes que declara `config/apps.json`. Las apps no detectadas se omiten (usa `--include-missing` para forzar).
+
+## CLI de instalación
+
+La CLI oficial del repo es `skills-hub`.
+
+```bash
+pnpm skills-hub install [--app=<id>] [--dry-run] [--include-missing] [--verbose]
+pnpm skills-hub sync    # alias de install
+pnpm skills-hub status  # detección de apps + auditoría del catálogo
 pnpm skills-hub doctor
 pnpm skills-hub doctor-skills
 pnpm skills-hub lint
 pnpm skills-hub check
 ```
 
+Flags de `install`/`sync`:
+
+- `--app=<id>` limita a una app concreta
+- `--dry-run` muestra el plan sin tocar disco
+- `--include-missing` instala aunque la app no se detecte
+- `--verbose` detalla cada operación de rsync
+
 Notas:
 
-- reutiliza la misma logica que `scripts/link-skills.mjs`
-- sirve como entrypoint formal para instalar las skills
-- respeta `config/apps.json` como fuente de exposicion por plataforma
-- sigue un modelo de CLI de producto parecido a `gentle-ai`, pero centrado en este catalogo
-- usa `pnpm skills-hub ...` dentro del repo; `pnpm exec` no expone el binario del paquete raiz
+- respeta `config/apps.json` como fuente de exposición por plataforma
+- usa `pnpm skills-hub ...` dentro del repo; `pnpm exec` no expone el binario del paquete raíz
+
+## Flujo profesional recomendado
+
+Lee `CONTRIBUTING.md` y valida cambios locales antes de abrir PR:
+
+```bash
+./scripts/doctor-skills.sh
+./scripts/doctor.sh
+./scripts/lint.sh
+./scripts/check.sh
+```
 
 ## Calidad automatizada
 
 - CI ejecuta `./scripts/lint.sh` en cada push y pull request.
 - El objetivo de CI es validar scripts y convenciones del repo sin depender de destinos locales.
-- `./scripts/validate-skills.sh` valida reglas semanticas basicas del catalogo: limite de 300 lineas por `SKILL.md`, naming no obsoleto y referencias legacy controladas.
-- `./scripts/doctor-skills.sh` audita el catalogo canonico: alineacion carpeta/frontmatter, fuentes expuestas por app y colisiones de nombre por plataforma.
+- `./scripts/validate-skills.sh` valida reglas semánticas básicas: límite de 300 líneas por `SKILL.md`, naming no obsoleto y referencias legacy controladas.
+- `./scripts/doctor-skills.sh` audita el catálogo canónico: alineación carpeta/frontmatter, fuentes expuestas por app y colisiones de nombre por plataforma.
 
-## Fuente canonica y modelo de exposicion
+## Fuente canónica y modelo de exposición
 
-Este repo es la **fuente canonica** de authoring:
+Este repo es la **fuente canónica** de authoring:
 
 - `skills/` contiene las skills reales
-- `config/apps.json` define que carpetas fuente expone cada app
+- `config/apps.json` define qué carpetas fuente expone cada app
 - `config/sync-map.sh` mantiene solo contenido legacy copiable
 
-Las rutas locales de apps (`~/.copilot/skills`, `~/.claude/skills`, `~/.agents/skills`, OpenCode) son **targets de exposicion**, no sitios de mantenimiento manual.
+Las rutas locales de apps (`~/.copilot/skills`, `~/.claude/skills`, `~/.agents/skills`, OpenCode) son **targets de exposición** (copias), no sitios de mantenimiento manual. Editar la copia instalada se considera drift y `check.sh` lo detecta.
 
 Reglas:
 
-- un nombre de skill canonico por directorio
+- un nombre de skill canónico por directorio
 - carpeta y frontmatter `name` deben coincidir
 - no duplicar el mismo nombre de skill dentro del conjunto expuesto a una misma app
-- tras renames, actualizar tambien prompts, config gestionada y referencias
+- tras renames, actualizar también prompts, config gestionada y referencias
 
-## Convencion global de package manager
+## Criterio de clasificación
+
+- Por defecto una skill va a `skills/common`: la consumen Claude, Copilot y agents.
+- Solo va a `skills/copilot-only` o `skills/claude-only` si **depende** de esa plataforma concreta.
+- No mezclar configuración de máquina dentro de `skills/`; eso queda en el tooling o fuera del repo.
+
+## Convención global de package manager
 
 Para proyectos JavaScript/TypeScript, la convención por defecto del catálogo es:
 
@@ -143,15 +158,11 @@ Excepciones:
 - si un repo ya declara otro package manager, la skill debe respetar el repo y explicitarlo
 - ejemplos con `npm` solo son válidos si el contexto depende de tooling o fixtures externos que aún lo requieran
 
-## Criterio de clasificacion
+## Contenido legacy copiable
 
-- Si una skill depende de un workflow o plataforma concreta de Copilot/OpenCode, va a `skills/copilot-only`.
-- Si una skill no depende de Copilot y puede compartirse sin cambios, puede promocionarse despues a `skills/common`.
-- No mezclar configuracion de maquina dentro de `skills/`; eso debe quedarse en el tooling o fuera del repo.
+`prompts/` se trata como contenido copiable y se sincroniza con `rsync` (par definido en `config/sync-map.sh`). `sync.sh` ejecuta ese paso después de copiar las skills.
 
 ## GitFlow del repositorio
-
-Este repo usa un GitFlow pragmático:
 
 - `main` para releases
 - `develop` para integración
@@ -159,54 +170,16 @@ Este repo usa un GitFlow pragmático:
 - `release/vX.Y.Z` desde `develop`
 - `hotfix/*` desde `main`
 
-Referencia completa:
-
-- `GITFLOW.md`
-- `BRANCH_PROTECTION.md`
-- `RELEASING.md`
-
-## Instalacion por enlaces
-
-El flujo recomendado es instalar skills mediante enlaces por skill, no copiando directorios completos:
-
-- En Linux se crean symlinks.
-- En Windows se crean junctions para directorios.
-- El instalador detecta si existen `~/.copilot`, `~/.claude` o sus equivalentes en `%USERPROFILE%`.
-- Para OpenCode, el instalador fusiona `opencode.json` y actualiza un bloque gestionado dentro de `.opencode/AGENTS.md`.
-- Si una app no esta instalada, se omite por defecto.
-- Si una ruta ya existe y no es un enlace del repo, se respeta y se marca como `skip`.
-- Antes de modificar ficheros de configuracion, crea backups `.bak-YYYYMMDD-HHMMSS`.
-
-Comandos:
-
-```bash
-node ./scripts/link-skills.mjs status
-node ./scripts/link-skills.mjs install --dry-run
-node ./scripts/link-skills.mjs install
-node ./scripts/link-skills.mjs install --app=copilot
-node ./scripts/link-skills.mjs install --replace
-```
-
-Flags:
-
-- `--app=<id>` limita a una app concreta
-- `--dry-run` muestra el plan sin tocar disco
-- `--replace` reemplaza enlaces existentes que apunten a otra ruta
-- `--include-missing` crea la ruta destino aunque la app no se detecte
-
-## Contenido legacy copiable
-
-No todo requiere enlaces. `prompts/` sigue tratandose como contenido copiable y se sincroniza con `rsync`.
-Por eso `sync.sh` mantiene un paso legacy adicional despues de la instalacion por enlaces.
+Referencia completa: `GITFLOW.md`, `BRANCH_PROTECTION.md`, `RELEASING.md`.
 
 ## Historial de cambios
 
 - Ver `CHANGELOG.md` para cambios notables del proyecto.
-- Ver `RELEASING.md` para el proceso de versionado y publicacion.
+- Ver `RELEASING.md` para el proceso de versionado y publicación.
 
 ## Gobernanza y seguridad
 
-- Ver `CONTRIBUTING.md` para flujo de contribucion.
+- Ver `CONTRIBUTING.md` para flujo de contribución.
 - Ver `SECURITY.md` para reporte responsable de vulnerabilidades.
-- Ver `.github/CODEOWNERS` para propiedad de revision por rutas.
+- Ver `.github/CODEOWNERS` para propiedad de revisión por rutas.
 - Ver `BRANCH_PROTECTION.md` para enforcement de checks en `main`.

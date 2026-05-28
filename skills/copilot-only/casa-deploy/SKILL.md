@@ -5,7 +5,7 @@ description: >
   Trigger: cuando el usuario quiere hacer deploy o actualizar un servicio en producción.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.0"
 ---
 > **🏠 CASA LAYER** — Only use this skill when working in a `.casa` intranet project.

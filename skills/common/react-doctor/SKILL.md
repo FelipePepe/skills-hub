@@ -9,7 +9,7 @@ description: >
   salud de componentes React.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez
+  author: Felipe Pérez
   version: "1.0"
 ---
 

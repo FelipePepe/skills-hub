@@ -4,7 +4,7 @@ description: >
   Use when auditing, refactoring, renaming, modularizing, or validating a shared skills catalog that is exposed to multiple agent platforms.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez
+  author: Felipe Pérez
   version: "1.0"
 ---
 
