@@ -38,6 +38,7 @@ POST   /api/boards/:boardId/lists           Body: { title } → BoardList (201)
 PATCH  /api/boards/:boardId/lists/reorder   Body: { orderedIds: string[] } → BoardList[]
 PUT    /api/lists/:id                        Body: { title?, position? } → BoardList
 DELETE /api/lists/:id                        → 204
+GET    /api/lists                            → BoardList[] (standalone)
 ```
 
 ## Cards
@@ -50,6 +51,7 @@ PATCH  /api/cards/:id/move                   Body: { listId, position } → Card
 GET    /api/cards/:id                        → Card
 PUT    /api/cards/:id                        Body: { title?, description?, dueDate?, labels? } → Card
 DELETE /api/cards/:id                        → 204
+POST   /api/cards                            Body: { listId, title, ... } → Card (201, standalone)
 ```
 
 ## Custom Fields
