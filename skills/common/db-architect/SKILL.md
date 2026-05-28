@@ -6,7 +6,7 @@ description: >
   migración, o hay queries lentas que optimizar.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.0"
 ---
 

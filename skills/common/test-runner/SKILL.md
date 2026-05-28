@@ -6,7 +6,7 @@ description: >
   "pasan los tests?", "qué falla?", o antes de marcar una tarea como done.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.0"
 ---
 

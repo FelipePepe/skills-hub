@@ -5,7 +5,7 @@ description: >
   Trigger: cuando hay que documentar algo nuevo en el vault: proyecto, servicio, tecnología.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.0"
 ---
 > **🏠 CASA LAYER** — Only use this skill when working in a `.casa` intranet project.

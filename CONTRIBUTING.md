@@ -15,8 +15,10 @@ Mantener este repositorio como fuente unica de verdad para sincronizar skills y 
 - Mantener cada `SKILL.md` por debajo de 300 lineas; si crece mas, modularizar en `references/`.
 - No introducir naming obsoleto (`mente`, `mente.casa`) cuando la convención actual sea `atlas`, `atlas.casa`.
 - En skills JS/TS nuevas, preferir `pnpm` y documentar `minimumReleaseAge` cuando la skill cubra setup/bootstrap.
-- Si se cambia la logica de instalacion, mantener alineados `bin/skills-hub.js` y `scripts/link-skills.mjs`.
-- Tratar `skills/` como fuente canonica y las rutas de apps como destinos de exposicion.
+- Si se cambia la logica de instalacion, mantener alineados `bin/skills-hub.js` y `scripts/sync.sh`.
+- Las skills se instalan por copia (rsync), nunca por symlink; ni el clon ni los destinos pueden vivir en un NAS.
+- Por defecto una skill va a `skills/common`; usar `copilot-only`/`claude-only` solo si depende de esa plataforma.
+- Tratar `skills/` como fuente canonica y las rutas de apps como destinos de exposicion (copias).
 - Evitar colisiones de nombre entre skills expuestas a una misma app.
 
 ## Flujo de trabajo

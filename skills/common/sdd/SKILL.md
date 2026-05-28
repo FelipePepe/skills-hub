@@ -8,7 +8,7 @@ description: >
   o cualquier comando del ciclo SDD.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl + gentleman-programming
+  author: Felipe Pérez + gentleman-programming
   version: "2.0"
 ---
 

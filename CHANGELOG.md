@@ -7,6 +7,19 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Cambiado
+
+- Modelo de instalacion: las skills ahora se **copian** (rsync) a cada app en `scripts/sync.sh`, en lugar de exponerse por symlink. Quedan en disco local de la maquina e independientes del clon.
+- Invariante de localidad: `scripts/lib/common.sh` incorpora `skills_hub_assert_local`, que aborta si el clon o algun destino vive en un filesystem de red (NFS/CIFS/SMB/sshfs). Aplicado en `sync.sh`, `check.sh` y `doctor.sh`.
+- `check.sh` detecta drift comparando contenido repo<->copias (rsync -ani) y marca symlinks residuales como drift.
+- `bin/skills-hub.js`: `install`/`sync` ejecutan `sync.sh`; `status` reutiliza la deteccion de `doctor.sh`.
+- Reclasificacion del catalogo: el grupo SDD y las skills base de Claude se movieron de `copilot-only` a `common` (default = `common`).
+- Modularizada la skill `trello-api-client` (SKILL.md de 616 a <100 lineas; detalle en `references/`).
+
+### Eliminado
+
+- Motor de symlinks `scripts/link-skills.mjs` y `scripts/lib/link-skills-*.mjs`. La logica de config gestionada de OpenCode se traslado a `scripts/install-opencode-config.mjs`.
+
 ### Aniadido
 
 - `scripts/doctor.sh` para diagnostico rapido de entorno local.

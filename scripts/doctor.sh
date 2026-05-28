@@ -1,36 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Diagnostico de entorno local: herramientas, deteccion de apps, invariante de
+# localidad (sin NAS) y auditoria del catalogo de skills.
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
-LINKER="$ROOT_DIR/scripts/link-skills.mjs"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 SKILLS_DOCTOR="$ROOT_DIR/scripts/doctor-skills.sh"
 
 # shellcheck disable=SC1091 source=lib/common.sh
 source "$COMMON_LIB"
-
-APP_FILTER=""
-INCLUDE_MISSING=false
-
-for arg in "$@"; do
-  case "$arg" in
-    --app=*) APP_FILTER="${arg#--app=}" ;;
-    --include-missing) INCLUDE_MISSING=true ;;
-    --help|-h)
-      cat <<EOF
-Uso: $0 [--app=<id>] [--include-missing]
-EOF
-      exit 0
-      ;;
-    *)
-      echo "Uso: $0 [--app=<id>] [--include-missing]" >&2
-      exit 2
-      ;;
-  esac
-done
 
 skills_hub_info "Doctor: verificando entorno local..."
 
@@ -40,18 +22,44 @@ skills_hub_require_file "$MAP_FILE"
 skills_hub_require_file "$APPS_FILE"
 skills_hub_require_file "$SKILLS_DOCTOR"
 skills_hub_validate_json "$APPS_FILE"
-
 skills_hub_source_sync_map "$MAP_FILE"
 
-linker_args=( status )
-if [[ -n "$APP_FILTER" ]]; then
-  linker_args+=( "--app=$APP_FILTER" )
-fi
-if [[ "$INCLUDE_MISSING" == true ]]; then
-  linker_args+=( --include-missing )
-fi
+skills_hub_assert_local "$ROOT_DIR" "clon del repo"
 
 errors=0
+
+skills_hub_info "Doctor: deteccion de apps y destinos..."
+while IFS=$'\t' read -r app_id install_path detect_csv; do
+  [[ -n "$app_id" ]] || continue
+  install_path="$(eval echo "$install_path")"
+
+  detected=false
+  IFS=',' read -r -a detect_list <<< "$detect_csv"
+  for dp in "${detect_list[@]}"; do
+    [[ -n "$dp" ]] || continue
+    dp="$(eval echo "$dp")"
+    if [[ -e "$dp" ]]; then detected=true; break; fi
+  done
+
+  state=$([[ "$detected" == true ]] && echo "detected" || echo "missing")
+  echo "- $app_id: $state"
+  [[ -n "$install_path" ]] && echo "  install: $install_path"
+  # Verifica que el destino, si existe, sea local.
+  [[ -d "$install_path" ]] && skills_hub_assert_local "$install_path" "destino de '$app_id'"
+done < <(
+  node -e '
+    const fs = require("node:fs");
+    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const P = "linux";
+    for (const app of data.apps) {
+      const install = app.installPath?.[P] ?? "";
+      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
+      console.log([app.id, install, detect].join("\t"));
+    }
+  ' "$APPS_FILE"
+)
+
+skills_hub_info "Doctor: verificando origenes/destinos legacy..."
 for pair in "${SYNC_PAIRS[@]}"; do
   src_rel="${pair%%::*}"
   dst_abs="${pair##*::}"
@@ -61,15 +69,10 @@ for pair in "${SYNC_PAIRS[@]}"; do
     echo "ERROR: origen inexistente -> $src_abs"
     errors=1
   fi
-
   if [[ ! -d "$dst_abs" ]]; then
-    skills_hub_warn "destino inexistente -> $dst_abs"
-    echo "      sync.sh lo creara automaticamente con mkdir -p" >&2
+    skills_hub_warn "destino inexistente -> $dst_abs (sync.sh lo creara)"
   fi
 done
-
-skills_hub_info "Doctor: estado de apps/configuracion enlazada..."
-node "$LINKER" "${linker_args[@]}"
 
 skills_hub_info "Doctor: auditoria del catalogo de skills..."
 bash "$SKILLS_DOCTOR"

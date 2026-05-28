@@ -47,3 +47,35 @@ skills_hub_source_sync_map() {
   # shellcheck disable=SC1090
   source "$map_file"
 }
+
+# Aborta si la ruta vive en un filesystem de red (NAS). Invariante del proyecto:
+# todo (clon y destinos de instalacion) debe quedar en disco local de la maquina.
+# Detecta por TIPO de filesystem (no por ruta hardcodeada) usando findmnt.
+skills_hub_assert_local() {
+  local target="${1:?missing path}"
+  local label="${2:-ruta}"
+
+  command -v findmnt >/dev/null 2>&1 || {
+    skills_hub_warn "findmnt no disponible: no se puede verificar que '$target' sea local."
+    return 0
+  }
+
+  # Resuelve al mount mas cercano aunque el path aun no exista.
+  local probe="$target"
+  while [[ ! -e "$probe" && "$probe" != "/" ]]; do
+    probe="$(dirname "$probe")"
+  done
+
+  # findmnt --target puede devolver varias lineas si hay mounts apilados
+  # (p. ej. autofs + cifs sobre el mismo punto). Cualquier capa de red basta
+  # para considerar la ruta remota.
+  local fstype
+  while IFS= read -r fstype; do
+    [[ -n "$fstype" ]] || continue
+    case "$fstype" in
+      nfs | nfs4 | cifs | smb | smb2 | smb3 | smbfs | fuse.sshfs | afs | 9p)
+        skills_hub_die "$label en filesystem de red ($fstype): $target. Debe estar en disco local (sin NAS). Clona el repo localmente."
+        ;;
+    esac
+  done < <(findmnt -nro FSTYPE --target "$probe" 2>/dev/null || true)
+}

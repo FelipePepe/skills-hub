@@ -1,116 +1,80 @@
 ---
 name: trello-api-client
 description: >
-  CLI para gestionar el Trello clone de la intranet .CASA.
-  Crear boards, listas, cards, moverlas, asignarlas.
-  Integración con SDD, Atlas y Portal.
+  CLI para gestionar el Trello clone de la intranet .CASA (boards, listas, cards,
+  custom fields) y su integración con SDD, Atlas y Portal.
   Trigger: "trello board", "trello card", "trello list", "crear tablero trello",
-  "move card", "add card", "trello new", "mover tarjeta"
+  "move card", "add card", "trello new", "mover tarjeta".
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
-  version: "1.0"
+  author: Felipe Pérez
+  version: "1.1"
 ---
 
-# Trello API Client - Documentación Modular
+## When to Use
 
-## 📋 Tabla de Contenidos
+Usar cuando se gestione el clon de Trello de la intranet `.CASA`: crear/mover boards,
+listas o cards, definir custom fields, o sincronizar el ciclo SDD con un tablero.
 
-| Archivo | Descripción |
-|---------|-------------|
-| [`architecture.md`](architecture.md) | Arquitectura del servicio, puertos, DB |
-| [`commands.md`](commands.md) | Todos los comandos CLI |
-| [`api-reference.md`](api-reference.md) | Endpoints de la API REST |
-| [`models.md`](models.md) | Modelos de datos y tipos |
-| [`integration-sdd.md`](integration-sdd.md) | Integración con Spec-Driven Development |
-| [`integration-atlas.md`](integration-atlas.md) | Sincronización con Atlas/Obsidian |
-| [`integration-portal.md`](integration-portal.md) | Dashboard y métricas en Portal |
-| [`troubleshooting.md`](troubleshooting.md) | Solución de problemas |
-| [`examples.md`](examples.md) | Ejemplos de uso completo |
+## Scope Guard
 
-## ✅ Estado del Servicio
+Skill **environment-bound**: asume infraestructura local concreta y NO es portable.
 
-```bash
-# Verificar que el backend está activo
-sudo systemctl status poc-trello
+- Backend nativo (systemd `poc-trello`) en **maya (192.168.1.55)**, puerto **3002**.
+- Requiere el binario `trello` autenticado (`trello login`) con token en `~/.trello/`.
+- Depende de PostgreSQL nativa (`poc_trello`) y nginx (`trello.casa`).
 
-# Puerto actual
-🟢 LISTEN en 3002 (nativo, NO Docker)
+Fuera de ese entorno, esta skill no aplica.
 
-# Logs en tiempo real
-sudo journalctl -u poc-trello -f
-```
-
-## 🎯 Quick Start
+## Servicio
 
 ```bash
-# 1. Autenticar
-trello login
-
-# 2. Crear un board
-trello board create "Mi Proyecto" --desc "Tablero para desarrollo"
-
-# 3. Crear columnas
-trello list create <board-id> "To Do"
-trello list create <board-id> "In Progress"
-trello list create <board-id> "Done"
-
-# 4. Crear una tarea
-trello card create <list-id> "Implementar algo" --desc "Descripción"
-
-# 5. Mover tarea
-trello card move-to <card-id> --column "In Progress"
+sudo systemctl status poc-trello       # estado (🟢 LISTEN en :3002, nativo, NO Docker)
+sudo journalctl -u poc-trello -f       # logs en tiempo real
 ```
 
-## 📖 Documentación Detallada
+## Quick Start
 
-### Arquitectura
-Ver [`architecture.md`](architecture.md) para:
-- Configuración del servicio systemd
-- PostgreSQL nativa
-- Nginx proxy
-- Troubleshooting
+```bash
+trello login                                              # 1. autenticar
+trello board create "Mi Proyecto" --desc "Desarrollo"     # 2. crear board
+trello list create <board-id> "In Progress"              # 3. crear columna
+trello card create <list-id> "Implementar algo"          # 4. crear card
+trello card move-to <card-id> --column "In Progress"     # 5. mover card
+```
 
-### Comandos CLI
-Ver [`commands.md`](commands.md) para:
-- Autenticación
-- Gestión de boards
-- Gestión de listas/columnas
-- Gestión de cards
-- Custom fields
-- Integraciones SDD/Atlas/Portal
+## Referencias
 
-### API Reference
-Ver [`api-reference.md`](api-reference.md) para:
-- Todos los endpoints
-- Request/response bodies
-- Códigos de error
+| Archivo | Contenido |
+|---------|-----------|
+| [`references/commands.md`](references/commands.md) | Todos los comandos CLI (auth, boards, lists, cards, fields, integraciones) + config |
+| [`references/api-endpoints.md`](references/api-endpoints.md) | Endpoints REST, bodies y códigos de error |
+| [`references/models.md`](references/models.md) | Modelos de datos (Board, Card, CustomField…) |
+| [`references/architecture.md`](references/architecture.md) | Servicio systemd, nginx, PostgreSQL, env, diagnóstico |
+| [`references/sdd-integration.md`](references/sdd-integration.md) | Mapeo de fases SDD ↔ columnas y reglas de sincronización |
+| [`references/examples.md`](references/examples.md) | Flujos completos (SDD y manual) |
 
-### Integraciones
-- [`integration-sdd.md`](integration-sdd.md) - Spec-Driven Development
-- [`integration-atlas.md`](integration-atlas.md) - Documentación automática
-- [`integration-portal.md`](integration-portal.md) - Dashboard en vivo
-
-### Ejemplos
-Ver [`examples.md`](examples.md) para:
-- Flujo SDD completo
-- Flujo manual simple
-- Comandos de diagnóstico
-
-## 🚨 Troubleshooting Rápido
+## Troubleshooting Rápido
 
 | Problema | Comando |
-|---|--|
+|----------|---------|
 | Servicio caído | `sudo systemctl restart poc-trello` |
 | Ver logs | `sudo journalctl -u poc-trello -n 50` |
-| Puerto ocupado? | `sudo ss -tlnp | grep 3002` |
-| API 404 | Verificar servicio: `curl http://localhost:3002/health` |
+| Puerto ocupado | `sudo ss -tlnp \| grep 3002` |
+| API 404 | `curl http://localhost:3002/health` |
 | Nginx falló | `sudo nginx -t && sudo systemctl reload nginx` |
 
-## 🔌 Referencias
+Detalle ampliado en [`references/architecture.md`](references/architecture.md#troubleshooting).
+
+## Referencias del Sistema
 
 - **Swagger UI:** http://localhost:3002/api-docs
+- **OpenAPI:** `/mnt/nas/sources/pocs/poc-trello/backend/src/openapi/openapi.yaml`
 - **Código:** `/mnt/nas/sources/pocs/poc-trello/`
-- **DB:** PostgreSQL nativa (`poc_trello`, user: `trello`)
 - **Service:** `/etc/systemd/system/poc-trello.service`
 
+## Model routing hints
+
+- preferred agent: devops
+- preferred model: ollama/qwen3.6:27b
+- routing intent: hint only; the skill must not switch models directly

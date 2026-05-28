@@ -5,7 +5,7 @@ description: >
   Trigger: solo cuando exista una referencia antigua a `sdd-proposal`; en flujo nuevo usar `sdd-propose`.
 license: Apache-2.0
 metadata:
-  author: Felipe Perez / SandMan Owl
+  author: Felipe Pérez
   version: "1.1"
 ---
 

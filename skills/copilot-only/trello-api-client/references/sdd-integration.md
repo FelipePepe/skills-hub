@@ -46,6 +46,27 @@ trello sdd-tasks sdd-tasks.json
 trello card move-to <card-id> --column "In Progress"
 ```
 
+## Acción por Fase
+
+| Fase SDD | Acción en Trello |
+|----------|------------------|
+| sdd-init | Crea board con columnas: Propuesta, Design, Apply, Review, Done |
+| sdd-propose | Crea card "Propuesta" en columna Propuesta |
+| sdd-design | Mueve card a columna Design |
+| sdd-apply | Mueve card a columna Apply + crea cards para tasks |
+| sdd-verify | Mueve cards a columna Review |
+| sdd-archive | Archiva board + documenta en Atlas |
+
+## Estado de Cards
+
+| Columna | Estado | Significado |
+|---------|--------|-------------|
+| Propuesta | pending | Feature en propuesta |
+| Design | design | En diseño técnico |
+| Apply | in-progress | Desarrollo en curso |
+| Review | review | Code review / testing |
+| Done | done | Completado y desplegado |
+
 ## Reglas
 
 1. **Un board = Una feature**
@@ -53,3 +74,9 @@ trello card move-to <card-id> --column "In Progress"
 3. **Las tasks del sdd-tasks se crean con status "In Progress"**
 4. **sdd-verify mueve todas las cards a "Review"**
 5. **sdd-archive cierra el board y documenta en Atlas**
+
+## Sincronización Bidireccional
+
+1. SDD actualiza SQL → actualizar card en Trello
+2. Trello mueve card → actualizar estado en SQL
+3. Si hay conflicto → resaltar al usuario para resolución manual

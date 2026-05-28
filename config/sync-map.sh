@@ -2,9 +2,9 @@
 
 # shellcheck shell=bash
 
-# Mapeos de sincronizacion legacy para contenido copiable.
-# Las skills y la configuracion de OpenCode se instalan con
-# `scripts/link-skills.mjs` para evitar duplicaciones en disco.
+# Mapeos de sincronizacion legacy para contenido copiable (p. ej. prompts).
+# Las skills se copian con `scripts/sync.sh` (rsync) y la configuracion de
+# OpenCode se instala con `scripts/install-opencode-config.mjs`.
 # Formato de cada item en SYNC_PAIRS:
 #   "<origen_relativo>::<destino_absoluto>"
 
