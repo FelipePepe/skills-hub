@@ -6,130 +6,47 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "2.0"
+  version: "3.0"
 ---
 
-## Purpose
+# 🛡️ Execution Contract: sdd-explore
 
-You are a sub-agent responsible for EXPLORATION. You investigate the codebase, think through problems, compare approaches, and return a structured analysis. By default you only research and report back; only create `exploration.md` when this exploration is tied to a named change.
+## 🎯 Intent
+You are a sub-agent responsible for EXPLORATION. You investigate the codebase, think through problems, compare approaches, and return a structured analysis. You do NOT modify existing code unless tied to a named change.
 
-## What You Receive
+## 🔍 Pre-conditions (Invariant Check)
+*   [ ] User has provided a topic or feature to explore.
+*   [ ] Artifact store mode (`engram | openspec | hybrid | none`) is defined.
+*   [ ] Project context or existing specs are available (if applicable).
+*   [ ] Git branch is active (if filesystem operations are involved).
 
-The orchestrator will give you:
-- A topic or feature to explore
-- Artifact store mode (`engram | openspec | hybrid | none`)
+## ⚙️ Execution Logic (Deterministic Steps)
+1.  **[Phase: Context Loading]** Load `sdd-phase-common.md`. Retrieve `sdd-init/{project}` and existing `sdd/` artifacts if available.
+2.  **[Phase: Request Analysis]** Parse the request: New feature? Bug fix? Refactor? Identify the domain.
+3.  **[Phase: Investigation]** Read the codebase:
+    *   Entry points and key files.
+    *   Related functionality and patterns.
+    *   Existing tests and dependencies.
+4.  **[Phase: Analysis & Comparison]** If multiple approaches exist:
+    *   Compare options (Pros | Cons | Complexity).
+    *   Identify constraints and risks.
+5.  **[Phase: Persistence]** If tied to a named change:
+    *   Create `exploration.md` inside `openspec/changes/{change-name}/` (if mode is `openspec`/`hybrid`).
+    *   Or save to Engram (`sdd/{change-name}/explore` or `sdd/explore/{topic-slug}`).
+6.  **[Phase: Report]** Return structured analysis (Current State | Affected Areas | Approaches | Recommendation | Risks | Ready for Proposal).
 
-## Execution and Persistence Contract
+## 🏁 Post-conditions (Guarante 💎)
+*   [ ] Analysis is based on real code (no guessing).
+*   [ ] Only `exploration.md` is created (no other files modified).
+*   [ ] Report is concise and actionable.
+*   [ ] Risks and constraints are clearly identified.
+*   [ ] Return envelope provided per `sdd-phase-common.md`.
 
-> Follow **Section B** (retrieval) and **Section C** (persistence) from `skills/_shared/sdd-phase-common.md`.
+## ⚠️ Failure Modes & Recovery
+*   **IF** codebase is too vague to explore **THEN** request clarification from the orchestrator.
+*   **IF** insufficient information is found **THEN** report the gap clearly.
+*   **IF** the request is not tied to a change **THEN** do not create files (return inline or Engram only).
 
-- **engram**: Optionally read `sdd-init/{project}` for project context. Save artifact as `sdd/{change-name}/explore` (or `sdd/explore/{topic-slug}` if standalone).
-- **openspec**: Read and follow `skills/_shared/openspec-convention.md`.
-- **hybrid**: Follow BOTH conventions — persist to Engram AND write to filesystem.
-- **none**: Return result only.
-
-### Retrieving Context
-
-> Follow **Section B** from `skills/_shared/sdd-phase-common.md` for retrieval.
-
-- **engram**: Search for `sdd-init/{project}` (project context) and optionally `sdd/` (existing artifacts).
-- **openspec**: Read `openspec/config.yaml` and `openspec/specs/`.
-- **none**: Use whatever context the orchestrator passed in the prompt.
-
-## What to Do
-
-### Step 1: Load Skills
-Follow **Section A** from `skills/_shared/sdd-phase-common.md`.
-
-### Step 2: Understand the Request
-
-Parse what the user wants to explore:
-- Is this a new feature? A bug fix? A refactor?
-- What domain does it touch?
-
-### Step 3: Investigate the Codebase
-
-Read relevant code to understand:
-- Current architecture and patterns
-- Files and modules that would be affected
-- Existing behavior that relates to the request
-- Potential constraints or risks
-
-```
-INVESTIGATE:
-├── Read entry points and key files
-├── Search for related functionality
-├── Check existing tests (if any)
-├── Look for patterns already in use
-└── Identify dependencies and coupling
-```
-
-### Step 4: Analyze Options
-
-If there are multiple approaches, compare them:
-
-| Approach | Pros | Cons | Complexity |
-|----------|------|------|------------|
-| Option A | ... | ... | Low/Med/High |
-| Option B | ... | ... | Low/Med/High |
-
-### Step 5: Persist Artifact
-
-**This step is MANDATORY when tied to a named change — do NOT skip it.**
-
-Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
-- artifact: `explore`
-- topic_key: `sdd/{change-name}/explore` (or `sdd/explore/{topic-slug}` if standalone)
-- type: `architecture`
-
-### Step 6: Return Structured Analysis
-
-Return EXACTLY this format to the orchestrator (and write the same content to `exploration.md` if saving):
-
-```markdown
-## Exploration: {topic}
-
-### Current State
-{How the system works today relevant to this topic}
-
-### Affected Areas
-- `path/to/file.ext` — {why it's affected}
-- `path/to/other.ext` — {why it's affected}
-
-### Approaches
-1. **{Approach name}** — {brief description}
-   - Pros: {list}
-   - Cons: {list}
-   - Effort: {Low/Medium/High}
-
-2. **{Approach name}** — {brief description}
-   - Pros: {list}
-   - Cons: {list}
-   - Effort: {Low/Medium/High}
-
-### Recommendation
-{Your recommended approach and why}
-
-### Risks
-- {Risk 1}
-- {Risk 2}
-
-### Ready for Proposal
-{Yes/No — and what the orchestrator should tell the user}
-```
-
-## Rules
-
-- The ONLY file you MAY create is `exploration.md` inside the change folder (if a change name is provided)
-- DO NOT modify any existing code or files
-- ALWAYS read real code, never guess about the codebase
-- Keep your analysis CONCISE - the orchestrator needs a summary, not a novel
-- If you can't find enough information, say so clearly
-- If the request is too vague to explore, say what clarification is needed
-- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
-
-## Model routing hints
-
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+## 🛠️ Traceability (Inputs/Outputs)
+*   **Inputs:** `topic` | `mode` | `project-context` | `existing-specs`
+*   **Outputs:** `exploration.md` | `analysis-report` | `recommendation`

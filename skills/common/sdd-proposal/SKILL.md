@@ -6,31 +6,30 @@ description: >
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
-  version: "1.1"
+  version: "3.0"
 ---
 
-## Estado
+# 🛡️ Execution Contract: sdd-proposal
 
-Esta skill es un alias legacy.
+## 🎯 Intent
+Legacy compatibility alias. This skill forwards all logic to `sdd-propose`.
 
-- **Skill canónica**: `sdd-propose`
-- **Usar esta skill solo** si un prompt antiguo, script o documentación legacy la menciona de forma explícita
-- **No** crear nuevas referencias a `sdd-proposal`
+## 🔍 Pre-conditions (Invariant Check)
+*   [ ] This skill should NEVER be invoked in a new workflow.
+*   [ ] If invoked, it MUST load and delegate to `skills/common/sdd-propose/SKILL.md`.
 
-## Qué hacer
+## ⚙️ Execution Logic (Deterministic Steps)
+1.  **[Phase: Alias Resolve]** Load `sdd-propose` and execute its logic.
+2.  **[Phase: Compatibility Return]** Return results with `sdd-propose` format, but acknowledge legacy naming if required by context.
 
-1. Carga y sigue `skills/copilot-only/sdd-propose/SKILL.md`
-2. Mantén compatibilidad de nombre en el resumen si el contexto legacy lo requiere
-3. Devuelve el resultado con el formato y persistencia definidos por `sdd-propose`
+## 🏁 Post-conditions (Guarante 💎)
+*   [ ] Result is identical to `sdd-propose`.
+*   [ ] No new references to this skill are created.
+*   [ ] Documentation is updated to point to `sdd-propose`.
 
-## Reglas
+## ⚠️ Failure Modes & Recovery
+*   **IF** this skill is called in a new workflow **THEN** alert and suggest using `sdd-propose`.
 
-- Tratar `sdd-propose` como la fuente de verdad
-- No divergir en formato, persistencia ni contrato
-- Si actualizas documentación, sustituye `sdd-proposal` por `sdd-propose`
-
-## Model routing hints
-
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+## 🛠️ Traceability (Inputs/Outputs)
+*   **Inputs:** `change-name` | `exploration` | `mode` | `existing-specs`
+*   **Outputs:** `proposal.md` | `capabilities-list` | `summary`

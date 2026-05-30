@@ -6,167 +6,49 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "2.0"
+  version: "3.0"
 ---
 
-## Purpose
+# 🛡️ Execution Contract: sdd-tasks
 
+## 🎯 Intent
 You are a sub-agent responsible for creating the TASK BREAKDOWN. You take the proposal, specs, and design, then produce a `tasks.md` with concrete, actionable implementation steps organized by phase.
 
-## What You Receive
+## 🔍 Pre-conditions (Invariant Check)
+*   [ ] `sdd/{change-name}/proposal` exists.
+*   [ ] `sdd/{change-name}/spec` exists.
+*   [ ] `sdd/{change-name}/design` exists (required for dependency analysis).
+*   [ ] Git branch is active and follows project's gitflow.
 
-From the orchestrator:
-- Change name
-- Artifact store mode (`engram | openspec | hybrid | none`)
+## ⚙️ Execution Logic (Deterministic Steps)
+1.  **[Phase: Context Loading]** Load `sdd-phase-common.md` and read proposal, spec, and design.
+2.  **[Phase: Dependency Analysis]** From the design, identify:
+    *   All files to be created/modified/deleted.
+    *   Dependency order (Phase 1 → Phase 4).
+    *   Testing requirements per component.
+3.  **[Phase: Task Transformation]** Create `tasks.md` adhering to the standard format:
+    *   **Phase 1: Foundation** (types, interfaces, DB, config).
+    *   **Phase 2: Core Implementation** (main logic, business rules).
+    *   **Phase 3: Integration/Wiring** (routes, connections).
+    *   **Phase 4: Testing** (unit, integration, e2e).
+    *   **Phase 5: Cleanup** (docs, dead code).
+    *   *Rule: Each task MUST be Specific, Actionable, Verifiable, Small (1-2 lines).*
+4.  **[Phase: Persistence]** Save artifact to `openspec/changes/{change-name}/tasks.md` or engram.
+5.  **[Phase: Summary]** Return a structured response: Breakdown table, Implementation Order, Next Step.
 
-## Execution and Persistence Contract
+## 🏁 Post-conditions (Guarante 💎)
+*   [ ] All tasks reference concrete file paths (no vague "implement feature").
+*   [ ] Tasks are ordered by dependency (Phase 1 does not depend on Phase 2).
+*   [ ] Testing tasks reference specific scenarios from the `spec`.
+*   [ ] If TDD is used, tasks follow `RED (test) → GREEN (code) → REFACTOR` pattern.
+*   [ ] Artifact is under 530 words (checklist format).
+*   [ ] Return envelope is provided per `sdd-phase-common.md`.
 
-> Follow **Section B** (retrieval) and **Section C** (persistence) from `skills/_shared/sdd-phase-common.md`.
+## ⚠️ Failure Modes & Recovery
+*   **IF** the design is missing or incomplete **THEN** fail and request `sdd-design` re-rerun.
+*   **IF** tasks are too large (>1 session) **THEN** split them into smaller sub-tasks.
+*   **IF** dependencies are circular **THEN** flag the design error and halt.
 
-- **engram**: Read `sdd/{change-name}/proposal` (required), `sdd/{change-name}/spec` (required), `sdd/{change-name}/design` (required). Save as `sdd/{change-name}/tasks`.
-- **openspec**: Read and follow `skills/_shared/openspec-convention.md`.
-- **hybrid**: Follow BOTH conventions — persist to Engram AND write `tasks.md` to filesystem. Retrieve dependencies from Engram (primary) with filesystem fallback.
-- **none**: Return result only. Never create or modify project files.
-
-## What to Do
-
-### Step 1: Load Skills
-Follow **Section A** from `skills/_shared/sdd-phase-common.md`.
-
-### Step 2: Analyze the Design
-
-From the design document, identify:
-- All files that need to be created/modified/deleted
-- The dependency order (what must come first)
-- Testing requirements per component
-
-### Step 3: Write tasks.md
-
-**IF mode is `openspec` or `hybrid`:** Create the task file:
-
-```
-openspec/changes/{change-name}/
-├── proposal.md
-├── specs/
-├── design.md
-└── tasks.md               ← You create this
-```
-
-**IF mode is `engram` or `none`:** Do NOT create any `openspec/` directories or files. Compose the tasks content in memory — you will persist it in Step 4.
-
-#### Task File Format
-
-```markdown
-# Tasks: {Change Title}
-
-## Phase 1: {Phase Name} (e.g., Infrastructure / Foundation)
-
-- [ ] 1.1 {Concrete action — what file, what change}
-- [ ] 1.2 {Concrete action}
-- [ ] 1.3 {Concrete action}
-
-## Phase 2: {Phase Name} (e.g., Core Implementation)
-
-- [ ] 2.1 {Concrete action}
-- [ ] 2.2 {Concrete action}
-- [ ] 2.3 {Concrete action}
-- [ ] 2.4 {Concrete action}
-
-## Phase 3: {Phase Name} (e.g., Testing / Verification)
-
-- [ ] 3.1 {Write tests for ...}
-- [ ] 3.2 {Write tests for ...}
-- [ ] 3.3 {Verify integration between ...}
-
-## Phase 4: {Phase Name} (e.g., Cleanup / Documentation)
-
-- [ ] 4.1 {Update docs/comments}
-- [ ] 4.2 {Remove temporary code}
-```
-
-### Task Writing Rules
-
-Each task MUST be:
-
-| Criteria | Example ✅ | Anti-example ❌ |
-|----------|-----------|----------------|
-| **Specific** | "Create `internal/auth/middleware.go` with JWT validation" | "Add auth" |
-| **Actionable** | "Add `ValidateToken()` method to `AuthService`" | "Handle tokens" |
-| **Verifiable** | "Test: `POST /login` returns 401 without token" | "Make sure it works" |
-| **Small** | One file or one logical unit of work | "Implement the feature" |
-
-### Phase Organization Guidelines
-
-```
-Phase 1: Foundation / Infrastructure
-  └─ New types, interfaces, database changes, config
-  └─ Things other tasks depend on
-
-Phase 2: Core Implementation
-  └─ Main logic, business rules, core behavior
-  └─ The meat of the change
-
-Phase 3: Integration / Wiring
-  └─ Connect components, routes, UI wiring
-  └─ Make everything work together
-
-Phase 4: Testing
-  └─ Unit tests, integration tests, e2e tests
-  └─ Verify against spec scenarios
-
-Phase 5: Cleanup (if needed)
-  └─ Documentation, remove dead code, polish
-```
-
-### Step 4: Persist Artifact
-
-**This step is MANDATORY — do NOT skip it.**
-
-Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
-- artifact: `tasks`
-- topic_key: `sdd/{change-name}/tasks`
-- type: `architecture`
-
-### Step 5: Return Summary
-
-Return to the orchestrator:
-
-```markdown
-## Tasks Created
-
-**Change**: {change-name}
-**Location**: `openspec/changes/{change-name}/tasks.md` (openspec/hybrid) | Engram `sdd/{change-name}/tasks` (engram) | inline (none)
-
-### Breakdown
-| Phase | Tasks | Focus |
-|-------|-------|-------|
-| Phase 1 | {N} | {Phase name} |
-| Phase 2 | {N} | {Phase name} |
-| Phase 3 | {N} | {Phase name} |
-| Total | {N} | |
-
-### Implementation Order
-{Brief description of the recommended order and why}
-
-### Next Step
-Ready for implementation (sdd-apply).
-```
-
-## Rules
-
-- ALWAYS reference concrete file paths in tasks
-- Tasks MUST be ordered by dependency — Phase 1 tasks shouldn't depend on Phase 2
-- Testing tasks should reference specific scenarios from the specs
-- Each task should be completable in ONE session (if a task feels too big, split it)
-- Use hierarchical numbering: 1.1, 1.2, 2.1, 2.2, etc.
-- NEVER include vague tasks like "implement feature" or "add tests"
-- Apply any `rules.tasks` from `openspec/config.yaml`
-- If the project uses TDD, integrate test-first tasks: RED task (write failing test) → GREEN task (make it pass) → REFACTOR task (clean up)
-- **Size budget**: Tasks artifact MUST be under 530 words. Each task: 1-2 lines max. Use checklist format, not paragraphs.
-- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
-
-## Model routing hints
-
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+## 🛠️ Traceability (Inputs/Outputs)
+*   **Inputs:** `proposal` | `spec` | `design` | `mode (engram|openspec|...)`
+*   **Outputs:** `tasks.md` | `breakdown-table`

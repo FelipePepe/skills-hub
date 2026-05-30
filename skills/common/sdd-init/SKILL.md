@@ -6,144 +6,51 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "3.1"
+  version: "3.0"
 ---
 
-## Purpose
+# 🛡️ Execution Contract: sdd-init
 
-You initialize SDD context in a project:
-- detect stack and conventions
-- detect testing capabilities
-- resolve Strict TDD mode
-- bootstrap the active persistence backend
+## 🎯 Intent
+You initialize SDD context in a project: detect stack and conventions, detect testing capabilities, resolve Strict TDD mode, and bootstrap the active persistence backend. You are an executor for this phase.
 
-You are an executor for this phase. Do the initialization work yourself.
+## 🔍 Pre-conditions (Invariant Check)
+*   [ ] Project root directory is accessible.
+*   [ ] Git repository exists (if project uses git).
+*   [ ] User has provided the change name or project context.
+*   [ ] The active persistence mode (`engram | openspec | hybrid | none`) is defined by the orchestrator.
 
-## Execution and Persistence Contract
+## ⚙️ Execution Logic (Deterministic Steps)
+1.  **[Phase: Context Detection]** Read the project and identify:
+    *   Tech stack (`package.json`, `go.mod`, `pyproject.toml`, etc.).
+    *   Existing conventions (linters, test frameworks, CI).
+    *   Architecture patterns already in use.
+2.  **[Phase: Testing Capability Detection]** Detect all testing infrastructure:
+    *   Test runner (framework + command).
+    *   Test layers (unit / integration / E2E).
+    *   Coverage command (if available).
+    *   Quality tools (linter, type checker, formatter).
+3.  **[Phase: TDD Resolution]** Resolve Strict TDD mode:
+    *   Priority: system/config marker → `openspec/config.yaml` → default `true` (if runner exists) → force `false` (if none).
+4.  **[Phase: Persistence Bootstrap]**
+    *   If `openspec` or `hybrid`: Create `openspec/`, `openspec/config.yaml`, `openspec/specs/`, `openspec/changes/archive/`.
+    *   If `engram` or `hybrid`: Persist to Engram (project context, testing capabilities).
+5.  **[Phase: Skill Registry]** Scan and register user/project-level skills. Write `.atl/skill-registry.md`.
+6.  **[Phase: Report]** Return structured summary: `status`, `executive_summary`, `artifacts`, `next_recommended`, `risks`.
 
-Mode behavior:
-- **engram** → do not create `openspec/`; persist project context and capabilities to Engram
-- **openspec** → bootstrap filesystem under `openspec/`
-- **hybrid** → do both
-- **none** → detect and return, but do not write files
+## 🏁 Post-conditions (Guarante 💎)
+*   [ ] All testing capabilities detected and persisted (Engram and/or filesystem).
+*   [ ] Strict TDD mode resolved and documented.
+*   [ ] `openspec/config.yaml` created with concise context if mode includes filesystem.
+*   [ ] Skill registry updated and persisted.
+*   [ ] No placeholder specs created (real detection only).
+*   [ ] Return envelope provided per `sdd-phase-common.md`.
 
-Use:
-- `skills/_shared/engram-convention.md`
-- `skills/_shared/openspec-convention.md`
+## ⚠️ Failure Modes & Recovery
+*   **IF** project has no test runner and Strict TDD is requested **THEN** disable TDD and report as warning.
+*   **IF** `openspec/` already exists **THEN** report and let orchestrator decide updates (do not overwrite).
+*   **IF** project files cannot be read **THEN** report **CRITICAL** and halt.
 
-## What to Do
-
-### Step 1: Detect project context
-
-Read the project and identify:
-- tech stack (`package.json`, `go.mod`, `pyproject.toml`, etc.)
-- existing conventions (linters, test frameworks, CI)
-- architecture patterns already in use
-
-### Step 2: Detect testing capabilities
-
-Detect all testing infrastructure:
-- **test runner** → framework + command
-- **test layers** → unit / integration / E2E
-- **coverage** → command if available
-- **quality tools** → linter, type checker, formatter
-
-Detection sources include:
-- `package.json`
-- `pyproject.toml`, `pytest.ini`, `setup.cfg`
-- `go.mod`, `Cargo.toml`
-- `Makefile`
-- dependency manifests and scripts
-
-Persist results using the format in:
-- `references/testing-capabilities-template.md`
-
-### Step 3: Resolve Strict TDD Mode
-
-Priority order:
-1. system prompt / agent config marker
-2. `openspec/config.yaml`
-3. default to `true` if a test runner exists
-4. force `false` if no test runner exists
-
-Do not ask the user interactively.
-
-### Step 4: Initialize persistence backend
-
-If mode includes `openspec`, create:
-
-```text
-openspec/
-├── config.yaml
-├── specs/
-└── changes/
-    └── archive/
-```
-
-### Step 5: Generate config (openspec mode)
-
-Create `openspec/config.yaml` with:
-- concise detected context
-- `strict_tdd`
-- phase rules for proposal/specs/design/tasks/apply/verify/archive
-- testing capabilities section when mode includes filesystem persistence
-
-Keep context concise.
-
-### Step 6: Persist testing capabilities
-
-Mandatory.
-
-If mode includes Engram, save a separate observation:
-- title: `sdd/{project-name}/testing-capabilities`
-- topic_key: `sdd/{project-name}/testing-capabilities`
-- type: `config`
-
-If mode includes openspec, also include testing capabilities in `openspec/config.yaml`.
-
-Use the exact structure from:
-- `references/testing-capabilities-template.md`
-
-### Step 7: Build skill registry
-
-Follow the `skill-registry` logic:
-- scan user-level and project-level skills
-- skip `sdd-*`, `_shared`, `skill-registry`
-- deduplicate by name (project-level wins)
-- scan project convention files like `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `GEMINI.md`, `copilot-instructions.md`
-- always write `.atl/skill-registry.md`
-- if Engram is available, also persist it there
-
-### Step 8: Persist project context
-
-Mandatory.
-
-If mode includes Engram, save:
-- title: `sdd-init/{project-name}`
-- topic_key: `sdd-init/{project-name}`
-- type: `architecture`
-
-If mode includes openspec, the generated config already captures the filesystem side.
-
-### Step 9: Return summary
-
-Return a structured summary adapted to the resolved mode.
-Use the templates from:
-- `references/return-modes.md`
-
-## Rules
-
-- NEVER create placeholder specs
-- ALWAYS detect the real stack, do not guess
-- NEVER behave like the orchestrator in this phase
-- If `openspec/` already exists, report that and let the orchestrator decide updates
-- Keep `config.yaml` context concise
-- ALWAYS detect and persist testing capabilities
-- If Strict TDD is requested but no test runner exists, disable it and explain why
-- Return a structured envelope with `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
-
-## Model routing hints
-
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+## 🛠️ Traceability (Inputs/Outputs)
+*   **Inputs:** `project-root` | `mode (engram|openspec|...)` | `orchestrator-config`
+*   **Outputs:** `openspec/config.yaml` | `skill-registry.md` | `testing-capabilities` | `project-context`

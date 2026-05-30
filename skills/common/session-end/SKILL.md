@@ -1,74 +1,47 @@
 ---
 name: session-end
 description: >
-  Session cleanup and memory consolidation protocol. Runs at the end of every task
-  to summarize work, persist findings, and close the session cleanly.
+  Session cleanup and memory consolidation protocol. Runs at the end of every task to summarize work, persist findings, and close the session cleanly.
   Trigger: Always active — execute when a task or request is fully completed.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
-  version: "1.0"
+  version: "3.0"
 ---
 
-## When to Use
+# 🛡️ Execution Contract: session-end
 
-ALWAYS ACTIVE — execute this at the end of every completed task or request, before closing the session.
+## 🎯 Intent
+Execute the mandatory cleanup and memory persistence protocol at the end of every completed task or session.
 
-## Protocol
+## 🔍 Pre-conditions (Invariant Check)
+*   [ ] Task or session is complete (user request fulfilled).
+*   [ ] Git hooks path is accessible.
+*   [ ] Engram service is available (if configured).
 
-At session end, run ALL steps in this exact order:
+## ⚙️ Execution Logic (Deterministic Steps)
+1.  **[Phase: Git Context]** Run `session-end.sh` to capture git state (branch, changes, commits).
+2.  **[Phase: Session Summary]** Call `engram-mem_session_summary` with:
+    *   **Goal**: One-sentence summary.
+    *   **Instructions**: User preferences/constraints discovered.
+    *   **Discoveries**: Technical findings or learnings.
+    *   **Accomplished**: ✅ Completed tasks | 🔲 Carried-over tasks.
+    *   **Relevant Files**: Key files modified.
+3.  **[Phase: Close Session]** Call `engram-mem_session_end` to release resources.
+4.  **[Phase: Report]** Confirm session closure to user.
 
-### Step 1 — Gather git context
-```bash
-bash ~/.copilot/hooks/copilot/session-end.sh
-```
+## 🏁 Post-conditions (Guarante 💎)
+*   [ ] Session summary is persisted to Engram.
+*   [ ] All 🔲 items are explicitly noted for next session.
+*   [ ] Git context is captured.
+*   [ ] Session is marked as closed.
+*   [ ] No step is skipped (even for short sessions).
 
-This hook outputs structured session context:
-- Current branch
-- Date/time
-- Changed files (staged + unstaged)
-- Last 5 commits
-- Uncommitted changes
+## ⚠️ Failure Modes & Recovery
+*   **IF** no work was done but session is ending **THEN** still close session with empty summary.
+*   **IF** engram is unavailable **THEN** note it and skip Engram calls (log to console).
+*   **IF** git repo is missing **THEN** note it in the summary.
 
-### Step 2 — Call engram session summary
-Use the hook output to call `engram-mem_session_summary` with the following format:
-
-```
-## Goal
-[One sentence: what was being worked on]
-
-## Instructions
-[User preferences, constraints, or context discovered during the session]
-
-## Discoveries
-- [Technical finding, gotcha, or learning]
-
-## Accomplished
-- ✅ [Completed task — with key implementation details]
-- 🔲 [Identified but not yet done — for next session]
-
-## Relevant Files
-- path/to/file.md — [role in the work]
-```
-
-### Step 3 — Close the session
-```
-engram-mem_session_end
-```
-
-This marks the session as completed and releases any tracked resources.
-
-## Critical Rules
-
-- **Never skip Step 1** — the hook output provides essential git context for the summary
-- **Never skip Step 2** — the summary is what preserves work across sessions
-- **Never skip Step 3** — the session must be closed cleanly
-- Always include the `🔲` items for work carried over to the next session
-- If the project has no git repo, note it explicitly in the summary
-- Do not block the user — if there is no work to summarize, still close the session
-
-## Relationship to session-start
-
-- `session-start` reads engram context and verifies state before work begins
-- `session-end` persists results and closes the session after work finishes
-- Together they form a complete session lifecycle: init → work → persist → close
+## 🛠️ Traceability (Inputs/Outputs)
+*   **Inputs:** `session-end` | `git-state` | `work-summary`
+*   **Outputs:** `engram-summary` | `session-closed`
