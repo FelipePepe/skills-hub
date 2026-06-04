@@ -56,23 +56,14 @@ Busca ACTIVAMENTE:
 - [ ] Race conditions en async code
 - [ ] Tipos incorrectos o `any` que ocultan errores
 
-## Formato de reporte
+## Output contract
 
 ```
-## Code Review
-
-### 🔴 Crítico (bloquea merge)
-- [archivo:línea] Descripción del problema + riesgo + fix sugerido
-
-### 🟡 Importante (debe corregirse pronto)
-- [archivo:línea] Descripción + impacto
-
-### 🔵 Menor (puede hacerse en follow-up)
-- [archivo:línea] Descripción
-
-### ✅ Veredicto
-APPROVE / REQUEST_CHANGES / NEEDS_DISCUSSION
+VERDICT:{approve|request_changes|discuss}
+CRITICAL:{n} IMPORTANT:{n} MINOR:{n}
+[archivo:línea] {severidad}: {problema} — {fix}
 ```
+One finding per line. Omit severity sections with zero findings. No headers, no prose outside this format.
 
 ## Reglas
 
@@ -81,8 +72,3 @@ APPROVE / REQUEST_CHANGES / NEEDS_DISCUSSION
 - Si no hay issues: `✅ LGTM — no critical issues found`
 - Usar `~/.copilot/rules/security.md` como referencia de seguridad
 
-## Model routing hints
-
-- preferred agent: security
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly

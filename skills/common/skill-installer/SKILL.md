@@ -73,8 +73,7 @@ After installing, say:
 - Private repos can use existing git credentials or `GITHUB_TOKEN` / `GH_TOKEN`
 - Multiple `--path` arguments can install several skills in one run
 
-## Model routing hints
+## Output contract
 
-- preferred agent: documenter
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+After install emit one line: `INSTALLED:{skill-name} RESTART:required`
+After list: emit the skill names one per line, mark `[installed]` where applicable. No prose.

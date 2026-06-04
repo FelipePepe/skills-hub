@@ -94,8 +94,7 @@ Before examining, ask:
 4. **Chaining** — Find small issues that combine.
 5. **Report** — CRITICAL first, then HIGH, then the rest.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: security
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Findings only. No preamble, no closing remarks. Lead with CRITICAL findings.
+Skip severity levels that have zero findings — do not emit empty sections.

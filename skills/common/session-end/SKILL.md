@@ -67,6 +67,14 @@ This marks the session as completed and releases any tracked resources.
 - If the project has no git repo, note it explicitly in the summary
 - Do not block the user — if there is no work to summarize, still close the session
 
+## Output contract
+
+After Step 3 emit exactly one line to the user:
+```
+SESSION:closed BRANCH:{name} COMMITTED:{yes|no}
+```
+No summary of what was done, no bullets, no headers. One line only.
+
 ## Relationship to session-start
 
 - `session-start` reads engram context and verifies state before work begins

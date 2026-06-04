@@ -125,11 +125,15 @@ If mode includes Engram, save:
 
 If mode includes openspec, the generated config already captures the filesystem side.
 
-### Step 9: Return summary
+### Step 9: Return
 
-Return a structured summary adapted to the resolved mode.
-Use the templates from:
-- `references/return-modes.md`
+Emit exactly this schema:
+```
+INIT:{project} MODE:{mode} TDD:{true|false}
+STACK:{tech1,tech2} SKILLS:{n-registered}
+NEXT:{sdd-new|sdd-explore}
+```
+No headers, no prose outside the schema.
 
 ## Rules
 
@@ -142,8 +146,7 @@ Use the templates from:
 - If Strict TDD is requested but no test runner exists, disable it and explain why
 - Return a structured envelope with `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 9. No preamble, no explanation,
+no markdown headers or bullets outside the schema. If you add anything else, you are wrong.

@@ -54,29 +54,14 @@ Si hay reporte de cobertura, identificar:
 - Error paths sin tests
 - Happy path cubierto pero edge cases no
 
-## Formato de reporte
+## Output contract
 
 ```
-## Test Results
-
-### Resumen
-- Total: X passed, Y failed, Z skipped
-- Cobertura: X% statements, Y% branches
-
-### ❌ Tests fallidos
-
-#### [nombre del test]
-- Archivo: path/to/test.ts:línea
-- Error: mensaje del error
-- Causa probable: ...
-- Fix sugerido: [código o descripción]
-
-### ⚠️ Gaps de cobertura
-- [archivo]: [función/rama] no cubierta — sugiero test: [descripción]
-
-### ✅ Veredicto
-PASS / FAIL / PARTIAL
+VERDICT:{pass|fail|partial} PASSED:{n} FAILED:{n} SKIPPED:{n} COV:{x%|n/a}
+FAIL:{test-name}@{file:line}: {error} — {causa} — {fix}
+GAP:{file}: {función/rama} sin cubrir
 ```
+One FAIL line per failing test. One GAP line per coverage gap. Omit FAIL/GAP lines if none. No headers, no prose outside this format.
 
 ## Reglas
 
@@ -86,8 +71,3 @@ PASS / FAIL / PARTIAL
 - No modificar tests sin aprobación — solo sugerir cambios
 - Usar `~/.copilot/rules/testing.md` como referencia
 
-## Model routing hints
-
-- preferred agent: tester
-- preferred model: ollama/qwen3-coder:30b
-- routing intent: hint only; the skill must not switch models directly

@@ -125,11 +125,12 @@ Núcleo mínimo a revisar siempre:
 - culpar a React cuando el problema es estructura de datos o diseño del componente
 - recomendar refactors enormes cuando bastaría un cambio pequeño y localizado
 
-## Salida esperada
+## Output contract
 
-La respuesta ideal debe devolver:
-- síntoma principal
-- hallazgos priorizados (`CRITICAL`, `WARNING`, `SUGGESTION`)
-- causa raíz probable
-- cambio mínimo recomendado
-- si hace falta, orden de refactor seguro
+```
+SYMPTOM:{one-line description}
+CRITICAL:{n} WARNING:{n} SUGGESTION:{n}
+[component:line] {severity}: {problema} — {fix mínimo}
+ORDER:{step1 → step2|none}
+```
+One finding per line. Omit severity rows with zero findings. No prose outside this format.

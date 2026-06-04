@@ -29,8 +29,6 @@ Esta skill es un alias legacy.
 - No divergir en formato, persistencia ni contrato
 - Si actualizas documentación, sustituye `sdd-proposal` por `sdd-propose`
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Follow the output contract of `sdd-propose` exactly. No additional prose.

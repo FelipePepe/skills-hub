@@ -74,29 +74,13 @@ VALUES ('NNN_descripcion', unixepoch('now') * 1000);
 COMMIT;
 ```
 
-## Formato de reporte
+## Output contract
 
 ```
-## DB Review
-
-### Esquema propuesto / revisado
-[SQL]
-
-### 🔴 Problemas (deben corregirse)
-- Descripción + impacto + fix
-
-### 🟡 Sugerencias (mejoras opcionales)
-- Descripción + beneficio
-
-### Índices recomendados
-- [tabla.campo]: razón (query X la necesita)
-
-### ✅ Veredicto
-APPROVED / NEEDS_CHANGES
+VERDICT:{approved|needs_changes}
+CRITICAL:{n} SUGGESTIONS:{n}
+[tabla.campo] {severidad}: {problema} — {fix}
+INDEX:{tabla.campo}: {razón|none}
 ```
+One finding per line. Omit sections with zero findings. No markdown headers outside this format.
 
-## Model routing hints
-
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
