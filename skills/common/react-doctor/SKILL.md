@@ -1,136 +1,135 @@
 ---
 name: react-doctor
 description: >
-  Diagnostica problemas y malos patrones en aplicaciones React: render loops,
-  efectos mal definidos, estado derivado innecesario, memoización incorrecta,
-  componentes demasiado grandes, problemas de hidratación, rendimiento y
-  accesibilidad básica. Trigger: cuando el usuario pide revisar una app React,
-  depurar comportamiento extraño, auditar performance/renderizado o mejorar la
-  salud de componentes React.
+  Diagnoses problems and bad patterns in React applications: render loops,
+  poorly defined effects, unnecessary derived state, incorrect memoization,
+  oversized components, hydration issues, performance, and basic accessibility.
+  Trigger: when the user asks to review a React app, debug strange behavior,
+  audit performance/rendering, or improve React component health.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
-  version: "1.0"
+  version: "1.1"
 ---
 
-## Cuándo usar este skill
+## When to Use
 
-- El usuario quiere revisar la salud técnica de una app React
-- Hay comportamiento extraño: re-renders, flicker, loops, hydration, stale state
-- Se quiere auditar componentes antes de merge o refactor
-- Hay dudas sobre hooks, memoización, lifting state, derived state o composición
+- The user wants to review the technical health of a React app
+- There is strange behavior: re-renders, flicker, loops, hydration, stale state
+- Auditing components before merge or refactor
+- Questions about hooks, memoization, lifting state, derived state, or composition
 
-## Cuándo NO usarlo
+## When NOT to Use
 
-- **No** para crear una app nueva desde cero: usar la skill de bootstrap correspondiente
-- **No** para bugs puramente de backend, infraestructura o bundling sin relación con React
-- **No** para discutir solo estilo visual sin impacto funcional o arquitectónico
+- **Not** for creating a new app from scratch: use the appropriate bootstrap skill
+- **Not** for purely backend, infrastructure, or bundling bugs unrelated to React
+- **Not** for discussing only visual style without functional or architectural impact
 
 ---
 
-## Regla de decisión rápida
+## Quick Decision Rule
 
-- Si el problema central es **comportamiento, estructura o rendimiento React** → `react-doctor`
-- Si el problema central es **tooling del repo** → `repo-tooling-casa` o equivalente
-- Si el problema central es **flujo git/release** → `gitflow-casa` o skill de workflow
+- If the core problem is **React behavior, structure, or performance** → `react-doctor`
+- If the core problem is **repo tooling** → `repo-tooling` or equivalent
+- If the core problem is **git/release flow** → `gitflow` or workflow skill
 
-Referencia de apoyo:
+Reference:
 - `references/checklist.md`
 
 ---
 
-## Protocolo de diagnóstico
+## Diagnostic Protocol
 
-### Paso 1 — Identificar el síntoma principal
+### Step 1 — Identify the main symptom
 
-Clasificar el problema en una de estas categorías:
-- re-renders excesivos
-- `useEffect` mal definido
-- estado derivado o duplicado
-- memoización inútil o ausente
-- componente demasiado grande o acoplado
+Classify the problem into one of these categories:
+- excessive re-renders
+- poorly defined `useEffect`
+- derived or duplicate state
+- useless or missing memoization
+- oversized or tightly coupled component
 - hydration / SSR mismatch
-- accesibilidad o interacción rota
-- cuellos de botella en listas o árboles grandes
+- broken accessibility or interaction
+- bottlenecks in large lists or trees
 
-### Paso 2 — Leer el componente y su contexto inmediato
+### Step 2 — Read the component and its immediate context
 
-Revisar:
-- props de entrada
-- hooks usados
-- dependencias de efectos
-- composición padre/hijo
-- origen del estado
+Review:
+- input props
+- hooks used
+- effect dependencies
+- parent/child composition
+- state origin
 - side effects
 
-No diagnosticar React mirando una sola línea fuera de contexto.
+Do not diagnose React by looking at a single line out of context.
 
-### Paso 3 — Buscar anti-patrones React
+### Step 3 — Look for React anti-patterns
 
-Revisar especialmente:
-- `useEffect` que sincroniza estado derivado que podría calcularse en render
-- `useEffect` con dependencias incorrectas o inestables
-- `useMemo` / `useCallback` añadidos sin beneficio real
-- estado local duplicando datos del servidor, props o cache externa
-- componentes que hacen demasiadas cosas a la vez
-- keys inestables en listas
-- lógica de negocio metida en JSX difícil de probar
-- handlers recreados en cascada sin necesidad en árboles grandes
+Pay special attention to:
+- `useEffect` syncing derived state that could be calculated at render time
+- `useEffect` with incorrect or unstable dependencies
+- `useMemo` / `useCallback` added without real benefit
+- local state duplicating server data, props, or external cache
+- components doing too many things at once
+- unstable keys in lists
+- business logic embedded in JSX that is hard to test
+- handlers recreated in cascades unnecessarily in large trees
 
-### Paso 4 — Priorizar el problema real
+### Step 4 — Prioritize the real problem
 
-Clasificar hallazgos:
-- **CRITICAL** → bug funcional, loop, hydration rota, pérdida de datos o UX bloqueada
-- **WARNING** → rendimiento pobre, acoplamiento alto, complejidad innecesaria, deuda importante
-- **SUGGESTION** → mejora estructural o simplificación no urgente
+Classify findings:
+- **CRITICAL** → functional bug, loop, broken hydration, data loss, or blocked UX
+- **WARNING** → poor performance, high coupling, unnecessary complexity, significant debt
+- **SUGGESTION** → structural improvement or non-urgent simplification
 
-### Paso 5 — Proponer el tratamiento correcto
+### Step 5 — Propose the correct treatment
 
-Elegir la intervención mínima adecuada:
-- eliminar estado derivado y calcular en render
-- reducir o corregir un `useEffect`
-- mover lógica a hook o función pura
-- dividir componente por responsabilidades
-- memoizar solo donde reduzca trabajo real
-- virtualizar o paginar listas grandes
-- arreglar claves, refs o boundaries SSR
+Choose the minimum adequate intervention:
+- remove derived state and calculate at render
+- reduce or correct a `useEffect`
+- move logic to a hook or pure function
+- split component by responsibilities
+- memoize only where it reduces real work
+- virtualize or paginate large lists
+- fix keys, refs, or SSR boundaries
 
-## Checklist de revisión
+## Review Checklist
 
-Usar la checklist completa de:
+Use the full checklist from:
 - `references/checklist.md`
 
-Núcleo mínimo a revisar siempre:
-- ¿hay estado que puede derivarse en render?
-- ¿hay efectos que en realidad son cálculo?
-- ¿las dependencias de hooks son correctas?
-- ¿la memoización tiene un motivo medible?
-- ¿el componente mezcla demasiadas responsabilidades?
-- ¿las listas usan keys estables?
-- ¿hay riesgo de hydration mismatch?
+Minimum core to always review:
+- Is there state that can be derived at render?
+- Are there effects that are actually computation?
+- Are hook dependencies correct?
+- Does the memoization have a measurable reason?
+- Does the component mix too many responsibilities?
+- Do lists use stable keys?
+- Is there a risk of hydration mismatch?
 
-## Heurísticas útiles
+## Useful Heuristics
 
-- Si un valor puede calcularse desde props/estado actual, probablemente no necesita `useState`
-- Si un `useEffect` solo copia datos de A a B, probablemente sobra
-- Si `useMemo` rodea lógica trivial, probablemente añade ruido
-- Si un componente supera claramente una sola responsabilidad, probablemente necesita extracción
-- Si el render depende de objetos/funciones recreadas en cada nivel, revisar estabilidad y coste real
+- If a value can be calculated from current props/state, it probably doesn't need `useState`
+- If a `useEffect` only copies data from A to B, it probably isn't needed
+- If `useMemo` wraps trivial logic, it probably adds noise
+- If a component clearly exceeds a single responsibility, it probably needs extraction
+- If the render depends on objects/functions recreated at every level, review stability and real cost
 
-## Anti-patrones
+## Anti-patterns
 
-- arreglar todo con más `useEffect`
-- añadir `useMemo` y `useCallback` “por si acaso”
-- duplicar estado remoto/local sin estrategia clara
-- culpar a React cuando el problema es estructura de datos o diseño del componente
-- recomendar refactors enormes cuando bastaría un cambio pequeño y localizado
+- fixing everything with more `useEffect`
+- adding `useMemo` and `useCallback` "just in case"
+- duplicating remote/local state without a clear strategy
+- blaming React when the problem is data structure or component design
+- recommending huge refactors when a small, localized change would suffice
 
 ## Output contract
 
 ```
 SYMPTOM:{one-line description}
 CRITICAL:{n} WARNING:{n} SUGGESTION:{n}
-[component:line] {severity}: {problema} — {fix mínimo}
+[component:line] {severity}: {problem} — {minimum fix}
 ORDER:{step1 → step2|none}
 ```
 One finding per line. Omit severity rows with zero findings. No prose outside this format.

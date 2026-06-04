@@ -1,33 +1,34 @@
 ---
 name: sdd-proposal
 description: >
-  Alias legacy de compatibilidad para la fase de propuesta de SDD.
-  Trigger: solo cuando exista una referencia antigua a `sdd-proposal`; en flujo nuevo usar `sdd-propose`.
+  Legacy compatibility alias for the SDD proposal phase.
+  Trigger: only when an old prompt, script, or legacy documentation explicitly
+  references `sdd-proposal`; use `sdd-propose` for all new flows.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
-  version: "1.1"
+  version: "1.2"
 ---
 
-## Estado
+## Status
 
-Esta skill es un alias legacy.
+This skill is a legacy alias.
 
-- **Skill canónica**: `sdd-propose`
-- **Usar esta skill solo** si un prompt antiguo, script o documentación legacy la menciona de forma explícita
-- **No** crear nuevas referencias a `sdd-proposal`
+- **Canonical skill**: `sdd-propose`
+- **Use this skill only** if an old prompt, script, or legacy documentation explicitly names it
+- **Do not** create new references to `sdd-proposal`
 
-## Qué hacer
+## What to Do
 
-1. Carga y sigue `skills/copilot-only/sdd-propose/SKILL.md`
-2. Mantén compatibilidad de nombre en el resumen si el contexto legacy lo requiere
-3. Devuelve el resultado con el formato y persistencia definidos por `sdd-propose`
+1. Load and follow `skills/common/sdd-propose/SKILL.md`
+2. Preserve name compatibility in the summary if the legacy context requires it
+3. Return the result using the format and persistence defined by `sdd-propose`
 
-## Reglas
+## Rules
 
-- Tratar `sdd-propose` como la fuente de verdad
-- No divergir en formato, persistencia ni contrato
-- Si actualizas documentación, sustituye `sdd-proposal` por `sdd-propose`
+- Treat `sdd-propose` as the source of truth
+- Do not diverge in format, persistence, or contract
+- If updating documentation, replace `sdd-proposal` with `sdd-propose`
 
 ## Output contract
 
