@@ -19,6 +19,7 @@ From the orchestrator:
 - Change name
 - The specific task(s) to implement (e.g., "Phase 1, tasks 1.1-1.3")
 - Artifact store mode (`engram | openspec | hybrid | none`)
+- Optional worktree context: `worktree_strategy`, `worktree_path`, `branch`, `base_branch`
 
 ## Execution and Persistence Contract
 
@@ -34,7 +35,17 @@ From the orchestrator:
 ### Step 1: Load Skills
 Follow **Section A** from `skills/_shared/sdd-phase-common.md`.
 
-### Step 2: Read Context
+### Step 2: Resolve Workspace
+
+If `worktree_strategy` is `task-worktree` or `batch-worktree`:
+1. Read `skills/_shared/sdd-worktree.md`.
+2. Confirm current working directory is the provided `worktree_path` (or switch there if the tool environment permits).
+3. Treat that worktree as the project root for all code reads/writes/tests.
+4. Include branch and worktree path in the final summary.
+
+If no worktree context is provided, use the current checkout (`inline`). Do not create or remove worktrees yourself unless explicitly instructed by the orchestrator.
+
+### Step 3: Read Context
 
 Before writing ANY code:
 1. Read the specs — understand WHAT the code must do
@@ -130,8 +141,9 @@ No headers, no prose, no markdown tables. If a field has nothing, write `none`.
 - NEVER implement tasks that weren't assigned to you
 - Skill loading is handled in Step 1 — follow any loaded skills strictly when writing code
 - Apply any `rules.apply` from `openspec/config.yaml`
-- If Strict TDD Mode is active (Step 3), load `strict-tdd.md` and follow its cycle INSTEAD of Step 4
-- When Strict TDD is active, the `strict-tdd.md` module's rules OVERRIDE Step 4 entirely
+- If Strict TDD Mode is active (Step 4), load `strict-tdd.md` and follow its cycle INSTEAD of Step 5
+- When Strict TDD is active, the `strict-tdd.md` module's rules OVERRIDE Step 5 entirely
+- If running in a worktree, only edit inside that worktree plus required SDD artifacts; do not merge, rebase, remove worktrees, or delete branches
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
 ## Output contract

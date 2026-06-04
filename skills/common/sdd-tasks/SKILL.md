@@ -95,6 +95,22 @@ Each task MUST be:
 | **Verifiable** | "Test: `POST /login` returns 401 without token" | "Make sure it works" |
 | **Small** | One file or one logical unit of work | "Implement the feature" |
 
+### Worktree Hints
+
+When tasks are likely to benefit from isolated implementation, add a short `## Worktree Plan` after the phases:
+
+```markdown
+## Worktree Plan
+
+| Task(s) | Strategy | Reason |
+|---------|----------|--------|
+| 1.1 | inline | Small config-only change |
+| 2.1 | task-worktree | Risky backend behavior change |
+| 2.2-2.3 | batch-worktree | Dependent UI changes |
+```
+
+Keep this advisory: the orchestrator makes the final worktree decision using `skills/_shared/sdd-worktree.md`.
+
 ### Phase Organization Guidelines
 
 ```
@@ -147,6 +163,7 @@ No headers, no tables, no prose outside the schema.
 - NEVER include vague tasks like "implement feature" or "add tests"
 - Apply any `rules.tasks` from `openspec/config.yaml`
 - If the project uses TDD, integrate test-first tasks: RED task (write failing test) → GREEN task (make it pass) → REFACTOR task (clean up)
+- If tasks are independent/risky, include a concise `Worktree Plan` with `inline`, `task-worktree`, or `batch-worktree` recommendations
 - **Size budget**: Tasks artifact MUST be under 530 words. Each task: 1-2 lines max. Use checklist format, not paragraphs.
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 

@@ -21,6 +21,7 @@ You are the Orchestrator of the SDD cycle. Your job is to:
 4. Maintain state (SQL + Engram/filesystem depending on mode)
 5. Never allow the agent to skip steps
 6. Inject `## Project Standards` into each sub-agent (see `skills/_shared/skill-resolver.md`)
+7. Decide if `sdd-apply` runs inline or in `git worktree` per task
 
 ## Persistence Modes
 
@@ -32,6 +33,18 @@ You are the Orchestrator of the SDD cycle. Your job is to:
 | `none` | No persistence (ephemeral) | Quick exploration, no commitment |
 
 **Default**: `engram`. If the user does not specify, use `engram`.
+
+## Worktrees per Task (optional)
+
+`git worktree` is a workspace isolation layer, not a persistence mode. Use it primarily in `sdd-apply` to implement tasks without polluting the main checkout.
+
+Read `skills/_shared/sdd-worktree.md` when:
+- The user explicitly requests worktrees
+- Multiple independent or risky tasks need parallel isolation
+- The current checkout has unrelated in-progress work
+- A server or test runner must stay running on another branch
+
+Default strategy: `inline`. If a worktree is used, the prompt to `sdd-apply` MUST include `worktree_strategy`, `worktree_path`, `branch`, `base_branch`, and task IDs.
 
 ## Cycle Map
 

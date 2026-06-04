@@ -18,9 +18,6 @@ if [[ "${#skill_files[@]}" -eq 0 ]]; then
   skills_hub_die "No se encontraron skills en $ROOT_DIR/skills"
 fi
 
-declare -A seen_frontmatter_names=()
-declare -A seen_dirs=()
-
 for file in "${skill_files[@]}"; do
   skill_dir="$(dirname "$file")"
   dir_name="$(basename "$skill_dir")"
@@ -31,16 +28,6 @@ for file in "${skill_files[@]}"; do
   if [[ "$frontmatter_name" != "$dir_name" ]]; then
     skills_hub_die "Nombre de carpeta y frontmatter desalineados: ${file#"$ROOT_DIR"/} (dir=$dir_name, name=$frontmatter_name)"
   fi
-
-  if [[ -n "${seen_frontmatter_names[$frontmatter_name]:-}" ]]; then
-    skills_hub_die "Nombre de skill duplicado: $frontmatter_name"
-  fi
-  seen_frontmatter_names[$frontmatter_name]=1
-
-  if [[ -n "${seen_dirs[$dir_name]:-}" ]]; then
-    skills_hub_die "Directorio de skill duplicado por basename: $dir_name"
-  fi
-  seen_dirs[$dir_name]=1
 done
 
 while IFS=$'\t' read -r app_id sources; do
@@ -66,7 +53,8 @@ while IFS=$'\t' read -r app_id sources; do
       fi
 
       if [[ -n "${exposed_names[$skill_name]:-}" ]]; then
-        skills_hub_die "La app '$app_id' expone skills duplicadas con el mismo nombre: $skill_name"
+        # Platform-specific source overrides common — last source wins, no error.
+        continue
       fi
       exposed_names[$skill_name]=1
       ((skill_count += 1))
