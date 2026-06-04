@@ -82,41 +82,20 @@ Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
 - topic_key: `sdd/{change-name}/explore` (or `sdd/explore/{topic-slug}` if standalone)
 - type: `architecture`
 
-### Step 6: Return Structured Analysis
+### Step 6: Return
 
-Return EXACTLY this format to the orchestrator (and write the same content to `exploration.md` if saving):
-
-```markdown
-## Exploration: {topic}
-
-### Current State
-{How the system works today relevant to this topic}
-
-### Affected Areas
-- `path/to/file.ext` — {why it's affected}
-- `path/to/other.ext` — {why it's affected}
-
-### Approaches
-1. **{Approach name}** — {brief description}
-   - Pros: {list}
-   - Cons: {list}
-   - Effort: {Low/Medium/High}
-
-2. **{Approach name}** — {brief description}
-   - Pros: {list}
-   - Cons: {list}
-   - Effort: {Low/Medium/High}
-
-### Recommendation
-{Your recommended approach and why}
-
-### Risks
-- {Risk 1}
-- {Risk 2}
-
-### Ready for Proposal
-{Yes/No — and what the orchestrator should tell the user}
+Emit exactly this schema:
 ```
+TOPIC:{name}
+FILES:{path/a,path/b|none}
+APPROACH:{name — one sentence rationale} EFFORT:{low|mid|high}
+APPROACH:{name — one sentence rationale} EFFORT:{low|mid|high}
+REC:{chosen approach name — one sentence why}
+RISKS:{risk1;risk2|none}
+READY:{yes|no — one sentence what's missing if no}
+```
+Only emit as many APPROACH lines as real alternatives found (min 1, max 3).
+No headers, no bullets, no prose outside the schema.
 
 ## Rules
 
@@ -128,8 +107,7 @@ Return EXACTLY this format to the orchestrator (and write the same content to `e
 - If the request is too vague to explore, say what clarification is needed
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 6. No preamble, no explanation,
+no markdown headers or bullets outside the schema. If you add anything else, you are wrong.

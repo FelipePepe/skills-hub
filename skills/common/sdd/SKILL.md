@@ -144,22 +144,12 @@ SELECT feature, phase, artifact_mode, verify_pass,
 FROM sdd_cycle ORDER BY updated_at DESC LIMIT 1;
 ```
 
-Output esperado:
+Output schema:
 ```
-## SDD Status: <feature>
-
-Fase actual: [propose|spec|design|tasks|apply|verify|archive]
-Modo: [engram|openspec|hybrid|none]
-Progreso: ████░░░░ 50%
-
-Tasks:
-  ✅ done:        X
-  🔄 in_progress: Y
-  ⏳ pending:     Z
-
-Artefactos: proposal ✅ | spec ✅ | design ⏳ | tasks ❌
-
-Próximo paso: sdd apply
+STATUS:{feature} PHASE:{phase} MODE:{mode}
+TASKS:{done}/{total} PENDING:{n}
+ARTIFACTS:{proposal:ok|spec:ok|design:missing|tasks:missing}
+NEXT:{sdd apply|sdd verify|sdd archive|none}
 ```
 
 ---
@@ -246,8 +236,11 @@ Antes de invocar CUALQUIER subagente, seguir el protocolo de `skills/_shared/ski
 5. **`red-team-offensive` es obligatorio en verify** — no opcional
 6. **Inyectar Project Standards** en todos los subagentes — nunca lanzar sin contexto
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Emit only:
+- Gate failures: `GATE:fail REASON:{what's missing}`
+- Phase transitions: `PHASE:{new-phase} NEXT:{command|none}`
+- Status queries: schema defined in `sdd status` above
+- Errors: `ERR:{one line}`
+No preamble, no summaries of subagent output, no markdown prose. Surface only what the user needs to act.
