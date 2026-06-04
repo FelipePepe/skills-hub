@@ -1,168 +1,134 @@
 ---
 name: session-end
 description: >
-  Cierre estructurado de sesión: revisa el trabajo realizado, separa lo
-  operativo (Engram) de lo arquitectónico estable (Atlas), busca duplicados antes
-  de guardar, persiste cada observación en formato canónico, y opcionalmente
-  añade entrada al journal del proyecto. Trigger: el usuario dice "cierra la
-  sesión", "fin de sesión", "guarda en engram", "guarda contexto", "resume lo
-  que hemos hecho", "qué guardamos de esta sesión", o al final de una sesión
-  de trabajo larga. Reemplaza a la antigua `engram-fin-sesion`.
+  Structured session close: reviews work done, separates operational (Engram)
+  from stable architectural (Atlas) knowledge, searches for duplicates before
+  saving, persists each observation in canonical format, and optionally adds
+  an entry to the project journal. Trigger: user says "close the session",
+  "end of session", "save to engram", "save context", "summarize what we did",
+  "what do we save from this session".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.0"
+  version: "1.1"
 ---
 
-## Cuándo usar este skill
+## When to Use
 
-- El usuario pide explícitamente cerrar/guardar al final de una sesión
-- Se ha realizado trabajo significativo (deploy, feature, bugfix, decisión arquitectónica)
-- El usuario dice "cerramos por hoy", "guarda lo importante", "resume la sesión"
-- Se detectan decisiones/aprendizajes que no están en memoria persistente
+- User explicitly requests closing/saving at the end of a session
+- Significant work was done (deploy, feature, bugfix, architectural decision)
+- User says "wrapping up", "save the important stuff", "summarize the session"
+- Decisions/learnings are detected that are not in persistent memory
 
-NO usar si:
-- La sesión ha sido trivial (un typo, una pregunta sin código)
-- Ya se ejecutó session-end en este mismo turno
+Do NOT use if:
+- The session was trivial (a typo, a question with no code)
+- session-end has already run in this turn
 
 ---
 
-## Protocolo de cierre
+## Close Protocol
 
-### Paso 1 — Revisar el historial de la sesión
+### Step 1 — Review session history
 
-Recorrer la conversación e identificar candidatos. Por cada uno, decidir tipo:
+Go through the conversation and identify candidates. For each one, decide type:
 
-| Tipo | Guardar si... |
-|------|--------------|
-| `decision` | Decisión de arquitectura/tecnología/enfoque no obvia |
-| `bugfix` | Error resuelto — síntoma, causa raíz, fix |
-| `architecture` | Estructura diseñada/documentada (módulo, red, sistema) |
-| `pattern` | Convención o forma de trabajar repetible |
-| `config` | Configuración del entorno (nginx, systemd, DNS, env vars) |
-| `discovery` | Hallazgo no documentado (puerto ocupado, limitación, comportamiento inesperado) |
+| Type | Save if... |
+|------|-----------|
+| `decision` | Architecture/technology/approach decision that is not obvious |
+| `bugfix` | Resolved error — symptom, root cause, fix |
+| `architecture` | Structure designed/documented (module, network, system) |
+| `pattern` | Repeatable convention or way of working |
+| `config` | Environment configuration (nginx, systemd, DNS, env vars) |
+| `discovery` | Undocumented finding (occupied port, limitation, unexpected behavior) |
 
-**No guardar**:
-- Pasos obvios o documentados oficialmente
-- Código que ya está en el repo (el repo es fuente de verdad)
-- Estado temporal (tareas en curso, TODOs sin contexto)
-- Cosas ya en Engram/Atlas — verificar primero
+**Do not save**:
+- Obvious steps or officially documented procedures
+- Code already in the repo (repo is source of truth)
+- Temporary state (in-progress tasks, TODOs without context)
+- Things already in Engram/Atlas — verify first
 
-### Paso 2 — Clasificar destino: Engram vs Atlas
+### Step 2 — Classify destination: Engram vs Atlas
 
-Cada candidato va a UN destino (no a ambos salvo razón explícita).
+Each candidate goes to ONE destination (not both unless explicitly justified).
 
-**Atlas — conocimiento persistente y arquitectónico** (vida útil >6 meses, cross-session):
-- Vive en `/mnt/nas/Obsidian/` (vault Obsidian). Acceso primario vía filesystem (Read/Write/Edit) — el MCP `atlas_*` puede no estar disponible en toda sesión.
-- Estructura: `Proyectos/<proyecto>.md` (entity page por proyecto), `Stack/<categoría>/<tech>.md` (referencia tech con `_INDEX.md` maestro), `Setup/` (infra/operacional), `AI/`, `Temp/`.
-- Decisiones de arquitectura "load-bearing": elección de stack, modelo de datos, contratos de API estables.
-- Convenciones organizacionales que aplican a múltiples proyectos.
-- Mapeos canónicos (e.g. "MDASH↔vi-sdd", taxonomías OWASP).
-- Patrones de trabajo establecidos a nivel personal/equipo.
+**Atlas — persistent architectural knowledge** (life span >6 months, cross-session):
+- Lives in `/mnt/nas/Obsidian/` (Obsidian vault). Primary access via filesystem (Read/Write/Edit).
+- Structure: `Projects/<project>.md` (entity page per project), `Stack/<category>/<tech>.md` (tech reference), `Setup/` (infra/operational), `AI/`, `Temp/`.
+- "Load-bearing" architecture decisions: stack choice, data model, stable API contracts.
+- Organizational conventions that apply to multiple projects.
+- Canonical mappings and established team/personal work patterns.
+- **Most typical at session close**: if a spec/phase was closed with architectural substance, **update `Projects/<project>.md`** with the delta (current state, metrics, new Stack links). Convention: refresh `**Last updated:** YYYY-MM-DD` at the top.
 
-**Lo más típico al cierre de sesión**: si hubo cierre de spec/phase con sustancia arquitectónica, **actualizar `Proyectos/<proyecto>.md`** con el delta (estado actual, métricas, links nuevos a Stack tech). No suele ser una página nueva — es un upsert sobre el entity page existente. Convención obligatoria: refrescar el campo `**Última actualización:** YYYY-MM-DD` al inicio.
+**Engram — operational memory** (life span weeks-months, day-to-day):
+- Resolved bugs (symptom+cause+fix)
+- Spec state and metrics (temporal snapshots)
+- Concrete environment configuration (venv, ports, paths)
+- Prioritized technical debt
+- Tactical decisions within a spec
 
-**Engram — memoria operativa** (vida útil semanas-meses, day-to-day):
-- Bugs resueltos (síntoma+causa+fix)
-- Estado de specs y métricas (snapshots temporales)
-- Configuración de entornos concretos (venv, puertos, paths)
-- Deuda técnica priorizada
-- Decisiones tácticas dentro de una spec
+**Quick rule**: if the answer to "will this still be true in 6 months?" is YES → atlas. If "it depends on the current state" → engram.
 
-**Regla rápida**: si la respuesta a "¿esto seguirá siendo cierto en 6 meses?" es SÍ → atlas. Si es "depende del estado actual" → engram.
+### Step 3 — Search for duplicates before saving
 
-### Paso 3 — Buscar duplicados antes de guardar
+For each candidate:
 
-Para cada candidato:
+- Engram: `mem_search("<title or keywords>", project=<X>)`. If similar exists: use `topic_key` for upsert with `mem_save` or `mem_update`.
+- Atlas: check if `Projects/<project>.md` exists in `/mnt/nas/Obsidian/`. If yes → edit the relevant section (do not create a new page). If the observation spans multiple projects or is about a technology, consider `Stack/<category>/<tech>.md`. Last resort: create a new page — only if the topic truly does not fit any existing one.
 
-- Engram: `mem_search("<título o keywords>", project=<X>)`. Si existe similar: usar `topic_key` para upsert con `mem_save` o `mem_update`.
-- Atlas: comprobar si existe `Proyectos/<proyecto>.md` en `/mnt/nas/Obsidian/`. Si sí → editar la sección relevante (no crear nueva página). Si la observación es transversal a varios proyectos o sobre una tecnología, considerar `Stack/<categoría>/<tech>.md`. Última opción: crear página nueva — solo si el tema realmente no encaja en ninguna existente.
+`topic_key` values (Engram) must be stable and composite: `vi-sdd/spec-006-owasp`, `homelab/nginx-config`, `personal/git-workflow`.
 
-Los `topic_key` (Engram) deben ser estables y compuestos: `vi-sdd/spec-006-owasp`, `homelab/nginx-config`, `personal/git-workflow`.
+### Step 4 — Save with canonical format
 
-### Paso 4 — Guardar con estructura canónica
-
-Formato obligatorio para el `content` (engram y atlas):
+Required format for `content` (engram and atlas):
 
 ```
-**What**: [qué se hizo o decidió, en una línea]
-**Why**: [por qué importa, qué problema resuelve]
-**Where**: [rutas, ficheros, comandos, servicios afectados]
-**Learned**: [gotchas, edge cases, decisiones tomadas — omitir si no aplica]
+**What**: [what was done or decided, in one line]
+**Why**: [why it matters, what problem it solves]
+**Where**: [paths, files, commands, affected services]
+**Learned**: [gotchas, edge cases, decisions made — omit if not applicable]
 ```
 
-**Títulos**: cortos, buscables, prefijados por proyecto cuando aplique.
+**Titles**: short, searchable, prefixed by project when applicable.
 - ✅ `vi-sdd: dedup command-injection-sink (spec 006 phase 8)`
-- ✅ `homelab: nginx en pihole2 - reload sin reiniciar`
-- ❌ `arreglé un problema con nginx`
+- ✅ `homelab: nginx on pihole2 - reload without restart`
+- ❌ `fixed a problem with nginx`
 
-**Proyectos frecuentes**: `homelab`, `poc-trello`, `openclaw`, `sdd-office`, `vi-sdd`, `engram`.
-**Scope personal** (preferido para infraestructura y patrones que aplican a varios proyectos): `scope: personal`.
+Run saves in parallel when independent (multiple `mem_save` in a single turn).
 
-Ejecutar guardados en paralelo cuando son independientes (varios `mem_save` en un único turno).
+### Step 5 — Project journal (if applicable)
 
-### Paso 5 — Journal del proyecto (si aplica)
+If the project has `docs/journal/sessions/` and the session was substantial:
 
-Si el proyecto tiene `docs/journal/sessions/` y la sesión fue sustancial (no trivial):
+- Check if an entry for today already exists: `docs/journal/sessions/YYYY-MM-DD.md`
+- If it does NOT exist and the session justifies an entry: **ask the user** before creating it
+- If it already exists: ask whether to append the advances from this turn
+- Do NOT create journal automatically — always confirm
 
-- Comprobar si ya existe entrada para hoy: `docs/journal/sessions/YYYY-MM-DD.md`
-- Si NO existe y la sesión justifica entrada: **preguntar al usuario** antes de crearla
-  - Plantilla en `docs/journal/sessions/_template.md` si existe
-  - Contenido mínimo: objetivo, trabajo realizado, decisiones, bugs encontrados, resultado cuantificado, estado al cierre
-- Si ya existe: preguntar si añadir append con los avances de este turno
-- NO crear journal automáticamente — siempre confirmar
+If the project has no `docs/journal/` → skip this step.
 
-Si el proyecto NO tiene `docs/journal/` → omitir este paso.
+### Step 6 — Report
 
-### Paso 6 — Resumen al usuario
+Emit exactly this schema:
 
-Mostrar tabla de lo guardado:
-
-| Destino | Título / Página | Tipo | Acción |
-|---------|-----------------|------|--------|
-| Engram | ... | bugfix | save |
-| Engram | ... | decision | update (#1234) |
-| Atlas | `Proyectos/vi-sdd.md` | architecture | edit (sección X) |
-| Atlas | `Stack/Languages/Rust.md` | pattern | edit (sección Y) |
-
-Y mencionar brevemente lo que se decidió NO guardar y por qué (e.g. "trivial", "ya estaba en X").
-
-Si se creó/modificó journal: incluir ruta del archivo.
+```
+SAVED:{n items} SKIPPED:{n — reason}
+ENGRAM:{title:type:save|update} ...
+ATLAS:{page:section:edit|create} ...
+JOURNAL:{path|none}
+```
+One ENGRAM line per saved item. One ATLAS line per saved item. No prose.
 
 ---
 
-## Reglas operativas
+## Operating Rules
 
-- **No inventes** observaciones — solo guarda lo que ocurrió en la conversación.
-- **No dupliques** — siempre `mem_search`/`atlas_search` primero. Upsert con `topic_key`.
-- **Paralelismo**: guardados independientes van en el mismo turno.
-- **Atlas conservador**: por defecto, ante la duda, va a Engram. Solo a Atlas si la decisión es claramente arquitectónica y estable.
-- **Respeta idioma del proyecto**: si CLAUDE.md del proyecto está en español, los títulos y contenidos también.
-- **No silenciar errores**: si engram/atlas falla, reporta al usuario qué quedó pendiente de guardar.
+- **Do not invent** observations — only save what happened in the conversation.
+- **Do not duplicate** — always `mem_search`/`atlas_search` first. Upsert with `topic_key`.
+- **Parallelism**: independent saves go in the same turn.
+- **Atlas conservative**: when in doubt, use Engram. Only Atlas if the decision is clearly architectural and stable.
+- **Do not silence errors**: if engram/atlas fails, report to the user what remains pending.
+- **Always respond in English.**
 
----
+## Output contract
 
-## Heurísticas rápidas
-
-**¿Vale la pena guardar esto?**
-- ¿Lo buscarías en memoria la próxima vez que hagas lo mismo? → Sí → guardar
-- ¿Tardaste >15 min en resolverlo o entenderlo? → Sí → guardar
-- ¿Es algo que podrías olvidar en 2 semanas? → Sí → guardar
-- ¿Está ya en el código, CLAUDE.md, o docs/? → No → no guardar
-
-**¿Engram o Atlas?**
-- "El catálogo OWASP de vi-sdd mapea 19 bug_classes a 7 categorías" → atlas (taxonomía estable)
-- "Spec 006 cerrada el 21-may con F1 0.998 y 317 tests" → engram (snapshot temporal)
-- "Para evitar duplicados, dedup de command-injection-sink omite el symbol" → engram (decisión táctica)
-- "Usamos arquitectura de pipeline en 6 etapas inspirada en MDASH" → atlas (decisión arquitectónica)
-
-**¿Crear journal?**
-- Sesión <30min sin cambios sustanciales → no
-- Sesión con bug fix nuevo, decisión, o phase cerrada → sí (preguntar)
-- Solo conversación/análisis sin código → no, pero sí actualizar memoria
-
----
-
-## Compatibilidad
-
-Esta skill **reemplaza** a la antigua `engram-fin-sesion`. Si el usuario invoca esa por nombre, este skill cubre el mismo trigger y añade Atlas + journal.
+Respond ONLY in the schema defined in Step 6. No preamble, no heuristic commentary, no prose outside the schema.

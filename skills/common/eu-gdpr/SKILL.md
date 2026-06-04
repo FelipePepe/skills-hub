@@ -1,78 +1,73 @@
 ---
 name: eu-gdpr
 description: >
-  Detecta y aplica el Reglamento General de Protección de Datos (GDPR/RGPD) de la UE en proyectos que manejen datos personales de ciudadanos europeos.
-  Proactivamente al detectar datos personales, campos de usuario, cookies, tracking, perfiles, o cuando el usuario menciona privacidad, datos personales, consentimientos, o regulaciones de datos.
+  Detects and applies the EU General Data Protection Regulation (GDPR) in projects
+  that handle personal data of EU citizens. Trigger: proactively when detecting
+  personal data, user fields, cookies, tracking, profiles, or when the user
+  mentions privacy, personal data, consent, or data regulations.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
-  version: "1.0"
+  version: "1.1"
 ---
 
-## Cuándo usar
+## When to Use
 
-- El proyecto almacena, procesa o transmite datos personales (nombre, email, IP, ubicación, etc.)
-- Se implementan formularios de registro/login con datos de usuario
-- Hay tracking, analytics, cookies, o perfiles de usuarios
-- El usuario menciona privacidad, datos personales, consentimiento, cookies, RGPD, GDPR
-- Se manejan datos sensibles (salud, biometría, opiniones políticas, orientación sexual)
-- Hay transferencias de datos fuera de la UE/EEE
+- The project stores, processes, or transmits personal data (name, email, IP, location, etc.)
+- Registration/login forms with user data are implemented
+- There is tracking, analytics, cookies, or user profiles
+- The user mentions privacy, personal data, consent, cookies, GDPR
+- Sensitive data is handled (health, biometrics, political opinions, sexual orientation)
+- Data is transferred outside the EU/EEA
 
-## Scope guard
+## Scope Guard
 
-- NO usar para proyectos sin datos personales (ej: datos públicos genéricos sin identificación)
-- NO usar para proyectos solo de backend sin interacción con usuarios de la UE
-- Si no hay datos personales — no hay GDPR aplicable
+- Do NOT use for projects without personal data (e.g. generic public data without identification)
+- Do NOT use for backend-only projects with no EU user interaction
+- If there is no personal data — GDPR does not apply
 
-## Detección
+## Detection
 
-Al iniciar el proyecto, escanear proactivamente:
+At project start, proactively scan:
 
-1. **Schema de base de datos**: campos con `email`, `phone`, `address`, `name`, `ip`, `geo`
+1. **Database schema**: fields with `email`, `phone`, `address`, `name`, `ip`, `geo`
 2. **Forms/inputs**: registration, login, profile, contact forms
 3. **Analytics/cookies**: `analytics.js`, `gtag.js`, `facebook pixel`, `hotjar`, `mixpanel`
-4. **APIs externas**: servicios que envían datos fuera de la UE (Stripe, Sentry, New Relic)
-5. **Keywords en código**: `consent`, `cookie_policy`, `privacy`, `data_subject`, `right_to_erasure`
-6. **Autenticación**: JWT tokens, session cookies, OAuth providers
+4. **External APIs**: services that send data outside the EU (Stripe, Sentry, New Relic)
+5. **Keywords in code**: `consent`, `cookie_policy`, `privacy`, `data_subject`, `right_to_erasure`
+6. **Authentication**: JWT tokens, session cookies, OAuth providers
 
-## Flujo de trabajo
+## Workflow
 
-1. **Clasificar** los datos según `references/data-categories.md`
-2. **Evaluar** base legal para el procesamiento (Art. 6) desde `references/legal-basis.md`
-3. **Aplicar** el checklist correspondiente desde `references/compliance-checklist.md`
-4. **Generar** un resumen de compliance al final del desarrollo
+1. **Classify** data according to `references/data-categories.md`
+2. **Evaluate** legal basis for processing (Art. 6) from `references/legal-basis.md`
+3. **Apply** the corresponding checklist from `references/compliance-checklist.md`
+4. **Generate** a compliance summary at the end of development
 
-## Reglas críticas
+## Critical Rules
 
-- **Datos sensibles**: Nunca almacenar datos de categoría especial sin base legal específica (Art. 9)
-- **Consentimiento**: Debe ser libre, específico, informado e inequívoco. No pre-checkeado. No silencioso.
-- **Derechos del interesado**: El código DEBE soportar: acceso, rectificación, eliminación, portabilidad, oposición, limitación
-- **Privacy by design**: Minimización de datos, retención limitada, cifrado por defecto
-- **Transferencias internacionales**: Solo a países con decisión de adecuación o salvaguardas apropiadas
-- **DPO**: Obligatorio si el procesamiento es a gran escala de datos sensibles o vigilancia sistemática
-- **Violación de datos**: Notificación a autoridad en 72 horas, y al interesado sin demora indebida si hay alto riesgo
+- **Sensitive data**: Never store special-category data without specific legal basis (Art. 9)
+- **Consent**: Must be freely given, specific, informed, and unambiguous. Not pre-checked. Not silent.
+- **Data subject rights**: Code MUST support: access, rectification, erasure, portability, objection, restriction
+- **Privacy by design**: Data minimization, limited retention, encryption by default
+- **International transfers**: Only to countries with adequacy decision or appropriate safeguards
+- **DPO**: Mandatory for large-scale processing of sensitive data or systematic surveillance
+- **Data breach**: Notify authority within 72 hours; notify data subjects without undue delay if high risk
 
-## Output
-
-Al revisar datos personales, proporcionar:
+## Output contract
 
 ```
-🇪🇺 EU GDPR Compliance Report
-────────────────────────────────
-Data Categories: [personal/special/children's]
-Legal Basis: [consent/contract/legal_obligation/legitimate_interest]
-Processing Locations: [EU-only/international]
-Data Subject Rights: [supported rights]
-Violations Found: [count]
-Recommendations:
-  1. [actionable item]
-  2. [actionable item]
-────────────────────────────────
+DATA:{personal|special|children}
+LEGAL_BASIS:{consent|contract|legal_obligation|legitimate_interest}
+LOCATIONS:{eu-only|international}
+RIGHTS:{list of supported rights}
+VIOLATIONS:{n} RECOMMENDATIONS:{item1;item2|none}
 ```
+No prose, no decorative separators. Fields on separate lines.
 
-## Recursos
+## Resources
 
-- [`references/data-categories.md`](references/data-categories.md) — Categorías de datos y su nivel de protección
-- [`references/legal-basis.md`](references/legal-basis.md) — Bases legales para el procesamiento
-- [`references/compliance-checklist.md`](references/compliance-checklist.md) — Checklist accionable por tipo
-- [`references/dsar.md`](references/dsar.md) — Guía de Data Subject Rights (derechos del interesado)
+- [`references/data-categories.md`](references/data-categories.md) — Data categories and protection level
+- [`references/legal-basis.md`](references/legal-basis.md) — Legal bases for processing
+- [`references/compliance-checklist.md`](references/compliance-checklist.md) — Actionable checklist by type
+- [`references/dsar.md`](references/dsar.md) — Data Subject Rights guide

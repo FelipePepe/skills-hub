@@ -1,168 +1,121 @@
 ---
 name: session-start
 description: >
-  Activa el workflow de sesión: detecta el proyecto activo, comprueba estado git,
-  lee el último journal y docs de estado, detecta spec activa con tareas pendientes,
-  consulta contexto en Engram y Atlas, y opcionalmente ejecuta tests/benchmark rápidos.
-  Devuelve un briefing de retomada con sugerencias de próximo paso. Trigger: el
-  usuario dice "empezamos sesión", "session start", "retomamos", "dónde lo dejamos",
-  "estado del proyecto", "ponme al día", "inicio de sesión".
+  Activates the session workflow: detects the active project, checks git state,
+  reads the last journal and status docs, detects active spec with pending tasks,
+  queries context in Engram and Atlas, and optionally runs quick tests/benchmarks.
+  Returns a resumption briefing with next-step suggestions. Trigger: user says
+  "let's start a session", "session start", "where did we leave off",
+  "what's the project status", "catch me up", "session init".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.0"
+  version: "1.1"
 ---
 
-## Cuándo usar este skill
+## When to Use
 
-- El usuario abre una sesión nueva en un proyecto y quiere retomar contexto
-- El usuario dice "dónde lo dejamos", "ponme al día", "estado del proyecto"
-- Después de varios días sin tocar un proyecto, al volver a él
-- Antes de empezar a programar en un repo no trivial
+- User opens a new session on a project and wants to resume context
+- User says "where did we leave off", "catch me up", "project status"
+- Returning to a project after several days away
+- Before starting to code in a non-trivial repo
 
-NO usar si:
-- El usuario pregunta algo concreto que NO requiere recargar contexto del proyecto
-- Ya se ha hecho session-start en esta misma sesión
+Do NOT use if:
+- The user asks something specific that does NOT require reloading project context
+- session-start has already run in this session
 
 ---
 
-## Protocolo de arranque
+## Startup Protocol
 
-Ejecutar los pasos en este orden. **Paralelizar** las llamadas independientes en un mismo turno (git + reads + mem_context + atlas_search son todas independientes).
+Run steps in this order. **Parallelize** independent calls in a single turn (git + reads + mem_context + atlas_search are all independent).
 
-### Paso 1 — Detectar el proyecto activo
+### Step 1 — Detect active project
 
-- `pwd` y buscar marcadores de proyecto: `.git`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `composer.json`
-- Si hay `CLAUDE.md` en el directorio: leerlo (políticas, convenciones, venv, comandos)
-- Si hay `CLAUDE.md` en `~/.claude/`: ya está cargado automáticamente — no releer
-- Nombre canónico del proyecto = nombre del directorio o `package.json::name`/`pyproject.toml::project.name`
+- `pwd` and look for project markers: `.git`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `composer.json`
+- If `CLAUDE.md` exists in the directory: read it (policies, conventions, venv, commands)
+- If `CLAUDE.md` is in `~/.claude/`: already loaded automatically — do not re-read
+- Canonical project name = directory name or `package.json::name` / `pyproject.toml::project.name`
 
-### Paso 2 — Estado git
+### Step 2 — Git state
 
-Ejecutar en paralelo en un único turno:
+Run in parallel in a single turn:
 
-- `git status --short` (cambios sin commitear)
-- `git branch --show-current` + `git log --oneline -5` (rama + últimos 5 commits)
-- `git stash list` (stashes pendientes)
+- `git status --short` (uncommitted changes)
+- `git branch --show-current` + `git log --oneline -5` (branch + last 5 commits)
+- `git stash list` (pending stashes)
 
-Si hay cambios sin commitear o stashes → señalarlos en el briefing.
+If there are uncommitted changes or stashes → flag them in the briefing.
 
-### Paso 3 — Documentación de estado
+### Step 3 — Status documentation
 
-Leer si existen (en orden, sin fallar si alguno falta):
+Read if they exist (in order, without failing if any is missing):
 
-1. `docs/journal/sessions/` — última entrada por fecha
-2. `docs/STATE.md` — snapshot ejecutivo
-3. `IMPLEMENTATION_SUMMARY.md` — capacidades y estado de specs
-4. `README.md` — solo si los anteriores no existen
+1. `docs/journal/sessions/` — latest entry by date
+2. `docs/STATE.md` — executive snapshot
+3. `IMPLEMENTATION_SUMMARY.md` — capabilities and spec status
+4. `README.md` — only if the above do not exist
 
-### Paso 4 — Spec activa (si el proyecto sigue SDD)
+### Step 4 — Active spec (if the project uses SDD)
 
-- Buscar `specs/NNN-*/tasks.md` (orden numérico descendente — la última suele ser la activa)
-- Para cada spec, contar checkboxes `- [ ]` (pendientes) vs `- [x]` (cerrados)
-- Spec activa = la última cuyo ratio de pendientes > 0 **Y** cuya última edición es reciente
+- Look for `specs/NNN-*/tasks.md` (descending numerical order — the last is usually active)
+- For each spec, count `- [ ]` (pending) vs `- [x]` (closed) checkboxes
+- Active spec = the last one with pending ratio > 0 AND whose last edit is recent
 
-CUIDADO: checkboxes sin marcar pueden ser obsoletos. Cruza con `IMPLEMENTATION_SUMMARY.md` o el journal antes de afirmar "spec X tiene Y pendientes". Si el resumen dice "cerrada" y los checkboxes están sin marcar → reportar el conflicto, no asumir que está abierta.
+CAUTION: unchecked checkboxes can be stale. Cross-reference with `IMPLEMENTATION_SUMMARY.md` or the journal before asserting "spec X has Y pending". If the summary says "closed" and checkboxes are unchecked → report the conflict, do not assume it is open.
 
-### Paso 5 — Memoria persistente
+### Step 5 — Persistent memory
 
-Ejecutar en paralelo:
+Run in parallel:
 
-- `mem_context(project=<nombre>, limit=20)` — observaciones recientes en Engram.
-- Lectura directa del vault **Atlas (Obsidian)** en `/mnt/nas/Obsidian/`:
-  - `Proyectos/<nombre>.md` — entity page del proyecto, si existe (estado arquitectónico).
-  - Si el MCP `atlas_search` está disponible, úsalo además. Si no, `grep`/`find` en el vault.
+- `mem_context(project=<name>, limit=20)` — recent observations in Engram.
+- Direct read of the **Atlas (Obsidian)** vault at `/mnt/nas/Obsidian/`:
+  - `Projects/<name>.md` — project entity page, if it exists (architectural state).
+  - If MCP `atlas_search` is available, use it additionally. If not, `grep`/`find` in the vault.
 
-Cruzar fechas:
-- Si la última observación de Engram es más antigua que el último journal → señalar "Engram desactualizado, hay drift de N días".
-- Si `Proyectos/<nombre>.md` tiene `Última actualización:` anterior al último journal del proyecto → señalar drift de Atlas en el briefing (es trabajo de `session-end` reconciliarlo).
+Cross-check dates:
+- If the last Engram observation is older than the last journal → flag "Engram out of date, N days of drift".
+- If `Projects/<name>.md` has `Last updated:` before the project's last journal → flag Atlas drift in the briefing (reconciliation is session-end's job).
 
-### Paso 6 — Tests/benchmark rápidos (opcional, preguntar primero)
+### Step 6 — Quick tests/benchmark (optional, ask first)
 
-NO ejecutar automáticamente. Preguntar al usuario:
+Do NOT run automatically. Ask the user:
 
-> "¿Ejecuto tests + benchmark como sanity check? (puede tardar ~30s-2min)"
+> "Run tests + benchmark as a sanity check? (may take ~30s-2min)"
 
-Si responde sí:
-- Detectar comando de tests desde `CLAUDE.md` del proyecto o convenciones (`pytest`, `npm test`, `go test ./...`, `cargo test`, `unittest discover -s tests`)
-- Respetar venvs y rutas documentadas en `CLAUDE.md` (e.g. vi-sdd usa `/home/sandman/.venvs/vi-sdd/bin/python`)
-- Reportar verde/rojo + número de tests; si rojo, NO intentar arreglar — solo señalar
+If yes:
+- Detect test command from project `CLAUDE.md` or conventions (`pytest`, `npm test`, `go test ./...`, `cargo test`, `unittest discover -s tests`)
+- Respect venvs and paths documented in `CLAUDE.md`
+- Report green/red + test count; if red, do NOT attempt to fix — only flag
 
-### Paso 7 — Briefing al usuario
+### Step 7 — Briefing
 
-Devolver un resumen estructurado:
+Emit exactly this schema:
 
 ```
-## Punto de retomada — <proyecto>
-
-**Rama:** <branch> · **Último commit:** <hash> <msg>
-**Cambios sin commitear:** <N archivos> | <ninguno>
-**Última sesión:** <fecha del journal> — <título o primera línea>
-
-### Estado del proyecto
-- <bullet con métricas clave de STATE/IMPLEMENTATION_SUMMARY>
-- <bullet con spec activa si la hay>
-
-### Deuda priorizada (top 3)
-- <de STATE.md §deuda o IMPLEMENTATION_SUMMARY>
-
-### Sugerencia de próximo paso
-<1-2 frases concretas basadas en el último journal y las tareas pendientes>
+BRANCH:{name} COMMIT:{hash message} UNCOMMITTED:{n files|none}
+LAST_SESSION:{date — title or first line|none}
+STATUS:{1-2 bullet points from STATE/IMPLEMENTATION_SUMMARY}
+ACTIVE_SPEC:{spec-name: N pending|none}
+DEBT:{item1;item2;item3|none}
+ENGRAM:{ok|out-of-date:N days}
+NEXT:{1-2 concrete sentences on what task to tackle}
 ```
 
-Si hay conflictos detectados (engram desactualizado, checkboxes vs IMPLEMENTATION_SUMMARY, tests rojos), añadir sección **⚠ Atención** con el detalle.
+If conflicts found (stale Engram, checkbox vs IMPLEMENTATION_SUMMARY mismatch, red tests), append:
+`ATTENTION:{description of conflict}`
 
 ---
 
-## Reglas operativas
+## Operating Rules
 
-- **No escribir nada en disco** durante session-start. Solo lectura.
-- **No modificar memorias** (engram/atlas) en start — eso es trabajo de `session-end`.
-- **Paralelizar lecturas** siempre que sea posible. Bash + Read + mem_context + atlas_search pueden ir en el mismo turno.
-- **Fallar grácil**: si engram, atlas, o algún archivo no responde/existe → omitir esa sección del briefing, no romper el flujo.
-- **Respeta idioma del proyecto**: si CLAUDE.md indica español (como vi-sdd, homelab), el briefing va en español. Inglés por defecto.
-- **No sugerir cambios de código** en el briefing. La sugerencia de próximo paso es "qué tarea atacar", no "qué línea editar".
+- **Write nothing to disk** during session-start. Read-only.
+- **Do not modify memories** (engram/atlas) on start — that is session-end's job.
+- **Parallelize reads** whenever possible. Bash + Read + mem_context + atlas_search can go in the same turn.
+- **Fail gracefully**: if engram, atlas, or any file does not respond/exist → omit that section from the briefing, do not break the flow.
+- **Do not suggest code changes** in the briefing. The next-step suggestion is "which task to tackle", not "which line to edit".
+- **Always respond in English.**
 
----
+## Output contract
 
-## Heurísticas
-
-**¿Hay spec activa?**
-- Existe `specs/NNN-*/tasks.md` con `- [ ]` pendientes Y el journal/STATE no dice explícitamente "cerrada" → sí
-- Si `IMPLEMENTATION_SUMMARY.md` dice "cerrada el <fecha>" y los checkboxes están sin marcar → checkboxes obsoletos, NO hay spec activa
-
-**¿Engram desactualizado?**
-- Última observación con `project=<X>` > 7 días antes del último journal → desactualizado
-- Sugerir al final del briefing: "Considera ejecutar `/session-end` al final de hoy para sincronizar Engram"
-
-**¿Atlas relevante?**
-- El vault Atlas vive en `/mnt/nas/Obsidian/`. Estructura: `Proyectos/<proyecto>.md` (entity page), `Stack/<categoría>/<tech>.md` (catálogo tech con `_INDEX.md`), `Setup/` (infra), `AI/`, `Temp/`.
-- Si `Proyectos/<proyecto>.md` existe → leerlo siempre: tiene estado arquitectónico estable + backlinks a tecnologías del Stack relevantes.
-- Para proyectos personales pequeños sin entity page, omitir.
-
----
-
-## Ejemplo de salida (vi-sdd, simulado)
-
-```
-## Punto de retomada — vi-sdd
-
-**Rama:** main · **Último commit:** abc1234 chore: close spec 006
-**Cambios sin commitear:** 12 archivos sin trackear (.artifacts/, .claude/, CLAUDE.md, docs/, specs/, src/, tests/)
-**Última sesión:** 2026-05-21 — Cierre spec 006 (OWASP coverage). Macro F1 0.998, 317 tests.
-
-### Estado del proyecto
-- 6 specs cerradas (001→006). Pipeline 6 etapas: prepare→scan→validate→dedup→prove→report.
-- Macro F1 0.998, 0 FPs, 7 categorías OWASP cubiertas. Última métrica récord.
-- No hay spec activa con phases pendientes.
-
-### Deuda priorizada (top 3)
-- Calibrar auditor LLM (qwen2.5-coder:7b alucina; F1 con auditor cae a 0.76)
-- Fixtures CVE OSS reales (Heartbleed, getaddrinfo) — spec 004 phase 10.1
-- A01 Django/Spring handler collectors (framework detectado, handlers no recolectados)
-
-### Sugerencia de próximo paso
-Si quieres seguir trabajando: abrir spec 007 extendiendo A07/A10 a Java/C#/Go/Rust, o sesión iterativa de calibración auditor (1-2h). Si el objetivo es consolidar: commit del estado actual (hay docs/, specs/, src/ sin trackear).
-
-⚠ Engram estaba desactualizado al 2026-05-18 — sincronizado en la sesión previa. OK.
-```
+Respond ONLY in the schema defined in Step 7. No preamble, no prose outside the schema.
