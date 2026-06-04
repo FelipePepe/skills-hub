@@ -40,27 +40,21 @@ ls openspec/config.yaml 2>/dev/null && cat openspec/config.yaml || echo "No SDD 
 - If `openspec/` exists: **SDD is active for this project.**
   - Check for an active change: `ls openspec/changes/` — if there's a change without `archived_at`, resume it with `sdd status`.
   - If there is NO active change and the user asks to implement a feature: **run `sdd new "<feature>"` BEFORE writing any code.**
-  - Remind the user: *"Este proyecto usa SDD — ¿arranco con `sdd new` o hay un change activo?"*
+  - Remind the user: *"This project uses SDD — should I start with `sdd new` or is there an active change?"*
 - If no `openspec/`: SDD is not configured, skip this step.
 
 ### Step 4 — Read engram context
+**Only run if** Step 1 returned a valid project id OR Step 3 found an active change. Otherwise skip.
 ```
 engram-mem_context project="{current-project}"
 ```
-Infer the project name from the git repo name or working directory.
 
-### Step 5 — Surface pending work
-Look for:
-- Observations tagged as `in_progress` or `blocked`
-- Session summaries with `🔲` (unfinished) items
-- Any explicit "TODO" or "next session" notes
-
-### Step 6 — Report to user
-Summarise briefly:
-- Active git branch
-- Active SDD change (if any) with its current phase
-- Pending engram work (if any)
-- Ask what to do next
+### Step 5 — Report to user
+Emit exactly this schema, then ask what to do next in one sentence:
+```
+BRANCH:{name} SDD:{change@phase|none} PENDING:{item|none}
+```
+No headers, no bullets, no explanation. Omit PENDING if none.
 
 ## Critical Rules
 
@@ -72,8 +66,7 @@ Summarise briefly:
 - Do NOT block the user waiting — if engram has nothing relevant, move on immediately
 - At session end: run `bash ~/.copilot/hooks/copilot/session-end.sh` and call `engram-mem_session_summary` + `engram-mem_session_end`
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 5. No preamble, no markdown headers,
+no explanation of what you did. One schema line + one question sentence. Nothing else.

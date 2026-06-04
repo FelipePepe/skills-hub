@@ -20,6 +20,16 @@
       "sources": [
         "skills/common",
         "skills/copilot-only"
+      ],
+      "configFiles": [
+        {
+          "source": "behavior/copilot/copilot-instructions.md",
+          "target": {
+            "linux": "~/.copilot/copilot-instructions.md",
+            "windows": "%USERPROFILE%/.copilot/copilot-instructions.md"
+          },
+          "strategy": "copy"
+        }
       ]
     },
     {
@@ -42,6 +52,16 @@
       "sources": [
         "skills/common",
         "skills/claude-only"
+      ],
+      "configFiles": [
+        {
+          "source": "behavior/claude/CLAUDE.md",
+          "target": {
+            "linux": "~/.claude/CLAUDE.md",
+            "windows": "%USERPROFILE%/.claude/CLAUDE.md"
+          },
+          "strategy": "copy"
+        }
       ]
     },
     {

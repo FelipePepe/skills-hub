@@ -172,33 +172,11 @@ Run `sdd-archive` behavior. Show the result:
 
 ### Phase 10: Summary
 
-Close the session with a recap:
-
-```markdown
-## Onboarding Complete! 🎉
-
-Here's what we built together:
-
-**Change**: {change-name}
-**Artifacts created**:
-- proposal.md — the WHY
-- specs/{capability}/spec.md — the WHAT
-- design.md — the HOW
-- tasks.md — the STEPS
-
-**Code changed**:
-- {list of files}
-
-**The SDD cycle in one line**:
-explore → propose → spec → design → tasks → apply → verify → archive
-
-**When to use SDD**: Any change where you want to agree on WHAT before writing code.
-Small tweaks? Just code. Features, APIs, architecture decisions? SDD first.
-
-**Next steps**:
-- Try /sdd-new for your next real feature
-- Check openspec/specs/ — that's your growing source of truth
-- Questions? The orchestrator is always available
+Close with exactly this schema:
+```
+DONE:{change-name} ARTIFACTS:{proposal|spec|design|tasks} FILES:{n-changed}
+CYCLE: explore→propose→spec→design→tasks→apply→verify→archive
+NEXT: /sdd-new for your next feature
 ```
 
 ## Rules
@@ -212,8 +190,7 @@ Small tweaks? Just code. Features, APIs, architecture decisions? SDD first.
 - Follow all format rules from the individual skills (sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive).
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Between phases: narrate in 1-2 sentences max. At Phase 10: emit only the schema above.
+No closing remarks, no "congratulations" prose outside the schema.

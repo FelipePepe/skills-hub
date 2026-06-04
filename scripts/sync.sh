@@ -146,4 +146,10 @@ config_args=()
 $DRY_RUN && config_args+=( --dry-run )
 node "$OPENCODE_CONFIG" "${config_args[@]}"
 
+skills_hub_info "Instalando archivos de comportamiento (CLAUDE.md, copilot-instructions.md)..."
+behavior_args=()
+$DRY_RUN && behavior_args+=( --dry-run )
+[[ -n "$APP_FILTER" ]] && behavior_args+=( "--app=$APP_FILTER" )
+bash "$SCRIPT_DIR/install-behavior.sh" "${behavior_args[@]}"
+
 skills_hub_info "Sincronizacion finalizada."

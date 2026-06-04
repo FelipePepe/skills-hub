@@ -155,8 +155,10 @@ git push -u origin feature/my-change
 gh pr create --base develop --title "feat(scope): description"
 ```
 
-## Model routing hints
+## Output contract
 
-- preferred agent: repo-agent
-- preferred model: ollama/devstral:latest
-- routing intent: hint only; the skill must not switch models directly
+After creating the PR emit exactly one line:
+```
+PR:{url} CHECKS:{pass|pending|fail} BLOCKED:{reason|none}
+```
+No prose, no summary of what you did. One line only.

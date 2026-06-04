@@ -209,8 +209,10 @@ Need variant guidance? → references/
 - `references/validation.md`
 - `references/blended-patterns.md`
 
-## Model routing hints
+## Output contract
 
-- preferred agent: documenter
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+After creating or updating a skill emit exactly one line:
+```
+SKILL:{name} PATH:{path} ARCHETYPE:{portable|env-bound|worker|orchestrator} LINES:{n}
+```
+No prose, no explanation, no checklist recap. One line only.

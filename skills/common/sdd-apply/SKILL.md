@@ -104,43 +104,18 @@ Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
 - type: `architecture`
 - Also update the tasks artifact with `[x]` marks via `mem_update` (engram) or file edit (openspec/hybrid).
 
-### Step 7: Return Summary
+### Step 7: Return
 
-Return to the orchestrator:
-
-```markdown
-## Implementation Progress
-
-**Change**: {change-name}
-**Mode**: {Strict TDD | Standard}
-
-### Completed Tasks
-- [x] {task 1.1 description}
-- [x] {task 1.2 description}
-
-### Files Changed
-| File | Action | What Was Done |
-|------|--------|---------------|
-| `path/to/file.ext` | Created | {brief description} |
-| `path/to/other.ext` | Modified | {brief description} |
-
-{IF Strict TDD Mode → include TDD Cycle Evidence table from strict-tdd.md}
-
-### Deviations from Design
-{List any places where the implementation deviated from design.md and why.
-If none, say "None — implementation matches design."}
-
-### Issues Found
-{List any problems discovered during implementation.
-If none, say "None."}
-
-### Remaining Tasks
-- [ ] {next task}
-- [ ] {next task}
-
-### Status
-{N}/{total} tasks complete. {Ready for next batch / Ready for verify / Blocked by X}
+Emit exactly this schema, one field per line:
 ```
+DONE:{1.1,1.2|none}
+MOD:{path/file:created|path/file:modified|none}
+PENDING:{1.3,1.4|none}
+DEV:{description of deviation|none}
+ERR:{description|none}
+STATUS:{N/total done — ready-for-verify|next-batch|blocked:reason}
+```
+No headers, no prose, no markdown tables. If a field has nothing, write `none`.
 
 ## Rules
 
@@ -159,8 +134,7 @@ If none, say "None."}
 - When Strict TDD is active, the `strict-tdd.md` module's rules OVERRIDE Step 4 entirely
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: coder
-- preferred model: ollama/qwen3-coder:30b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 7. No preamble, no explanation,
+no markdown headers or bullets outside the schema. If you add anything else, you are wrong.
