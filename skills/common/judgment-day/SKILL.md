@@ -105,7 +105,7 @@ All judge and fix-agent outputs must include a final `Skill Resolution` line ind
 
 ## Language
 
-- Mirror the user’s language when possible
+- Always respond in English
 - Keep verdict tables concise and scannable
 - Do not soften confirmed CRITICAL issues
 
