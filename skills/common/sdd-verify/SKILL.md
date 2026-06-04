@@ -174,14 +174,17 @@ If the project is React:
 Persist artifact `verify-report` using the mode rules above.
 Use topic key `sdd/{change-name}/verify-report` when Engram applies.
 
-### Step 9: Return summary
+### Step 9: Return
 
-Return the same content you persist.
-Use the full report template from:
-- `references/report-template.md`
-
-When Strict TDD is active, include the extra tables from:
-- `references/strict-tdd-tables.md`
+Emit exactly this schema:
+```
+RESULT:{pass|fail} CRITICALS:{n} WARNINGS:{n}
+TESTS:{passed}/{total} BUILD:{ok|fail}
+COVERAGE:{percent%|n/a}
+BLOCKING:{description of first critical|none}
+```
+If Strict TDD active, append one line: `TDD:{evidence:ok|missing}`
+No prose, no tables, no headers outside the schema.
 
 ## Rules
 
@@ -200,8 +203,7 @@ When Strict TDD is active, include the extra tables from:
 - Reuse cached testing capabilities whenever possible
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`
 
-## Model routing hints
+## Output contract
 
-- preferred agent: tester
-- preferred model: ollama/qwen3-coder:30b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 9. No preamble, no explanation,
+no markdown tables or bullets outside the schema. If you add anything else, you are wrong.

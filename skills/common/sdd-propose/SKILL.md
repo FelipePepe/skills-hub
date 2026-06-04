@@ -133,25 +133,16 @@ Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
 - topic_key: `sdd/{change-name}/proposal`
 - type: `architecture`
 
-### Step 6: Return Summary
+### Step 6: Return
 
-Return to the orchestrator:
-
-```markdown
-## Proposal Created
-
-**Change**: {change-name}
-**Location**: `openspec/changes/{change-name}/proposal.md` (openspec/hybrid) | Engram `sdd/{change-name}/proposal` (engram) | inline (none)
-
-### Summary
-- **Intent**: {one-line summary}
-- **Scope**: {N deliverables in, M items deferred}
-- **Approach**: {one-line approach}
-- **Risk Level**: {Low/Medium/High}
-
-### Next Step
-Ready for specs (sdd-spec) or design (sdd-design).
+Emit exactly this schema:
 ```
+PROPOSAL:{change-name} RISK:{low|mid|high}
+SCOPE:{n-in,m-deferred}
+CAPS:{new:cap1,cap2|modified:cap3|none}
+NEXT:{sdd-spec}
+```
+No headers, no bullets, no prose outside the schema.
 
 ## Rules
 
@@ -169,8 +160,7 @@ Ready for specs (sdd-spec) or design (sdd-design).
 - **Size budget**: Proposal artifact MUST be under 450 words. Use bullet points and tables over prose. Headers organize, not explain.
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 6. No preamble, no explanation,
+no markdown tables or bullets outside the schema. If you add anything else, you are wrong.

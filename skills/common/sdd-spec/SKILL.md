@@ -174,28 +174,16 @@ Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
 - topic_key: `sdd/{change-name}/spec`
 - type: `architecture`
 
-### Step 6: Return Summary
+### Step 6: Return
 
-Return to the orchestrator:
-
-```markdown
-## Specs Created
-
-**Change**: {change-name}
-
-### Specs Written
-| Domain | Type | Requirements | Scenarios |
-|--------|------|-------------|-----------|
-| {domain} | Delta/New | {N added, M modified, K removed} | {total scenarios} |
-
-### Coverage
-- Happy paths: {covered/missing}
-- Edge cases: {covered/missing}
-- Error states: {covered/missing}
-
-### Next Step
-Ready for design (sdd-design). If design already exists, ready for tasks (sdd-tasks).
+Emit exactly this schema:
 ```
+SPEC:{change-name} DOMAINS:{domain1,domain2}
+REQS:{n-added,m-modified,k-removed} SCENARIOS:{total}
+COVERAGE:{happy:ok|edge:ok|error:missing}
+NEXT:{sdd-design|sdd-tasks}
+```
+No headers, no tables, no prose outside the schema.
 
 ## Rules
 
@@ -224,8 +212,7 @@ Ready for design (sdd-design). If design already exists, ready for tasks (sdd-ta
 | **SHOULD NOT** | Not recommended, but may be acceptable with justification |
 | **MAY** | Optional |
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 6. No preamble, no explanation,
+no markdown tables or bullets outside the schema. If you add anything else, you are wrong.

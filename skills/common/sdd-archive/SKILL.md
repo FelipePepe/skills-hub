@@ -103,35 +103,16 @@ Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
 - topic_key: `sdd/{change-name}/archive-report`
 - type: `architecture`
 
-### Step 6: Return Summary
+### Step 6: Return
 
-Return to the orchestrator:
-
-```markdown
-## Change Archived
-
-**Change**: {change-name}
-**Archived to**: `openspec/changes/archive/{YYYY-MM-DD}-{change-name}/` (openspec/hybrid) | Engram archive report (engram) | inline (none)
-
-### Specs Synced
-| Domain | Action | Details |
-|--------|--------|---------|
-| {domain} | Created/Updated | {N added, M modified, K removed requirements} |
-
-### Archive Contents
-- proposal.md ✅
-- specs/ ✅
-- design.md ✅
-- tasks.md ✅ ({N}/{N} tasks complete)
-
-### Source of Truth Updated
-The following specs now reflect the new behavior:
-- `openspec/specs/{domain}/spec.md`
-
-### SDD Cycle Complete
-The change has been fully planned, implemented, verified, and archived.
-Ready for the next change.
+Emit exactly this schema:
 ```
+ARCHIVED:{change-name} DATE:{YYYY-MM-DD}
+SPECS:{domain1:n-added,m-modified|domain2:created|none}
+ARTIFACTS:{proposal:ok|spec:ok|design:ok|tasks:N/N}
+DONE:cycle-complete
+```
+No headers, no tables, no prose outside the schema.
 
 ## Rules
 
@@ -145,8 +126,7 @@ Ready for the next change.
 - Apply any `rules.archive` from `openspec/config.yaml`
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 6. No preamble, no explanation,
+no markdown tables or bullets outside the schema. If you add anything else, you are wrong.

@@ -128,28 +128,16 @@ Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
 - topic_key: `sdd/{change-name}/design`
 - type: `architecture`
 
-### Step 5: Return Summary
+### Step 5: Return
 
-Return to the orchestrator:
-
-```markdown
-## Design Created
-
-**Change**: {change-name}
-**Location**: `openspec/changes/{change-name}/design.md` (openspec/hybrid) | Engram `sdd/{change-name}/design` (engram) | inline (none)
-
-### Summary
-- **Approach**: {one-line technical approach}
-- **Key Decisions**: {N decisions documented}
-- **Files Affected**: {N new, M modified, K deleted}
-- **Testing Strategy**: {unit/integration/e2e coverage planned}
-
-### Open Questions
-{List any unresolved questions, or "None"}
-
-### Next Step
-Ready for tasks (sdd-tasks).
+Emit exactly this schema:
 ```
+DESIGN:{change-name} DECISIONS:{n}
+FILES:{n-created,m-modified,k-deleted}
+OPEN:{question|none}
+NEXT:{sdd-tasks}
+```
+No headers, no bullets, no prose outside the schema.
 
 ## Rules
 
@@ -164,8 +152,7 @@ Ready for tasks (sdd-tasks).
 - **Size budget**: Design artifact MUST be under 800 words. Architecture decisions as tables (option | tradeoff | decision). Code snippets only for non-obvious patterns.
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 5. No preamble, no explanation,
+no markdown tables or bullets outside the schema. If you add anything else, you are wrong.

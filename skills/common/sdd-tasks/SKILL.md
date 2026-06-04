@@ -127,30 +127,15 @@ Follow **Section C** from `skills/_shared/sdd-phase-common.md`.
 - topic_key: `sdd/{change-name}/tasks`
 - type: `architecture`
 
-### Step 5: Return Summary
+### Step 5: Return
 
-Return to the orchestrator:
-
-```markdown
-## Tasks Created
-
-**Change**: {change-name}
-**Location**: `openspec/changes/{change-name}/tasks.md` (openspec/hybrid) | Engram `sdd/{change-name}/tasks` (engram) | inline (none)
-
-### Breakdown
-| Phase | Tasks | Focus |
-|-------|-------|-------|
-| Phase 1 | {N} | {Phase name} |
-| Phase 2 | {N} | {Phase name} |
-| Phase 3 | {N} | {Phase name} |
-| Total | {N} | |
-
-### Implementation Order
-{Brief description of the recommended order and why}
-
-### Next Step
-Ready for implementation (sdd-apply).
+Emit exactly this schema:
 ```
+TASKS:{change-name} TOTAL:{n} PHASES:{n}
+PHASE:{1:name:n-tasks} PHASE:{2:name:n-tasks} ...
+NEXT:{sdd-apply}
+```
+No headers, no tables, no prose outside the schema.
 
 ## Rules
 
@@ -165,8 +150,7 @@ Ready for implementation (sdd-apply).
 - **Size budget**: Tasks artifact MUST be under 530 words. Each task: 1-2 lines max. Use checklist format, not paragraphs.
 - Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Respond ONLY in the schema defined in Step 5. No preamble, no explanation,
+no markdown tables or bullets outside the schema. If you add anything else, you are wrong.
