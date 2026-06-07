@@ -15,6 +15,33 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Comando `copilot-credits` registrado en el campo `bin` de `package.json`.
 - Sección `## Análisis de créditos de Copilot` en `README.md` con referencia de uso, ejemplo de salida y explicación de la fuente de datos.
 
+## [2.1.0] - 2026-06-07
+
+### Añadido
+
+- Sub-capa de sub-agentes en `agents/` (`common` y `claude-only`): 4 agentes instalados en `~/.claude/agents/` — `planner`, `silent-failure-hunter`, `security-reviewer`, `build-error-resolver` (#21).
+- `skills/common/_shared/prompt-defense-baseline.md`: bloque canónico de defensa contra prompt injection, requerido en todas las definiciones de agente (#21).
+- Soporte de `agentSources` y `agentInstallPath` en `config/apps.json` para la app `claude` (#21).
+- Skills de cumplimiento normativo europeo: `eu-ai-act` y `eu-gdpr` en `skills/common` (#19).
+- Archivos de comportamiento versionados (`behavior/claude/CLAUDE.md`, `behavior/copilot/copilot-instructions.md`) con tabla de auto-carga de skills completa (#20).
+- `scripts/install-behavior.sh`: instalador de archivos de comportamiento (copia segura sin `--delete`) integrado en el pipeline de sync (#20).
+- `config/model-map.json`: configuración de scheduling de modelos según VRAM disponible.
+- `skills/skills-manifest.json`: registro canónico de skills.
+- `scripts/validate-skill-system.sh`: script de validación del sistema de skills en 7 fases.
+
+### Cambiado
+
+- 9 skills movidas de `copilot-only` a `common` (`atlas-docs`, `casa-*`, `infisical-*`, `project-workflow`, `trello-api-client`) — paridad de catálogo a 47+ skills por plataforma (#20).
+- 24 skills reescritas con esquemas de salida fijos (campos delimitados) para reducir tokens de respuesta y eliminar variabilidad (#20).
+- Todas las skills traducidas al inglés; regla de respuesta siempre en inglés aplicada en todos los skills y archivos de comportamiento (#20).
+- `scripts/sync.sh` integra el ciclo de agentes con `rsync_file` sin `--delete` (preserva agentes de fuentes externas) (#21).
+- `scripts/check.sh` y `scripts/doctor.sh` extendidos con sección de detección de drift de agentes (#21).
+- Reducción de huella de tokens en skills de alta frecuencia: `skill-creator` −57%, `code-reviewer` −23%, `test-runner` −14%; límite máximo de 5 hallazgos en `code-reviewer` (#23).
+
+### Corregido
+
+- `doctor-skills.sh`: validación de nombres duplicados opera ahora por superficie de app, permitiendo variantes específicas de plataforma (ej. `session-start`) (#19).
+
 ## [2.0.0] - 2026-05-29
 
 ### Cambiado
@@ -65,7 +92,9 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.0.0...HEAD
+[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/FelipePepe/skills-hub/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/FelipePepe/skills-hub/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/FelipePepe/skills-hub/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/FelipePepe/skills-hub/releases/tag/v1.1.0
 [0.1.0]: https://github.com/FelipePepe/skills-hub/releases/tag/v0.1.0
