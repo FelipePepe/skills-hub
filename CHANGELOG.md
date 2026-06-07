@@ -7,6 +7,19 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Aniadido
+
+- Capa canónica `agents/` con 8 agents ligeros (`architect`, `code-reviewer`, `test-runner`, `security-reviewer`, `sdd-orchestrator`, `frontend-reviewer`, `db-architect`, `docs-researcher`) que enrutan hacia skills existentes.
+- Manifiestos declarativos `manifests/install-{modules,components,profiles}.json` inspirados en ECC para planificacion selectiva por perfiles (`minimal`, `sdd`, `engineering`, `security`, `full`).
+- `scripts/install-plan.mjs` para inspeccionar perfiles/componentes/modulos y generar planes read-only.
+- Validadores `scripts/validate-agents.mjs`, `scripts/validate-manifests.mjs` y doctor `scripts/doctor-agents.sh`.
+
+### Cambiado
+
+- `sync.sh` ahora copia agents a destinos declarados (`~/.claude/agents`, `~/.agents/agents`) ademas de skills, manteniendo copias reales sin symlinks.
+- `check.sh`, `doctor.sh`, `lint.sh`, CLI y `validate-skill-system.sh` integran la nueva superficie agents/manifests.
+
+
 ## [2.0.0] - 2026-05-29
 
 ### Cambiado

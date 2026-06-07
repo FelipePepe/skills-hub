@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "profiles": {
+    "minimal": {
+      "description": "Low-context baseline: portable skills plus core routing agents.",
+      "modules": [
+        "skills-core",
+        "agents-core"
+      ]
+    },
+    "sdd": {
+      "description": "Spec-Driven Development workflow with SDD skills and orchestrator agent.",
+      "modules": [
+        "skills-core",
+        "agents-core",
+        "sdd-skills",
+        "sdd-agents"
+      ]
+    },
+    "engineering": {
+      "description": "General engineering profile with review, testing, architecture, frontend, and database agents.",
+      "modules": [
+        "skills-core",
+        "agents-core",
+        "engineering-agents"
+      ]
+    },
+    "security": {
+      "description": "Security profile with adversarial review agent and supporting skills.",
+      "modules": [
+        "skills-core",
+        "agents-core",
+        "security-agents"
+      ]
+    },
+    "full": {
+      "description": "All currently classified skills and agents. Not recommended as default because of context budget.",
+      "modules": [
+        "skills-core",
+        "agents-core",
+        "sdd-skills",
+        "sdd-agents",
+        "engineering-agents",
+        "security-agents"
+      ]
+    }
+  }
+}

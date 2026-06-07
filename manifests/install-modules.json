@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "modules": [
+    {
+      "id": "skills-core",
+      "kind": "skills",
+      "description": "Portable skills shared across supported apps.",
+      "paths": [
+        "skills/common"
+      ],
+      "targets": [
+        "claude",
+        "copilot",
+        "agents"
+      ],
+      "dependencies": [],
+      "defaultInstall": true,
+      "cost": "medium",
+      "stability": "stable"
+    },
+    {
+      "id": "agents-core",
+      "kind": "agents",
+      "description": "Minimal lightweight role agents for architecture, review, validation, and documentation research.",
+      "paths": [
+        "agents/common/architect.md",
+        "agents/common/code-reviewer.md",
+        "agents/common/test-runner.md",
+        "agents/common/docs-researcher.md"
+      ],
+      "targets": [
+        "claude",
+        "agents"
+      ],
+      "dependencies": [],
+      "defaultInstall": true,
+      "cost": "light",
+      "stability": "experimental"
+    },
+    {
+      "id": "sdd-skills",
+      "kind": "skills",
+      "description": "Spec-Driven Development lifecycle skills.",
+      "paths": [
+        "skills/common/sdd",
+        "skills/common/sdd-init",
+        "skills/common/sdd-explore",
+        "skills/common/sdd-propose",
+        "skills/common/sdd-spec",
+        "skills/common/sdd-design",
+        "skills/common/sdd-tasks",
+        "skills/common/sdd-apply",
+        "skills/common/sdd-verify",
+        "skills/common/sdd-archive",
+        "skills/common/sdd-onboard"
+      ],
+      "targets": [
+        "claude",
+        "copilot",
+        "agents"
+      ],
+      "dependencies": [
+        "skills-core"
+      ],
+      "defaultInstall": false,
+      "cost": "medium",
+      "stability": "stable"
+    },
+    {
+      "id": "sdd-agents",
+      "kind": "agents",
+      "description": "SDD orchestration agent surface.",
+      "paths": [
+        "agents/common/sdd-orchestrator.md"
+      ],
+      "targets": [
+        "claude",
+        "agents"
+      ],
+      "dependencies": [
+        "agents-core",
+        "sdd-skills"
+      ],
+      "defaultInstall": false,
+      "cost": "light",
+      "stability": "experimental"
+    },
+    {
+      "id": "engineering-agents",
+      "kind": "agents",
+      "description": "Additional engineering specialist agents for frontend and database review.",
+      "paths": [
+        "agents/common/frontend-reviewer.md",
+        "agents/common/db-architect.md"
+      ],
+      "targets": [
+        "claude",
+        "agents"
+      ],
+      "dependencies": [
+        "agents-core",
+        "skills-core"
+      ],
+      "defaultInstall": false,
+      "cost": "light",
+      "stability": "experimental"
+    },
+    {
+      "id": "security-agents",
+      "kind": "agents",
+      "description": "Security review agents and their supporting skills.",
+      "paths": [
+        "agents/common/security-reviewer.md"
+      ],
+      "targets": [
+        "claude",
+        "agents"
+      ],
+      "dependencies": [
+        "agents-core",
+        "skills-core"
+      ],
+      "defaultInstall": false,
+      "cost": "light",
+      "stability": "experimental"
+    }
+  ]
+}

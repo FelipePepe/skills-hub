@@ -10,6 +10,8 @@ MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 SKILLS_DOCTOR="$ROOT_DIR/scripts/doctor-skills.sh"
+AGENTS_DOCTOR="$ROOT_DIR/scripts/doctor-agents.sh"
+MANIFEST_VALIDATOR="$ROOT_DIR/scripts/validate-manifests.mjs"
 
 # shellcheck disable=SC1091 source=lib/common.sh
 source "$COMMON_LIB"
@@ -21,6 +23,8 @@ skills_hub_require_command node
 skills_hub_require_file "$MAP_FILE"
 skills_hub_require_file "$APPS_FILE"
 skills_hub_require_file "$SKILLS_DOCTOR"
+skills_hub_require_file "$AGENTS_DOCTOR"
+skills_hub_require_file "$MANIFEST_VALIDATOR"
 skills_hub_validate_json "$APPS_FILE"
 skills_hub_source_sync_map "$MAP_FILE"
 
@@ -76,6 +80,12 @@ done
 
 skills_hub_info "Doctor: auditoria del catalogo de skills..."
 bash "$SKILLS_DOCTOR"
+
+skills_hub_info "Doctor: auditoria del catalogo de agents..."
+bash "$AGENTS_DOCTOR"
+
+skills_hub_info "Doctor: validando manifiestos declarativos..."
+node "$MANIFEST_VALIDATOR"
 
 if [[ "$errors" -ne 0 ]]; then
   skills_hub_info "Doctor detecto errores de configuracion local."

@@ -1,6 +1,6 @@
 # skills-hub
 
-Fuente única de verdad para tus skills de asistentes de IA, pensada para **instalarlas en cualquiera de tus máquinas** desde un único repositorio en GitHub.
+Fuente única de verdad para tus skills y agents de asistentes de IA, pensada para **instalarlas en cualquiera de tus máquinas** desde un único repositorio en GitHub.
 
 Incluye una CLI instalable que copia el catálogo a las apps locales compatibles.
 
@@ -11,6 +11,8 @@ Mantener todas las skills versionadas en un solo repositorio y **distribuirlas a
 - ~/.copilot/skills
 - ~/.claude/skills
 - ~/.agents/skills
+- ~/.claude/agents
+- ~/.agents/agents
 - ~/.config/Code/User/prompts (contenido legacy)
 - OpenCode (config gestionada)
 
@@ -25,8 +27,11 @@ Mantener todas las skills versionadas en un solo repositorio y **distribuirlas a
 - `skills/common`: skills compartidas por todas las plataformas (el caso por defecto).
 - `skills/copilot-only`: skills exclusivas de Copilot/OpenCode (excepción).
 - `skills/claude-only`: skills exclusivas de Claude (excepción).
+- `agents/common`: agents ligeros compartidos que enrutan trabajo hacia skills.
+- `agents/claude-only`, `agents/codex-only`, `agents/opencode-only`: agents específicos de plataforma cuando sean necesarios.
 - `prompts`: prompts globales e instrucciones (contenido copiable legacy).
-- `config/apps.json`: manifiesto de apps detectables, sus rutas y qué fuentes consume cada una.
+- `config/apps.json`: manifiesto de apps detectables, sus rutas y qué fuentes de skills/agents consume cada una.
+- `manifests/`: módulos, componentes y perfiles instalables al estilo ECC para planificación selectiva.
 - `config/sync-map.sh`: mapeos legacy para contenido copiable como `prompts`.
 - `opencode/opencode.managed.json`: fragmento gestionado de `opencode.json` (json-merge).
 - `opencode/AGENTS.md`: bloque gestionado para `.opencode/AGENTS.md`.
@@ -42,7 +47,8 @@ Mantener todas las skills versionadas en un solo repositorio y **distribuirlas a
 pnpm install
 pnpm skills-hub status            # apps detectadas + auditoría del catálogo
 pnpm skills-hub install --dry-run # plan de copia sin tocar disco
-pnpm skills-hub install           # copia las skills a las apps locales
+pnpm skills-hub plan --list-profiles # perfiles declarativos disponibles
+pnpm skills-hub install           # copia skills y agents a las apps locales
 pnpm skills-hub check             # ¿hay drift entre repo y copias?
 ```
 
@@ -55,6 +61,8 @@ Equivalentes directos:
 ./scripts/check.sh
 ./scripts/doctor.sh
 ./scripts/doctor-skills.sh
+./scripts/doctor-agents.sh
+node ./scripts/validate-manifests.mjs
 ./scripts/lint.sh
 ./scripts/import-copilot-skills.sh --dry-run
 ```
@@ -80,6 +88,8 @@ pnpm skills-hub sync    # alias de install
 pnpm skills-hub status  # detección de apps + auditoría del catálogo
 pnpm skills-hub doctor
 pnpm skills-hub doctor-skills
+pnpm skills-hub doctor-agents
+pnpm skills-hub plan --profile minimal
 pnpm skills-hub lint
 pnpm skills-hub check
 ```
@@ -112,13 +122,16 @@ Lee `CONTRIBUTING.md` y valida cambios locales antes de abrir PR:
 - CI ejecuta `./scripts/lint.sh` en cada push y pull request.
 - El objetivo de CI es validar scripts y convenciones del repo sin depender de destinos locales.
 - `./scripts/validate-skills.sh` valida reglas semánticas básicas: límite de 300 líneas por `SKILL.md`, naming no obsoleto y referencias legacy controladas.
-- `./scripts/doctor-skills.sh` audita el catálogo canónico: alineación carpeta/frontmatter, fuentes expuestas por app y colisiones de nombre por plataforma.
+- `./scripts/doctor-skills.sh` audita el catálogo canónico de skills: alineación carpeta/frontmatter, fuentes expuestas por app y colisiones de nombre por plataforma.
+- `./scripts/doctor-agents.sh` audita el catálogo canónico de agents: frontmatter, referencias a skills existentes y exposición por app.
+- `node ./scripts/validate-manifests.mjs` valida módulos, componentes y perfiles instalables.
 
 ## Fuente canónica y modelo de exposición
 
 Este repo es la **fuente canónica** de authoring:
 
 - `skills/` contiene las skills reales
+- `agents/` contiene agents ligeros que enrutan hacia skills
 - `config/apps.json` define qué carpetas fuente expone cada app
 - `config/sync-map.sh` mantiene solo contenido legacy copiable
 
@@ -127,8 +140,9 @@ Las rutas locales de apps (`~/.copilot/skills`, `~/.claude/skills`, `~/.agents/s
 Reglas:
 
 - un nombre de skill canónico por directorio
-- carpeta y frontmatter `name` deben coincidir
-- no duplicar el mismo nombre de skill dentro del conjunto expuesto a una misma app
+- un nombre de agent canónico por fichero
+- carpeta/fichero y frontmatter `name` deben coincidir
+- no duplicar el mismo nombre de skill o agent dentro del conjunto expuesto a una misma app
 - tras renames, actualizar también prompts, config gestionada y referencias
 
 ## Criterio de clasificación
@@ -157,6 +171,14 @@ Excepciones:
 
 - si un repo ya declara otro package manager, la skill debe respetar el repo y explicitarlo
 - ejemplos con `npm` solo son válidos si el contexto depende de tooling o fixtures externos que aún lo requieran
+
+
+### Agents vs skills
+
+- Un **agent** es un rol/persona breve: decide, revisa, coordina y enruta.
+- Una **skill** es el protocolo profundo de una tarea reutilizable.
+- Los agents deben referenciar skills existentes en frontmatter `skills:` y no duplicar el contenido largo de `SKILL.md`.
+- La instalación de agents es selectiva por perfil para evitar context bloat.
 
 ## Contenido legacy copiable
 

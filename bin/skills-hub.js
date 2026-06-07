@@ -11,19 +11,21 @@ const argv = process.argv.slice(2);
 function printHelp() {
   console.log(`skills-hub
 
-CLI del catalogo de skills y su instalacion local por copia.
+CLI del catalogo de skills/agents y su instalacion local por copia.
 
 Uso:
   skills-hub install [--app=<id>] [--dry-run] [--include-missing] [--verbose]
   skills-hub sync    [--app=<id>] [--dry-run] [--include-missing] [--verbose]
   skills-hub status  [--app=<id>] [--include-missing]
+  skills-hub plan    [--profile=<id>|--component=<id>|--list-profiles]
   skills-hub doctor
   skills-hub doctor-skills
+  skills-hub doctor-agents
   skills-hub lint
   skills-hub check
 
 Notas:
-  - install y sync son equivalentes: copian las skills del repo a cada app local.
+  - install y sync son equivalentes: copian skills y agents del repo a cada app local.
   - Las skills se COPIAN (no symlinks) y todo debe vivir en disco local (sin NAS).
   - status/doctor reutilizan la deteccion de doctor.sh.
 `);
@@ -58,8 +60,15 @@ async function main() {
     case "doctor":
       await runRepoScript("doctor.sh", rest);
       return;
+    case "plan":
+    case "install-plan":
+      await runRepoScript("install-plan.mjs", rest);
+      return;
     case "doctor-skills":
       await runRepoScript("doctor-skills.sh", rest);
+      return;
+    case "doctor-agents":
+      await runRepoScript("doctor-agents.sh", rest);
       return;
     case "lint":
       await runRepoScript("lint.sh", rest);

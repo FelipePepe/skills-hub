@@ -120,6 +120,75 @@ done < <(
   ' "$APPS_FILE"
 )
 
+skills_hub_info "Copiando agents a las apps detectadas...$([[ "$DRY_RUN" == true ]] && echo ' [dry-run]')"
+
+# Extrae de apps.json: id<TAB>agentInstallPath<TAB>detectPaths(,)<TAB>agentSources(,)
+# Solo apps con al menos una source de agents.
+while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
+  [[ -n "$app_id" ]] || continue
+  [[ -n "$sources_csv" ]] || continue
+
+  if [[ -n "$APP_FILTER" && "$app_id" != "$APP_FILTER" ]]; then
+    continue
+  fi
+
+  install_path="$(eval echo "$install_path")"
+
+  detected=false
+  IFS=',' read -r -a detect_list <<< "$detect_csv"
+  for dp in "${detect_list[@]}"; do
+    [[ -n "$dp" ]] || continue
+    dp="$(eval echo "$dp")"
+    if [[ -e "$dp" ]]; then detected=true; break; fi
+  done
+
+  if [[ "$detected" == false && "$INCLUDE_MISSING" == false ]]; then
+    skills_hub_info "  $app_id agents: app no detectada, se omite (usa --include-missing para forzar)."
+    continue
+  fi
+
+  skills_hub_assert_local "$install_path" "destino de agents '$app_id'"
+  if [[ ! -d "$install_path" ]]; then
+    if [[ "$DRY_RUN" == true ]]; then
+      echo "PLAN: mkdir -p $install_path"
+    else
+      mkdir -p "$install_path"
+    fi
+  fi
+
+  skills_hub_info "  $app_id agents -> $install_path"
+
+  IFS=',' read -r -a source_list <<< "$sources_csv"
+  for source_dir in "${source_list[@]}"; do
+    [[ -n "$source_dir" ]] || continue
+    abs_source="$ROOT_DIR/$source_dir"
+    [[ -d "$abs_source" ]] || { skills_hub_warn "agent source inexistente, se omite -> $abs_source"; continue; }
+
+    while IFS= read -r -d '' agent_file; do
+      agent_name="$(basename "$agent_file")"
+      [[ "$agent_name" == _* || "$agent_name" == .* ]] && continue
+      if [[ "$DRY_RUN" == true && ! -d "$install_path" ]]; then
+        echo "PLAN: copy $agent_file -> $install_path/$agent_name"
+      else
+        rsync "${rsync_base[@]}" "$agent_file" "$install_path/$agent_name"
+      fi
+    done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -type f -name '*.md' -print0 | sort -z)
+  done
+done < <(
+  node -e '
+    const fs = require("node:fs");
+    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const P = "linux";
+    for (const app of data.apps) {
+      const sources = Array.isArray(app.agentSources) ? app.agentSources.join(",") : "";
+      if (!sources) continue;
+      const install = app.agentInstallPath?.[P] ?? "";
+      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
+      console.log([app.id, install, detect, sources].join("\t"));
+    }
+  ' "$APPS_FILE"
+)
+
 skills_hub_info "Sincronizando contenido copiable legacy (prompts, etc.)..."
 for pair in "${SYNC_PAIRS[@]}"; do
   src_rel="${pair%%::*}"

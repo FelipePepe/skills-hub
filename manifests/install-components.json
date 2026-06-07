@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "components": [
+    {
+      "id": "baseline:skills",
+      "family": "baseline",
+      "description": "Common portable skills.",
+      "modules": [
+        "skills-core"
+      ]
+    },
+    {
+      "id": "baseline:agents",
+      "family": "baseline",
+      "description": "Core lightweight agents.",
+      "modules": [
+        "agents-core"
+      ]
+    },
+    {
+      "id": "workflow:sdd",
+      "family": "workflow",
+      "description": "SDD skills and orchestrator agent.",
+      "modules": [
+        "sdd-skills",
+        "sdd-agents"
+      ]
+    },
+    {
+      "id": "capability:engineering",
+      "family": "capability",
+      "description": "Architecture, review, test, frontend, and database agents.",
+      "modules": [
+        "engineering-agents"
+      ]
+    },
+    {
+      "id": "capability:security",
+      "family": "capability",
+      "description": "Security review agent and supporting skill routing.",
+      "modules": [
+        "security-agents"
+      ]
+    }
+  ]
+}

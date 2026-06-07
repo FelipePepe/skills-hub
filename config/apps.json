@@ -30,7 +30,8 @@
           },
           "strategy": "copy"
         }
-      ]
+      ],
+      "agentSources": []
     },
     {
       "id": "claude",
@@ -62,6 +63,14 @@
           },
           "strategy": "copy"
         }
+      ],
+      "agentInstallPath": {
+        "linux": "~/.claude/agents",
+        "windows": "%USERPROFILE%/.claude/agents"
+      },
+      "agentSources": [
+        "agents/common",
+        "agents/claude-only"
       ]
     },
     {
@@ -83,6 +92,13 @@
       },
       "sources": [
         "skills/common"
+      ],
+      "agentInstallPath": {
+        "linux": "~/.agents/agents",
+        "windows": "%USERPROFILE%/.agents/agents"
+      },
+      "agentSources": [
+        "agents/common"
       ]
     },
     {
@@ -121,7 +137,8 @@
           "strategy": "markdown-managed-block",
           "blockId": "opencode-routing"
         }
-      ]
+      ],
+      "agentSources": []
     }
   ]
 }

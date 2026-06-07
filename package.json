@@ -17,7 +17,11 @@
     "check": "./scripts/check.sh",
     "sync": "./scripts/sync.sh",
     "install:skills": "node ./bin/skills-hub.js install",
-    "status:skills": "node ./bin/skills-hub.js status"
+    "status:skills": "node ./bin/skills-hub.js status",
+    "doctor:agents": "./scripts/doctor-agents.sh",
+    "validate:agents": "node ./scripts/validate-agents.mjs",
+    "validate:manifests": "node ./scripts/validate-manifests.mjs",
+    "install-plan": "node ./scripts/install-plan.mjs"
   },
   "engines": {
     "node": ">=20"
