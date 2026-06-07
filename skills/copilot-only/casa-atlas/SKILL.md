@@ -1,8 +1,9 @@
 ---
 name: casa-atlas
 description: >
-  Añade o actualiza documentación en el vault Obsidian (Atlas/Mente) en la NAS sin SSH manual.
-  Trigger: cuando hay que documentar algo nuevo en el vault: proyecto, servicio, tecnología.
+  Adds or updates documentation in the Obsidian vault (Atlas/Mente) on the NAS without
+  manual SSH. Trigger: when something new needs to be documented in the vault: project,
+  service, technology.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
@@ -14,64 +15,64 @@ metadata:
 
 ## When to Use
 
-- Se acaba de implementar algo nuevo que debe quedar documentado
-- El usuario dice "documenta esto en atlas" o "añade a Atlas"
-- Se crea un nuevo servicio, proyecto o se aprende algo importante
+- Something new was just implemented that needs to be documented
+- The user says "document this in atlas" or "add to Atlas"
+- A new service or project is created, or something important is learned
 
-## Infraestructura
+## Infrastructure
 
-| Dato | Valor |
+| Data | Value |
 |------|-------|
-| NAS montada en | `/mnt/nas/` en maya (192.168.1.55) |
+| NAS mounted at | `/mnt/nas/` on maya (192.168.1.55) |
 | Vault path | `/mnt/nas/Obsidian/` |
 | App | atlas.casa |
 
-## Comando
+## Command
 
 ```bash
-# Desde archivo local (pasar contenido via stdin)
+# From a local file (pass content via stdin)
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa atlas add <type> "<title>" --content "<markdown>"'
 
-# O pasar contenido largo via heredoc
-ssh -o BatchMode=yes felipe@192.168.1.55 'cat > /tmp/nota.md' << 'EOF'
-[contenido markdown]
+# Or pass long content via heredoc
+ssh -o BatchMode=yes felipe@192.168.1.55 'cat > /tmp/note.md' << 'EOF'
+[markdown content]
 EOF
-ssh -o BatchMode=yes felipe@192.168.1.55 'casa atlas add <type> "<title>" --file /tmp/nota.md'
+ssh -o BatchMode=yes felipe@192.168.1.55 'casa atlas add <type> "<title>" --file /tmp/note.md'
 ```
 
-## Tipos válidos
+## Valid Types
 
-| Tipo | Ruta destino |
-|------|-------------|
-| `proyecto` | `/mnt/nas/Obsidian/Proyectos/<title>.md` |
+| Type | Destination path |
+|------|----------------|
+| `project` | `/mnt/nas/Obsidian/Projects/<title>.md` |
 | `setup` | `/mnt/nas/Obsidian/Setup/<title>.md` |
 | `stack` | `/mnt/nas/Obsidian/Stack/<title>.md` |
 
-## Importante: wikilinks bidireccionales
+## Important: Bidirectional Wikilinks
 
-Todo documento debe cumplir:
-1. Al menos 2 wikilinks `[[NombreNota]]` a otros documentos del vault
-2. Sección `## Ver también` al final
-3. Si es `proyecto`: enlazar tecnologías del stack usadas
-4. Si es `stack`: incluir `## Proyectos que lo usan`
+Every document must meet:
+1. At least 2 wikilinks `[[NoteName]]` to other vault documents
+2. `## See Also` section at the end
+3. If `project`: link to the stack technologies used
+4. If `stack`: include `## Projects Using It`
 
-Ver skill `atlas-docs` para templates completos.
+See skill `atlas-docs` for complete templates.
 
-## Alternativa directa (para contenido largo)
+## Direct Alternative (for long content)
 
-Si el contenido es muy largo, escribir directamente via SSH a maya:
+If the content is very long, write directly via SSH to maya:
 
 ```bash
-ssh -o BatchMode=yes felipe@192.168.1.55 'cat > /mnt/nas/Obsidian/Proyectos/mi-proyecto.md' << 'EOF'
-# Mi Proyecto
-...contenido...
+ssh -o BatchMode=yes felipe@192.168.1.55 'cat > /mnt/nas/Obsidian/Projects/my-project.md' << 'EOF'
+# My Project
+...content...
 EOF
 ```
 
-## Verificar
+## Verify
 
 ```bash
-ssh -o BatchMode=yes felipe@192.168.1.55 'ls /mnt/nas/Obsidian/Proyectos/'
+ssh -o BatchMode=yes felipe@192.168.1.55 'ls /mnt/nas/Obsidian/Projects/'
 ```
 
 ## Model routing hints

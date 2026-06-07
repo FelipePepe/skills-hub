@@ -1,8 +1,8 @@
 ---
 name: casa-domain
 description: >
-  Gestiona dominios .casa en la intranet: nginx en maya, DNS en pihole1+pihole2, y card en portal.
-  Trigger: cuando el usuario quiere añadir, eliminar o listar un dominio .casa.
+  Manages .casa domains on the intranet: nginx on maya, DNS on pihole1+pihole2, and
+  card in portal. Trigger: when the user wants to add, remove, or list a .casa domain.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
@@ -14,74 +14,74 @@ metadata:
 
 ## When to Use
 
-- El usuario dice "añade el dominio X.casa" o "crea una URL para X"
-- El usuario quiere exponer un servicio nuevo en la intranet con un dominio .casa
-- El usuario quiere eliminar un dominio .casa
-- El usuario pregunta qué dominios .casa existen
+- The user says "add domain X.casa" or "create a URL for X"
+- The user wants to expose a new service on the intranet with a .casa domain
+- The user wants to remove a .casa domain
+- The user asks what .casa domains exist
 
-## Infraestructura
+## Infrastructure
 
-| Componente | Máquina | IP |
+| Component | Machine | IP |
 |-----------|---------|-----|
 | CLI `casa` | maya | 192.168.1.55 |
 | nginx | maya | 192.168.1.55 |
 | pihole1 DNS | pihole1 | 192.168.1.53 |
 | pihole2 DNS | pihole2 | 192.168.1.54 |
-| portal.casa | NAS vía maya | /mnt/nas/webs/portal.casa/index.html |
+| portal.casa | NAS via maya | /mnt/nas/webs/portal.casa/index.html |
 
-## Comandos
+## Commands
 
 ```bash
-# Añadir dominio con nginx reverse proxy y card en portal
+# Add domain with nginx reverse proxy and portal card
 ssh -o BatchMode=yes felipe@192.168.1.55 \
   'casa domain add <domain> <ip> --port <port> --portal --icon <emoji> --desc "<desc>" --machine <hostname>'
 
-# Añadir solo DNS (sin nginx ni portal)
+# Add DNS only (no nginx or portal)
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain add <domain> <ip>'
 
-# Eliminar dominio
+# Remove domain
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain remove <domain>'
 
-# Listar todos los dominios .casa
+# List all .casa domains
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain list'
 ```
 
-## Opciones de `domain add`
+## `domain add` Options
 
-| Flag | Descripción | Ejemplo |
+| Flag | Description | Example |
 |------|-------------|---------|
-| `--port <n>` | Puerto del servicio en maya → crea nginx reverse proxy | `--port 3000` |
-| `--portal` | Añade card al portal.casa | |
-| `--icon <emoji>` | Icono de la card (default: 🌐) | `--icon 📊` |
-| `--desc <text>` | Descripción en la card del portal | `--desc "Mi servicio"` |
-| `--machine <name>` | Badge en la card (default: maya/pihole2) | `--machine maya` |
+| `--port <n>` | Service port on maya → creates nginx reverse proxy | `--port 3000` |
+| `--portal` | Adds card to portal.casa | |
+| `--icon <emoji>` | Card icon (default: 🌐) | `--icon 📊` |
+| `--desc <text>` | Description on the portal card | `--desc "My service"` |
+| `--machine <name>` | Badge on the card (default: maya/pihole2) | `--machine maya` |
 
-## Ejemplos reales
+## Real Examples
 
 ```bash
-# Añadir Grafana en maya puerto 3000 con portal
+# Add Grafana on maya port 3000 with portal
 ssh -o BatchMode=yes felipe@192.168.1.55 \
-  'casa domain add grafana.casa 192.168.1.55 --port 3000 --portal --icon 📊 --desc "Métricas y dashboards" --machine maya'
+  'casa domain add grafana.casa 192.168.1.55 --port 3000 --portal --icon 📊 --desc "Metrics and dashboards" --machine maya'
 
-# Añadir solo DNS (servicio en otra máquina con su propio nginx)
-ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain add nuevo.casa 192.168.1.54'
+# Add DNS only (service on another machine with its own nginx)
+ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain add new.casa 192.168.1.54'
 
-# Eliminar
+# Remove
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain remove grafana.casa'
 ```
 
-## Lo que hace internamente
+## What It Does Internally
 
-1. Crea `/etc/nginx/sites-available/<domain>` en maya + symlink a sites-enabled + reload nginx
-2. Añade `address=/<domain>/<ip>` en `/etc/dnsmasq.d/local.conf` en pihole1 Y pihole2 via SSH
-3. Reinicia pihole-FTL en ambos piholes
-4. Si `--portal`: inserta card en Servicios + actualiza badge count en portal.casa HTML
+1. Creates `/etc/nginx/sites-available/<domain>` on maya + symlink to sites-enabled + nginx reload
+2. Adds `address=/<domain>/<ip>` to `/etc/dnsmasq.d/local.conf` on pihole1 AND pihole2 via SSH
+3. Restarts pihole-FTL on both piholes
+4. If `--portal`: inserts card in Services + updates badge count in portal.casa HTML
 
-## Verificar resultado
+## Verify Result
 
 ```bash
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain list'
-# Debe aparecer el nuevo dominio
+# The new domain should appear
 ```
 
 ## Model routing hints

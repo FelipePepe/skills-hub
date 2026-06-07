@@ -1,94 +1,93 @@
 ---
 name: project-workflow
 description: >
-  Flujo de trabajo completo para crear y desplegar proyectos en la intranet.
-  Desde cero hasta producción: SDD + GitFlow + Infisical + Deploy + DNS + Atlas.
-  Trigger: cuando el usuario quiere empezar un proyecto nuevo o cuando pregunta
-  cómo trabajamos.
+  Complete workflow for creating and deploying projects on the intranet.
+  From zero to production: SDD + GitFlow + Infisical + Deploy + DNS + Atlas.
+  Trigger: when the user wants to start a new project or asks how we work.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
   version: "1.0"
 ---
 
-## Flujo Completo
+## Complete Flow
 
 ```
-FASE 1 — ARRANQUE
-  casa project init <nombre> [--secrets] [--github] [--template node|angular]
+PHASE 1 — STARTUP
+  casa project init <name> [--secrets] [--github] [--template node|angular]
 
-FASE 2 — DISEÑO
-  /sdd-new <nombre>   →  proposal → spec → design → tasks
+PHASE 2 — DESIGN
+  /sdd-new <name>   →  proposal → spec → design → tasks
 
-FASE 3 — DESARROLLO
+PHASE 3 — DEVELOPMENT
   GitFlow (`feature/*`, `release/*`, `hotfix/*`) + conventional commits
-  /sdd-apply          →  implementar tasks
-  casa atlas add      →  documentar decisiones DURANTE el desarrollo
+  /sdd-apply        →  implement tasks
+  casa atlas add    →  document decisions DURING development
 
-FASE 4 — VERIFICACIÓN
-  /sdd-verify         →  validar contra spec
-  tests locales
-  smoke test en staging local (docker compose up en dev)
+PHASE 4 — VERIFICATION
+  /sdd-verify       →  validate against spec
+  local tests
+  smoke test in local staging (docker compose up in dev)
 
-FASE 5 — RELEASE
-  PR develop → main + code review (aunque sea self-review)
-  git tag semántico (v1.0.0) + CHANGELOG
+PHASE 5 — RELEASE
+  PR develop → main + code review (even if self-review)
+  semantic tag (v1.0.0) + CHANGELOG
 
-FASE 6 — PRODUCCIÓN
-  casa deploy <nombre>
+PHASE 6 — PRODUCTION
+  casa deploy <name>
   health check: curl http://localhost:<port>/health
-  casa domain add <nombre>.casa <ip> --port <n> --portal --icon <emoji> --desc "<desc>"
+  casa domain add <name>.casa <ip> --port <n> --portal --icon <emoji> --desc "<desc>"
 
-FASE 7 — CIERRE
-  casa atlas add proyecto "<nombre>" --file nota.md   (actualizar con URL prod)
-  engram mem_save (arquitectura, decisiones, gotchas)
-  /sdd-archive <nombre>
+PHASE 7 — CLOSE
+  casa atlas add project "<name>" --file note.md   (update with prod URL)
+  engram mem_save (architecture, decisions, gotchas)
+  /sdd-archive <name>
 ```
 
-## Fase 1 — `casa project init` en detalle
+## Phase 1 — `casa project init` in Detail
 
 ```bash
-# Mínimo (solo git + directorio deploy)
-ssh -o BatchMode=yes felipe@192.168.1.55 'casa project init <nombre>'
+# Minimum (git + deploy directory only)
+ssh -o BatchMode=yes felipe@192.168.1.55 'casa project init <name>'
 
-# Con vault Infisical (si el proyecto usa secretos)
-ssh -o BatchMode=yes felipe@192.168.1.55 'casa project init <nombre> --secrets --envs dev,prod'
+# With Infisical vault (if the project uses secrets)
+ssh -o BatchMode=yes felipe@192.168.1.55 'casa project init <name> --secrets --envs dev,prod'
 
-# Con repo GitHub privado
-ssh -o BatchMode=yes felipe@192.168.1.55 'casa project init <nombre> --secrets --github'
+# With private GitHub repo
+ssh -o BatchMode=yes felipe@192.168.1.55 'casa project init <name> --secrets --github'
 ```
 
-Esto crea:
-- `/home/felipe/<nombre>/` — directorio de deploy en maya
-- Repo git con branches `main` y `develop`
-- (opt) Repo privado en GitHub
-- (opt) Proyecto en Infisical con environments y Machine Identity
+This creates:
+- `/home/felipe/<name>/` — deploy directory on maya
+- Git repo with `main` and `develop` branches
+- (opt) Private GitHub repo
+- (opt) Infisical project with environments and Machine Identity
 
-## Fase 2 — SDD
+## Phase 2 — SDD
 
 ```
-/sdd-new <nombre>        ← arranca el ciclo completo
-/sdd-continue <nombre>   ← continúa la siguiente fase
-/sdd-apply <nombre>      ← implementa los tasks
-/sdd-verify <nombre>     ← valida contra spec
-/sdd-archive <nombre>    ← cierra el cambio
+/sdd-new <name>        ← starts the full cycle
+/sdd-continue <name>   ← continues to the next phase
+/sdd-apply <name>      ← implements the tasks
+/sdd-verify <name>     ← validates against spec
+/sdd-archive <name>    ← closes the change
 ```
 
-## Fase 3 — GitFlow
+## Phase 3 — GitFlow
 
 ```bash
 # Feature
 git checkout develop
 git pull
-git checkout -b feature/<nombre>
+git checkout -b feature/<name>
 
-# Commits convencionales
+# Conventional commits
 git commit -m "feat: add login endpoint"
 git commit -m "fix: handle expired JWT"
 git commit -m "chore: update dependencies"
 
 # PR feature → develop
-gh pr create --base develop --title "feat: <descripción>"
+gh pr create --base develop --title "feat: <description>"
 
 # Release
 git checkout develop
@@ -96,99 +95,99 @@ git pull
 git checkout -b release/v1.0.0
 gh pr create --base main --title "release: v1.0.0"
 
-# Tras merge a main
+# After merge to main
 git tag v1.0.0
 git checkout develop && git merge --no-ff main
 ```
 
-## Fase 3 — Infisical (si `--secrets`)
+## Phase 3 — Infisical (if `--secrets`)
 
 ```bash
-# Output de casa project init --secrets:
+# Output of casa project init --secrets:
 # Client ID:     abc123
-# Client Secret: xyz789   ← solo en bootstrap .env
+# Client Secret: xyz789   ← bootstrap .env only
 
-# .env mínimo del proyecto (SOLO credenciales Infisical)
+# Minimal project .env (ONLY Infisical credentials)
 INFISICAL_CLIENT_ID=abc123
 INFISICAL_CLIENT_SECRET=xyz789
 INFISICAL_SITE_URL=http://infisical.casa
 
-# Todos los demás secretos van DIRECTAMENTE en infisical.casa
-# No hay más variables en .env
+# All other secrets go DIRECTLY into infisical.casa
+# No more variables in .env
 ```
 
-Ver skill `infisical-vault` para el patrón de código.
+See skill `infisical-vault` for the code pattern.
 
-## Fase 5 — Release checklist
+## Phase 5 — Release Checklist
 
-- [ ] Todos los tests pasan
-- [ ] /sdd-verify verde
-- [ ] PR aprobado (aunque sea self-review)
-- [ ] CHANGELOG actualizado
-- [ ] Tag semántico creado
-- [ ] `develop` actualizado con los cambios del release
+- [ ] All tests pass
+- [ ] /sdd-verify green
+- [ ] PR approved (even if self-review)
+- [ ] CHANGELOG updated
+- [ ] Semantic tag created
+- [ ] `develop` updated with release changes
 
-## Fase 6 — Deploy
+## Phase 6 — Deploy
 
 ```bash
 # Deploy
-ssh -o BatchMode=yes felipe@192.168.1.55 'casa deploy <nombre>'
+ssh -o BatchMode=yes felipe@192.168.1.55 'casa deploy <name>'
 
-# Health check post-deploy
+# Post-deploy health check
 ssh -o BatchMode=yes felipe@192.168.1.55 'curl -sf http://localhost:<port>/health || echo FAIL'
 
-# Añadir dominio + portal (solo cuando el health check pasa)
+# Add domain + portal (only when health check passes)
 ssh -o BatchMode=yes felipe@192.168.1.55 \
-  'casa domain add <nombre>.casa 192.168.1.55 --port <port> --portal \
-   --icon <emoji> --desc "<descripción>" --machine maya'
+  'casa domain add <name>.casa 192.168.1.55 --port <port> --portal \
+   --icon <emoji> --desc "<description>" --machine maya'
 
-# Verificar DNS desde la red
-ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain list | grep <nombre>'
+# Verify DNS from the network
+ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain list | grep <name>'
 ```
 
 ## Rollback
 
 ```bash
-# Si el deploy falla:
+# If the deploy fails:
 ssh -o BatchMode=yes felipe@192.168.1.55 \
-  'cd /home/felipe/<nombre> && git checkout <tag-anterior> && docker compose up -d'
+  'cd /home/felipe/<name> && git checkout <previous-tag> && docker compose up -d'
 ```
 
-## Fase 7 — Documentación cierre
+## Phase 7 — Close Documentation
 
-### Atlas (actualizar nota con URL prod)
+### Atlas (update note with prod URL)
 ```bash
 ssh -o BatchMode=yes felipe@192.168.1.55 \
-  "sed -i 's|## Deploy|## URL Producción\n\`http://<nombre>.casa\`\n\n## Deploy|' \
-  /mnt/nas/Obsidian/Proyectos/<nombre>.md"
+  "sed -i 's|## Deploy|## Production URL\n\`http://<name>.casa\`\n\n## Deploy|' \
+  /mnt/nas/Obsidian/Projects/<name>.md"
 ```
 
 ### Engram
 ```
-mem_save title: "Deployed <nombre> to production"
+mem_save title: "Deployed <name> to production"
 type: architecture
 content: What/Why/Where/Learned
 ```
 
-## Reglas de oro
+## Golden Rules
 
-1. **Vault ANTES que código** — nunca `.env` con datos reales en el repo
-2. **SDD ANTES de implementar** — spec y diseño primero, código después
-3. **Documentar DURANTE el desarrollo** — no al final
-4. **Health check ANTES del dominio** — no añadir al portal si el servicio falla
-5. **Conventional commits siempre** — feat/fix/chore/docs/refactor/test
+1. **Vault BEFORE code** — never `.env` with real data in the repo
+2. **SDD BEFORE implementing** — spec and design first, code after
+3. **Document DURING development** — not at the end
+4. **Health check BEFORE the domain** — do not add to the portal if the service fails
+5. **Conventional commits always** — feat/fix/chore/docs/refactor/test
 
-## Herramientas de referencia
+## Reference Tools
 
-| Herramienta | Skill |
-|-------------|-------|
-| Proyecto completo | `project-workflow` (este) |
-| Dominios .casa | `casa-domain` |
-| Vault Infisical | `casa-vault` + `infisical-vault` |
-| Deploy producción | `casa-deploy` |
-| Documentación Atlas | `casa-atlas` + `atlas-docs` |
-| SDD completo | skills `sdd-*` |
-| GitFlow | skill `gitflow` |
+| Tool | Skill |
+|------|-------|
+| Full project | `project-workflow` (this) |
+| .casa domains | `casa-domain` |
+| Infisical vault | `casa-vault` + `infisical-vault` |
+| Production deploy | `casa-deploy` |
+| Atlas documentation | `casa-atlas` + `atlas-docs` |
+| Full SDD | `sdd-*` skills |
+| GitFlow | `gitflow` skill |
 
 ## Model routing hints
 

@@ -1,42 +1,42 @@
 ---
 name: poc-init
 description: >
-  Inicializa un nuevo proyecto PoC con el stack estándar: Angular 21 +
-  Express/TypeScript + Drizzle ORM + OpenAPI + GitFlow + CLAUDE.md + estructura
-  lista para deploy-casa. Trigger: "crea un nuevo poc", "nuevo proyecto",
-  "inicializa el proyecto X", "scaffolding para X".
+  Initializes a new PoC project with the standard stack: Angular 21 +
+  Express/TypeScript + Drizzle ORM + OpenAPI + GitFlow + CLAUDE.md + structure
+  ready for deploy-casa. Trigger: "create a new poc", "new project",
+  "initialize project X", "scaffolding for X".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
   version: "1.1"
 ---
 
-## Cuándo usar
+## When to Use
 
-- El usuario quiere arrancar un proyecto nuevo desde cero.
-- Pide un PoC, scaffold o proyecto estándar para la intranet `.casa`.
-- Hay que crear base frontend+backend sin reinventar estructura.
+- The user wants to start a new project from scratch.
+- They ask for a PoC, scaffold, or standard project for the `.casa` intranet.
+- A frontend+backend base is needed without reinventing structure.
 
-## Stack estándar
+## Standard Stack
 
-| Capa | Tecnología |
-|------|------------|
+| Layer | Technology |
+|-------|------------|
 | Frontend | Angular 21 + Angular Material/CDK |
-| Estado | Signals + RxJS |
+| State | Signals + RxJS |
 | Backend | Express + TypeScript |
 | ORM/DB | Drizzle ORM + PostgreSQL |
 | API | OpenAPI 3.0 |
 | Tests | Vitest |
-| Calidad | ESLint + Prettier + Lefthook |
-| Deploy | compatible con `deploy-casa` |
+| Quality | ESLint + Prettier + Lefthook |
+| Deploy | compatible with `deploy-casa` |
 
-## Protocolo rápido
+## Quick Protocol
 
-1. Confirmar nombre del proyecto, dominio `.casa` deseado y si necesita auth.
-2. Crear repo con estructura:
+1. Confirm project name, desired `.casa` domain, and whether it needs auth.
+2. Create the repo with this structure:
 
 ```text
-<proyecto>/
+<project>/
 ├── backend/
 ├── frontend/
 ├── .github/copilot-instructions.md
@@ -45,7 +45,7 @@ metadata:
 └── start-dev.sh
 ```
 
-3. Inicializar GitFlow:
+3. Initialize GitFlow:
 
 ```bash
 git init
@@ -54,20 +54,20 @@ git checkout -b develop
 git checkout -b feature/init
 ```
 
-4. Generar `.env.example`, nunca secrets reales.
-5. Añadir OpenAPI, tests mínimos y scripts de dev/build/test.
-6. Validar que backend y frontend arrancan antes de darlo por terminado.
+4. Generate `.env.example`, never real secrets.
+5. Add OpenAPI, minimum tests, and dev/build/test scripts.
+6. Validate that both backend and frontend start before marking it complete.
 
-## Referencia detallada
+## Detailed Reference
 
-Para árbol completo de carpetas, ejemplos de `package.json`, OpenAPI, Drizzle, Angular, scripts y checklist final, cargar:
+For the full folder tree, `package.json` examples, OpenAPI, Drizzle, Angular, scripts, and final checklist, load:
 
 - `references/full-protocol.md`
 
-## Reglas
+## Rules
 
-- No crear secrets reales en `.env`; usar `.env.example` o Infisical si aplica.
-- Mantener TypeScript strict en backend y frontend.
-- Usar controladores funcionales Express, no clases, salvo que el proyecto pida otra cosa.
-- Cada PoC debe salir con tests mínimos y `start-dev.sh` funcional.
-- Si el usuario quiere algo más pequeño que el stack estándar, reducir alcance explícitamente.
+- Do not create real secrets in `.env`; use `.env.example` or Infisical if applicable.
+- Keep TypeScript strict in both backend and frontend.
+- Use functional Express controllers, not classes, unless the project requires otherwise.
+- Every PoC must ship with minimum tests and a working `start-dev.sh`.
+- If the user wants something smaller than the standard stack, explicitly reduce the scope.

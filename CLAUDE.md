@@ -68,6 +68,7 @@ Direct script invocation:
 - `SYNC_PAIRS` format: `"<rel_path>::<abs_path>"` — destination must be absolute
 - Naming: use `atlas`/`atlas.casa`, never `mente`/`mente.casa`
 - Naming: use `sdd-propose` as canonical, `sdd-proposal` is legacy alias only
+- ONLY use `pnpm` — `npm` and `npx` are FORBIDDEN. Use `pnpm` and `pnpm dlx` instead. This applies to skill examples, scripts, and all commands in this repo.
 - Use `pnpm` in JS/TS skill examples; document `minimumReleaseAge: 10080` for bootstrap/setup skills
 - Default placement for a skill is `skills/common` (consumed by all apps); use `copilot-only`/`claude-only` only when it truly depends on that platform
 - Skills are installed by COPY (rsync), never symlinks; after editing a skill, re-run `pnpm skills-hub sync` to propagate
