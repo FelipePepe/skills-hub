@@ -1,10 +1,10 @@
 ---
 name: trello-api-client
 description: >
-  CLI para gestionar el Trello clone de la intranet .CASA (boards, listas, cards,
-  custom fields) y su integración con SDD, Atlas y Portal.
-  Trigger: "trello board", "trello card", "trello list", "crear tablero trello",
-  "move card", "add card", "trello new", "mover tarjeta".
+  CLI to manage the .CASA intranet Trello clone (boards, lists, cards, custom fields)
+  and its integration with SDD, Atlas, and Portal.
+  Trigger: "trello board", "trello card", "trello list", "create trello board",
+  "move card", "add card", "trello new", "move card".
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
@@ -13,64 +13,64 @@ metadata:
 
 ## When to Use
 
-Usar cuando se gestione el clon de Trello de la intranet `.CASA`: crear/mover boards,
-listas o cards, definir custom fields, o sincronizar el ciclo SDD con un tablero.
+Use when managing the intranet `.CASA` Trello clone: create/move boards, lists or cards,
+define custom fields, or sync the SDD cycle with a board.
 
 ## Scope Guard
 
-Skill **environment-bound**: asume infraestructura local concreta y NO es portable.
+Skill **environment-bound**: assumes specific local infrastructure and is NOT portable.
 
-- Backend nativo (systemd `poc-trello`) en **maya (192.168.1.55)**, puerto **3002**.
-- Requiere el binario `trello` autenticado (`trello login`) con token en `~/.trello/`.
-- Depende de PostgreSQL nativa (`poc_trello`) y nginx (`trello.casa`).
+- Native backend (systemd `poc-trello`) on **maya (192.168.1.55)**, port **3002**.
+- Requires the `trello` binary authenticated (`trello login`) with token in `~/.trello/`.
+- Depends on native PostgreSQL (`poc_trello`) and nginx (`trello.casa`).
 
-Fuera de ese entorno, esta skill no aplica.
+Outside that environment, this skill does not apply.
 
-## Servicio
+## Service
 
 ```bash
-sudo systemctl status poc-trello       # estado (🟢 LISTEN en :3002, nativo, NO Docker)
-sudo journalctl -u poc-trello -f       # logs en tiempo real
+sudo systemctl status poc-trello       # status (🟢 LISTEN on :3002, native, NOT Docker)
+sudo journalctl -u poc-trello -f       # real-time logs
 ```
 
 ## Quick Start
 
 ```bash
-trello login                                              # 1. autenticar
-trello board create "Mi Proyecto" --desc "Desarrollo"     # 2. crear board
-trello list create <board-id> "In Progress"              # 3. crear columna
-trello card create <list-id> "Implementar algo"          # 4. crear card
-trello card move-to <card-id> --column "In Progress"     # 5. mover card
+trello login                                              # 1. authenticate
+trello board create "My Project" --desc "Development"     # 2. create board
+trello list create <board-id> "In Progress"              # 3. create column
+trello card create <list-id> "Implement something"       # 4. create card
+trello card move-to <card-id> --column "In Progress"     # 5. move card
 ```
 
-## Referencias
+## References
 
-| Archivo | Contenido |
-|---------|-----------|
-| [`references/commands.md`](references/commands.md) | Todos los comandos CLI (auth, boards, lists, cards, fields, integraciones) + config |
-| [`references/api-endpoints.md`](references/api-endpoints.md) | Endpoints REST, bodies y códigos de error |
-| [`references/models.md`](references/models.md) | Modelos de datos (Board, Card, CustomField…) |
-| [`references/architecture.md`](references/architecture.md) | Servicio systemd, nginx, PostgreSQL, env, diagnóstico |
-| [`references/sdd-integration.md`](references/sdd-integration.md) | Mapeo de fases SDD ↔ columnas y reglas de sincronización |
-| [`references/examples.md`](references/examples.md) | Flujos completos (SDD y manual) |
+| File | Content |
+|------|---------|
+| [`references/commands.md`](references/commands.md) | All CLI commands (auth, boards, lists, cards, fields, integrations) + config |
+| [`references/api-endpoints.md`](references/api-endpoints.md) | REST endpoints, bodies and error codes |
+| [`references/models.md`](references/models.md) | Data models (Board, Card, CustomField…) |
+| [`references/architecture.md`](references/architecture.md) | systemd service, nginx, PostgreSQL, env, diagnostics |
+| [`references/sdd-integration.md`](references/sdd-integration.md) | SDD phases ↔ columns mapping and sync rules |
+| [`references/examples.md`](references/examples.md) | Complete flows (SDD and manual) |
 
-## Troubleshooting Rápido
+## Quick Troubleshooting
 
-| Problema | Comando |
-|----------|---------|
-| Servicio caído | `sudo systemctl restart poc-trello` |
-| Ver logs | `sudo journalctl -u poc-trello -n 50` |
-| Puerto ocupado | `sudo ss -tlnp \| grep 3002` |
+| Problem | Command |
+|---------|---------|
+| Service down | `sudo systemctl restart poc-trello` |
+| View logs | `sudo journalctl -u poc-trello -n 50` |
+| Port occupied | `sudo ss -tlnp \| grep 3002` |
 | API 404 | `curl http://localhost:3002/health` |
-| Nginx falló | `sudo nginx -t && sudo systemctl reload nginx` |
+| Nginx failed | `sudo nginx -t && sudo systemctl reload nginx` |
 
-Detalle ampliado en [`references/architecture.md`](references/architecture.md#troubleshooting).
+Extended detail in [`references/architecture.md`](references/architecture.md#troubleshooting).
 
-## Referencias del Sistema
+## System References
 
 - **Swagger UI:** http://localhost:3002/api-docs
 - **OpenAPI:** `/mnt/nas/sources/pocs/poc-trello/backend/src/openapi/openapi.yaml`
-- **Código:** `/mnt/nas/sources/pocs/poc-trello/`
+- **Code:** `/mnt/nas/sources/pocs/poc-trello/`
 - **Service:** `/etc/systemd/system/poc-trello.service`
 
 ## Model routing hints

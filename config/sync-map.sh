@@ -16,4 +16,5 @@ esac
 # shellcheck disable=SC2034
 SYNC_PAIRS=(
   "prompts::${_VSCODE_USER_DIR}/prompts"
+  "output-styles::${HOME}/.claude/output-styles"
 )
