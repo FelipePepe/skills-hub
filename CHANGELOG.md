@@ -15,6 +15,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Comando `copilot-credits` registrado en el campo `bin` de `package.json`.
 - Sección `## Análisis de créditos de Copilot` en `README.md` con referencia de uso, ejemplo de salida y explicación de la fuente de datos.
 
+
 ## [2.1.0] - 2026-06-07
 
 ### Añadido
