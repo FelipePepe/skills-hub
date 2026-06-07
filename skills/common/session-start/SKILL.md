@@ -58,13 +58,9 @@ No headers, no bullets, no explanation. Omit PENDING if none.
 
 ## Critical Rules
 
-- **Never skip any step**, even for "quick" requests
-- **Step 2 (GitFlow check) must happen before the first file edit**, not after
-- **Step 3 (SDD check) must happen before implementing ANY new feature or phase**
-- If the project has no git repo, initializing git IS part of the workflow — do it before coding
-- Do NOT start implementing a feature without an active SDD change unless the user explicitly overrides
-- Do NOT block the user waiting — if engram has nothing relevant, move on immediately
-- At session end: run `bash ~/.copilot/hooks/copilot/session-end.sh` and call `engram-mem_session_summary` + `engram-mem_session_end`
+- **Never skip any step**, even for quick requests
+- Step 2 is the gate — no file edit before GitFlow check passes
+- Engram unavailability is not a blocker — skip Step 4 gracefully and continue
 
 ## Output contract
 
