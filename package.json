@@ -7,7 +7,8 @@
   "type": "module",
   "packageManager": "pnpm@10.33.2",
   "bin": {
-    "skills-hub": "./bin/skills-hub.js"
+    "skills-hub": "./bin/skills-hub.js",
+    "copilot-credits": "./bin/copilot-credits.js"
   },
   "scripts": {
     "skills-hub": "node ./bin/skills-hub.js",
