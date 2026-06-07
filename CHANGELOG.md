@@ -17,6 +17,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Skills de cumplimiento normativo europeo: `eu-ai-act` y `eu-gdpr` en `skills/common` (#19).
 - Archivos de comportamiento versionados (`behavior/claude/CLAUDE.md`, `behavior/copilot/copilot-instructions.md`) con tabla de auto-carga de skills completa (#20).
 - `scripts/install-behavior.sh`: instalador de archivos de comportamiento (copia segura sin `--delete`) integrado en el pipeline de sync (#20).
+- `config/model-map.json`: configuración de scheduling de modelos según VRAM disponible.
+- `skills/skills-manifest.json`: registro canónico de skills.
+- `scripts/validate-skill-system.sh`: script de validación del sistema de skills en 7 fases.
 
 ### Cambiado
 
