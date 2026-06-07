@@ -18,24 +18,15 @@ Your job is to run tests, diagnose failures, and identify coverage gaps.
 ## Process
 
 ### 1. Detect the test stack
-```bash
-# View available scripts
-cat package.json | grep -A 20 '"scripts"'
 
-# Find vitest config
-ls vitest.config.* 2>/dev/null || cat vite.config.ts 2>/dev/null | grep -A 10 test
-```
+Read `package.json` scripts section; locate vitest config (`vitest.config.*` or `vite.config.ts`).
 
 ### 2. Run tests
+
 ```bash
-# Unit tests
-pnpm test --run 2>&1 | tail -50
-
-# With coverage
-pnpm test --run --coverage 2>&1 | tail -80
-
-# Specific file
-pnpm test --run src/users/users.service.test.ts 2>&1
+pnpm test --run 2>&1 | tail -50                            # unit
+pnpm test --run --coverage 2>&1 | tail -80                 # with coverage
+pnpm test --run {file} 2>&1                                # specific file
 ```
 
 ### 3. Diagnose failures

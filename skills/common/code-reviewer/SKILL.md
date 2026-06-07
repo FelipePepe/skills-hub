@@ -30,31 +30,15 @@ git --no-pager diff --name-only HEAD
 
 ### 2. Security scan
 
-Actively look for:
-- [ ] Hardcoded secrets or credentials (look for: `key`, `secret`, `token`, `password`, `Bearer`)
-- [ ] SQL/command injection — unsanitized inputs
-- [ ] Path traversal — `../` without validation, `path.join` without `path.resolve`
-- [ ] `eval()` or `Function()` with user input
-- [ ] Overly permissive CORS (`*` in production)
-- [ ] Missing security headers
-- [ ] Skipped or inconsistent auth checks
-- [ ] Dependencies with known vulnerabilities
+Hardcoded secrets (`key`, `secret`, `token`, `password`, `Bearer`), SQL/command injection (unsanitized inputs), path traversal (`../` without `path.resolve`), `eval()`/`Function()` with user input, overly permissive CORS (`*`), missing security headers, skipped auth checks, vulnerable dependencies.
 
 ### 3. Performance scan
 
-- [ ] N+1 queries — loops with DB calls inside
-- [ ] Queries without indexes on frequently filtered/sorted fields
-- [ ] Missing `await` causing race conditions
-- [ ] Event loop blocking — heavy synchronous operations without offloading
-- [ ] Memory leaks — event listeners without cleanup, closures capturing large objects
-- [ ] Repeated computation that should be cached
+N+1 queries (DB calls inside loops), unindexed frequently-filtered fields, missing `await` (race conditions), synchronous event-loop blocking, memory leaks (listeners without cleanup), repeated computation without caching.
 
 ### 4. Correctness
 
-- [ ] Unhandled edge cases (null, undefined, empty array, 0)
-- [ ] Incomplete error handling — errors silenced with `catch(e) {}`
-- [ ] Race conditions in async code
-- [ ] Incorrect types or `any` hiding errors
+Unhandled edge cases (null, empty array, 0), silenced errors (`catch(e) {}`), async race conditions, `any` hiding type errors.
 
 ## Output contract
 
@@ -63,7 +47,7 @@ VERDICT:{approve|request_changes|discuss}
 CRITICAL:{n} IMPORTANT:{n} MINOR:{n}
 [file:line] {severity}: {problem} — {fix}
 ```
-One finding per line. Omit severity sections with zero findings. No headers, no prose outside this format.
+One finding per line. Max 5 findings — report the most critical first. Omit sections with zero findings. No headers, no prose outside this format.
 
 ## Rules
 

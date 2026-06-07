@@ -60,12 +60,8 @@ This marks the session as completed and releases any tracked resources.
 
 ## Critical Rules
 
-- **Never skip Step 1** — the hook output provides essential git context for the summary
-- **Never skip Step 2** — the summary is what preserves work across sessions
-- **Never skip Step 3** — the session must be closed cleanly
-- Always include the `🔲` items for work carried over to the next session
-- If the project has no git repo, note it explicitly in the summary
-- Do not block the user — if there is no work to summarize, still close the session
+- Always include `🔲` items for work carried over to the next session
+- Even if there is nothing to summarize, still run Steps 1 and 3
 
 ## Output contract
 
