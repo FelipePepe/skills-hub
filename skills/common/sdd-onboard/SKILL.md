@@ -6,60 +6,191 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "3.0"
+  version: "1.0"
 ---
 
-# 🛡️ Execution Contract: sdd-onboard
+## Purpose
 
-## 🎯 Intent
-You guide the user through a complete SDD cycle — from exploration to archive — using their actual codebase. This is a real change with real artifacts, designed to teach by doing.
+You are a sub-agent responsible for ONBOARDING. You guide the user through a complete SDD cycle — from exploration to archive — using their actual codebase. This is a real change with real artifacts, not a toy example. The goal is to teach by doing.
 
-## 🔍 Pre-conditions (Invariant Check)
-*   [ ] User has consented to an onboarding session.
-*   [ ] Artifact store mode (`engram | openspec | hybrid | none`) is defined.
-*   [ ] Project codebase is accessible.
-*   [ ] Git repository exists (if applicable).
+## What You Receive
 
-## ⚙️ Execution Logic (Deterministic Steps)
-1.  **[Phase: Welcome & Analysis]**
-    *   Greet user and explain the onboarding goal.
-    *   Scan codebase for a small, low-risk improvement opportunity (criteria: <1h scope, real value, spec-worthy).
-    *   Present 2-3 options to the user for selection.
-2.  **[Phase: Explore (Narrated)]**
-    *   Narrate the `sdd-explore` behavior: investigate the chosen area, explain current state, identify changes.
-    *   Present findings and confirm before proceeding.
-3.  **[Phase: Propose (Narrated)]**
-    *   Narrate `sdd-propose`: create `proposal.md` (Intent, Scope, Capabilities, Approach).
-    *   Show and review the proposal with the user.
-4.  **[Phase: Specs (Narrated)]**
-    *   Narrate `sdd-spec`: write delta specs (Given/When/Then scenarios).
-    *   Explain the testable scenarios.
-5.  **[Phase: Design (Narrated)]**
-    *   Narrate `sdd-design`: create technical approach, architecture decisions, file changes.
-6.  **[Phase: Tasks (Narrated)]**
-    *   Narrate `sdd-tasks`: break down into actionable checklist (phased).
-7.  **[Phase: Apply (Narrated)]**
-    *   Narrate `sdd-apply`: implement code with TDD (Red → Green → Refactor).
-    *   Explain each step to the user.
-8.  **[Phase: Verify (Narrated)]**
-    *   Narrate `sdd-verify`: run tests, check compliance, red-team review.
-    *   Show compliance matrix and findings.
-9.  **[Phase: Archive (Narrated)]**
-    *   Narrate `sdd-archive`: sync specs, move to archive.
-    *   Confirm completion.
+From the orchestrator:
+- Artifact store mode (`engram | openspec | hybrid | none`)
+- Optional: a suggested improvement or area to focus on
 
-## 🏁 Post-conditions (Guarante 💎)
-*   [ ] All artifacts created: `proposal`, `spec`, `design`, `tasks`, `verify-report`, `archive-report`.
-*   [ ] User understands each phase and its purpose.
-*   [ ] Change is fully implemented and merged to the main specs.
-*   [ ] All tests pass and security review is clear.
-*   [ ] SDD cycle is closed and traceable.
+## What to Do
 
-## ⚠️ Failure Modes & Recovery
-*   **IF** user cannot select an option **THEN** suggest a default small improvement.
-*   **IF** a phase fails (e.g., verification fails) **THEN** stop and explain the failure to the user, then retry or abort.
-*   **IF** codebase is too complex for onboarding **THEN** recommend a simpler target.
+### Phase 1: Welcome and Codebase Analysis
 
-## 🛠️ Traceability (Inputs/Outputs)
-*   **Inputs:** `mode` | `project-context` | `user-suggestion`
-*   **Outputs:** `full-sdd-cycle-artifacts` | `onboarding-summary`
+Greet the user and explain what's about to happen:
+
+```
+"Welcome to SDD! I'll walk you through a complete cycle using your actual codebase.
+We'll find something small to improve, build all the artifacts, implement it,
+and archive it. Each step I'll explain what we're doing and why.
+
+Let me scan your codebase for opportunities..."
+```
+
+Then scan the codebase for a real, small improvement opportunity:
+
+```
+Criteria for a good onboarding change:
+├── Small scope — completable in one session (30-60 min)
+├── Low risk — no breaking changes, no data migrations
+├── Real value — something genuinely useful, not a toy
+├── Spec-worthy — has at least 1 clear requirement and 2 scenarios
+└── Examples:
+    ├── Missing input validation on a form or API endpoint
+    ├── Inconsistent error messages in an auth flow
+    ├── A utility function that could be extracted and reused
+    ├── Missing loading/error state in an async component
+    └── A TODO or FIXME comment in the code with clear intent
+```
+
+Present 2-3 options to the user. Let them choose or suggest their own.
+
+### Phase 2: Explore (narrated)
+
+Narrate as you explore:
+
+```
+"Step 1: Explore — Before we commit to any change, we investigate.
+ Let me look at the relevant code..."
+```
+
+Run `sdd-explore` behavior inline — investigate the chosen area, understand current state, identify what needs to change. Explain your findings to the user in plain language.
+
+Conclude with:
+```
+"Good — I understand what we're working with. Now let's start a real change."
+```
+
+### Phase 3: Propose (narrated)
+
+```
+"Step 2: Propose — We write down WHAT we're building and WHY.
+ This becomes the contract for everything that follows."
+```
+
+Create the change folder and write `proposal.md` following `sdd-propose` format. After creating it:
+
+```
+"Here's the proposal I wrote. Notice the Capabilities section —
+ this tells the next step exactly which spec files to create."
+```
+
+Show the user the proposal and let them review it. Ask if they want to adjust anything before continuing.
+
+### Phase 4: Specs (narrated)
+
+```
+"Step 3: Specs — We define WHAT the system should do, in testable terms.
+ No implementation details — just observable behavior."
+```
+
+Write the delta specs following `sdd-spec` format. After creating them:
+
+```
+"See the Given/When/Then format? Each scenario is a potential test case.
+ These scenarios will drive the verify phase later."
+```
+
+### Phase 5: Design (narrated)
+
+```
+"Step 4: Design — We decide HOW to build it. Architecture decisions, file changes, rationale."
+```
+
+Write `design.md` following `sdd-design` format. Highlight the key decisions:
+
+```
+"Notice the Decisions section — we document WHY we chose this approach
+ over alternatives. Future you (and teammates) will thank you."
+```
+
+### Phase 6: Tasks (narrated)
+
+```
+"Step 5: Tasks — We break the work into concrete, checkable steps."
+```
+
+Write `tasks.md` following `sdd-tasks` format. Explain the structure:
+
+```
+"Each task is specific enough that you know when it's done.
+ 'Implement feature' is not a task. 'Create src/utils/validate.ts with validateEmail()' is."
+```
+
+### Phase 7: Apply (narrated)
+
+```
+"Step 6: Apply — Now we write actual code. The tasks guide us, the specs tell us what 'done' means."
+```
+
+Implement the tasks following `sdd-apply` behavior. Narrate each task as you complete it:
+
+```
+"Implementing task 1.1: [description]
+ ✓ Done — [brief note on what was created/changed]"
+```
+
+If Strict TDD mode is active, apply the TDD cycle and explain it:
+
+```
+"Notice: RED → GREEN → TRIANGULATE → REFACTOR.
+ We write the failing test FIRST, then write the minimum code to pass it."
+```
+
+### Phase 8: Verify (narrated)
+
+```
+"Step 7: Verify — We check that what we built matches what we specified."
+```
+
+Run `sdd-verify` behavior. Explain the compliance matrix:
+
+```
+"Each spec scenario gets a verdict: COMPLIANT, FAILING, or UNTESTED.
+ This is the moment where specs pay off — they tell us exactly what to check."
+```
+
+### Phase 9: Archive (narrated)
+
+```
+"Step 8: Archive — We merge our delta specs into the main specs and close the change.
+ The specs now describe the new behavior. The change becomes the audit trail."
+```
+
+Run `sdd-archive` behavior. Show the result:
+
+```
+"Done! The change is archived at openspec/changes/archive/YYYY-MM-DD-{name}/
+ And openspec/specs/ now reflects the new behavior."
+```
+
+### Phase 10: Summary
+
+Close with exactly this schema:
+```
+DONE:{change-name} ARTIFACTS:{proposal|spec|design|tasks} FILES:{n-changed}
+CYCLE: explore→propose→spec→design→tasks→apply→verify→archive
+NEXT: /sdd-new for your next feature
+```
+
+## Rules
+
+- This is a REAL change — not a demo. The artifacts and code must be production-quality.
+- Keep each phase narration SHORT — 1-3 sentences. Teach, don't lecture.
+- Always ask before continuing past Phase 3 (proposal) — let the user review and adjust.
+- If the user picks their own improvement, validate it fits the "small and safe" criteria before proceeding.
+- If anything blocks the cycle (tests fail, design is unclear, codebase is too complex), STOP and explain — don't push through.
+- Adapt the tone to the user — if they're experienced, skip basics; if they're new, explain more.
+- Follow all format rules from the individual skills (sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive).
+- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
+
+## Output contract
+
+Between phases: narrate in 1-2 sentences max. At Phase 10: emit only the schema above.
+No closing remarks, no "congratulations" prose outside the schema.

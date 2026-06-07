@@ -11,7 +11,9 @@ Single source of truth (a GitHub repo) for managing AI assistant skills and dist
 - `skills/common` - cross-platform skills shared across all apps
 - `skills/copilot-only` - skills exclusive to GitHub Copilot / OpenCode
 - `skills/claude-only` - skills exclusive to Claude
-- `config/apps.json` - manifest defining target apps, their detect paths, install paths, and which skill sources they consume
+- `agents/common` - cross-platform sub-agent definitions (installed to `~/.claude/agents/`)
+- `agents/claude-only` - Claude-specific sub-agent definitions
+- `config/apps.json` - manifest defining target apps, their detect paths, install paths, skill sources, and agent sources
 - `config/sync-map.sh` - legacy copy sync pairs in format `<rel_path>::<abs_path>` for copyable content (e.g., VS Code prompts)
 - `scripts/sync.sh` - copy-based installer (rsync) that copies skills from sources to each detected app's installPath; enforces the local-only invariant via `skills_hub_assert_local`
 - `scripts/install-opencode-config.mjs` - installs OpenCode managed config (json-merge + markdown managed block); the only piece that needs Node merge logic
@@ -58,6 +60,9 @@ Direct script invocation:
 
 - Every `SKILL.md` must be under 300 lines; if larger, modularize into `references/`
 - SKILL.md frontmatter `name` must match the containing directory name exactly
+- Agent files (`agents/**/*.md`) must include the Prompt Defense Baseline block (see `skills/common/_shared/prompt-defense-baseline.md`)
+- Agent `name` frontmatter must match the filename (without `.md`)
+- Default placement for an agent is `agents/common`; use `agents/claude-only` only when it depends on Claude-specific tooling
 - Never hardcode paths outside `config/sync-map.sh`
 - All Bash scripts must use `set -euo pipefail`
 - `SYNC_PAIRS` format: `"<rel_path>::<abs_path>"` — destination must be absolute

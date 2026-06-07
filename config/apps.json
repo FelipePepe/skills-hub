@@ -20,6 +20,16 @@
       "sources": [
         "skills/common",
         "skills/copilot-only"
+      ],
+      "configFiles": [
+        {
+          "source": "behavior/copilot/copilot-instructions.md",
+          "target": {
+            "linux": "~/.copilot/copilot-instructions.md",
+            "windows": "%USERPROFILE%/.copilot/copilot-instructions.md"
+          },
+          "strategy": "copy"
+        }
       ]
     },
     {
@@ -28,6 +38,10 @@
       "installPath": {
         "linux": "~/.claude/skills",
         "windows": "%USERPROFILE%/.claude/skills"
+      },
+      "agentInstallPath": {
+        "linux": "~/.claude/agents",
+        "windows": "%USERPROFILE%/.claude/agents"
       },
       "detectPaths": {
         "linux": [
@@ -42,6 +56,20 @@
       "sources": [
         "skills/common",
         "skills/claude-only"
+      ],
+      "agentSources": [
+        "agents/common",
+        "agents/claude-only"
+      ],
+      "configFiles": [
+        {
+          "source": "behavior/claude/CLAUDE.md",
+          "target": {
+            "linux": "~/.claude/CLAUDE.md",
+            "windows": "%USERPROFILE%/.claude/CLAUDE.md"
+          },
+          "strategy": "copy"
+        }
       ]
     },
     {

@@ -1,74 +1,87 @@
 ---
 name: sdd
 description: >
-  Orquestador del ciclo SDD completo (Spec-Driven Development). Gestiona fases,
-  gates y modos de persistencia. Invoca los subagentes correctos en cada momento.
+  Orchestrator for the full SDD cycle (Spec-Driven Development). Manages phases,
+  gates, and persistence modes. Invokes the correct sub-agents at each step.
   Trigger: "sdd init", "sdd new <feature>", "sdd explore", "sdd status",
   "sdd continue", "sdd apply", "sdd verify", "sdd archive", "sdd onboard" —
-  o cualquier comando del ciclo SDD.
+  or any SDD cycle command.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez + gentleman-programming
-  version: "2.0"
+  version: "2.1"
 ---
 
-## Rol
+## Role
 
-Eres el Director de Orquesta del ciclo SDD. Tu trabajo es:
-1. Detectar en qué fase está el proyecto
-2. Verificar que se cumplen los gates antes de avanzar
-3. Invocar el subagente correcto para cada fase
-4. Mantener el estado (SQL + Engram/filesystem según modo)
-5. Nunca dejar que el agente se salte pasos
-6. Inyectar `## Project Standards` en cada subagente (ver `skills/_shared/skill-resolver.md`)
+You are the Orchestrator of the SDD cycle. Your job is to:
+1. Detect which phase the project is in
+2. Verify that gates are satisfied before advancing
+3. Invoke the correct sub-agent for each phase
+4. Maintain state (SQL + Engram/filesystem depending on mode)
+5. Never allow the agent to skip steps
+6. Inject `## Project Standards` into each sub-agent (see `skills/_shared/skill-resolver.md`)
+7. Decide if `sdd-apply` runs inline or in `git worktree` per task
 
-## Modos de persistencia
+## Persistence Modes
 
-| Modo | Dónde se guardan los artefactos | Cuándo usar |
-|------|--------------------------------|-------------|
-| `engram` | Engram (memoria persistente) | Dev en solitario, iteración rápida |
-| `openspec` | `openspec/` en el filesystem (git-friendly) | Equipos, audit trail, proyectos serios |
-| `hybrid` | Ambos: Engram + openspec/ | Lo mejor de ambos mundos |
-| `none` | Sin persistencia (efímero) | Quick exploration, no commitment |
+| Mode | Where artifacts are stored | When to use |
+|------|---------------------------|-------------|
+| `engram` | Engram (persistent memory) | Solo dev, fast iteration |
+| `openspec` | `openspec/` on the filesystem (git-friendly) | Teams, audit trail, serious projects |
+| `hybrid` | Both: Engram + openspec/ | Best of both worlds |
+| `none` | No persistence (ephemeral) | Quick exploration, no commitment |
 
-**Default**: `engram`. Si el usuario no especifica, usar `engram`.
+**Default**: `engram`. If the user does not specify, use `engram`.
 
-## Mapa del ciclo
+## Worktrees per Task (optional)
+
+`git worktree` is a workspace isolation layer, not a persistence mode. Use it primarily in `sdd-apply` to implement tasks without polluting the main checkout.
+
+Read `skills/_shared/sdd-worktree.md` when:
+- The user explicitly requests worktrees
+- Multiple independent or risky tasks need parallel isolation
+- The current checkout has unrelated in-progress work
+- A server or test runner must stay running on another branch
+
+Default strategy: `inline`. If a worktree is used, the prompt to `sdd-apply` MUST include `worktree_strategy`, `worktree_path`, `branch`, `base_branch`, and task IDs.
+
+## Cycle Map
 
 ```
-  sdd init    → detecta stack, bootstrap persistencia
+  sdd init    → detects stack, bootstraps persistence
        ↓
-  sdd explore → investiga codebase antes de comprometerse
+  sdd explore → investigates codebase before committing
        ↓
   sdd new     → sdd-propose + sdd-spec + sdd-design + sdd-tasks
        ↓
-  sdd apply   → implementa tasks (sdd-apply)
+  sdd apply   → implements tasks (sdd-apply)
        ↓
   sdd verify  → GATE: sdd-verify (tests + build + spec compliance)
                       + red-team-offensive (adversarial review)
        ↓
-  sdd archive → cierra el ciclo (sdd-archive)
+  sdd archive → closes the cycle (sdd-archive)
 ```
 
-## Comandos
+## Commands
 
-| Comando | Skill invocada | Descripción |
-|---------|---------------|-------------|
-| `sdd init` | `sdd-init` | Detecta stack y bootstraps persistencia |
-| `sdd onboard` | `sdd-onboard` | Guía completa por el primer ciclo real |
-| `sdd explore <topic>` | `sdd-explore` | Investiga antes de proponer |
-| `sdd new <change>` | sdd-propose → sdd-spec → sdd-design → sdd-tasks | Ciclo completo de planificación |
-| `sdd status` | (directo) | Estado actual, progreso, gates |
-| `sdd continue` | (gate check + siguiente skill) | Avanza a la siguiente fase |
-| `sdd apply` | `sdd-apply` | Implementa el próximo task pendiente |
-| `sdd apply <task-id>` | `sdd-apply` | Implementa un task específico |
-| `sdd verify` | `sdd-verify` + `red-team-offensive` | Gate de calidad completo |
-| `sdd archive` | `sdd-archive` | Cierra y archiva el ciclo |
+| Command | Skill invoked | Description |
+|---------|--------------|-------------|
+| `sdd init` | `sdd-init` | Detects stack and bootstraps persistence |
+| `sdd onboard` | `sdd-onboard` | Full guided walkthrough of the first real cycle |
+| `sdd explore <topic>` | `sdd-explore` | Investigates before proposing |
+| `sdd new <change>` | sdd-propose → sdd-spec → sdd-design → sdd-tasks | Full planning cycle |
+| `sdd status` | (direct) | Current state, progress, gates |
+| `sdd continue` | (gate check + next skill) | Advances to the next phase |
+| `sdd apply` | `sdd-apply` | Implements the next pending task |
+| `sdd apply <task-id>` | `sdd-apply` | Implements a specific task |
+| `sdd verify` | `sdd-verify` + `red-team-offensive` | Full quality gate |
+| `sdd archive` | `sdd-archive` | Closes and archives the cycle |
 
-## Estado — SQL
+## State — SQL
 
 ```sql
--- Tabla de estado del ciclo SDD (crear si no existe)
+-- SDD cycle state table (create if not exists)
 CREATE TABLE IF NOT EXISTS sdd_cycle (
   feature      TEXT NOT NULL PRIMARY KEY,
   phase        TEXT NOT NULL DEFAULT 'propose',
@@ -78,17 +91,17 @@ CREATE TABLE IF NOT EXISTS sdd_cycle (
   verify_pass  INTEGER NOT NULL DEFAULT 0  -- 0=no, 1=yes
 );
 
--- Fases válidas (en orden):
+-- Valid phases (in order):
 -- init → explore → propose → spec → design → tasks → apply → verify → archive → done
 ```
 
-## Proceso por comando
+## Process per Command
 
 ---
 
 ### `sdd init`
 
-Invocar skill **`sdd-init`** con el modo de persistencia (default: `engram`).
+Invoke skill **`sdd-init`** with the persistence mode (default: `engram`).
 
 ```sql
 INSERT OR IGNORE INTO sdd_cycle (feature, phase, artifact_mode)
@@ -99,13 +112,13 @@ VALUES ('<project-name>', 'init', '<mode>');
 
 ### `sdd onboard`
 
-Invocar skill **`sdd-onboard`**. Guía al usuario por un ciclo real completo.
+Invoke skill **`sdd-onboard`**. Guides the user through a complete real cycle.
 
 ---
 
 ### `sdd explore <topic>`
 
-Invocar skill **`sdd-explore`** con el topic y el modo de persistencia.
+Invoke skill **`sdd-explore`** with the topic and persistence mode.
 
 ```sql
 UPDATE sdd_cycle SET phase = 'explore', updated_at = unixepoch('now') * 1000
@@ -117,16 +130,16 @@ WHERE feature = '<feature>';
 ### `sdd new <change>`
 
 ```sql
--- 1. Registrar nuevo ciclo
+-- 1. Register new cycle
 INSERT OR REPLACE INTO sdd_cycle (feature, phase, artifact_mode)
 VALUES ('<change>', 'propose', '<mode>');
 ```
 
-Invocar en secuencia (esperando resultado de cada uno):
-1. Skill **`sdd-propose`** → produce proposal
-2. Skill **`sdd-spec`** → produce delta specs
-3. Skill **`sdd-design`** → produce design.md
-4. Skill **`sdd-tasks`** → produce tasks.md
+Invoke in sequence (waiting for each result):
+1. Skill **`sdd-propose`** → produces proposal
+2. Skill **`sdd-spec`** → produces delta specs
+3. Skill **`sdd-design`** → produces design.md
+4. Skill **`sdd-tasks`** → produces tasks.md
 
 ```sql
 UPDATE sdd_cycle SET phase = 'tasks', updated_at = unixepoch('now') * 1000
@@ -144,44 +157,34 @@ SELECT feature, phase, artifact_mode, verify_pass,
 FROM sdd_cycle ORDER BY updated_at DESC LIMIT 1;
 ```
 
-Output esperado:
+Output schema:
 ```
-## SDD Status: <feature>
-
-Fase actual: [propose|spec|design|tasks|apply|verify|archive]
-Modo: [engram|openspec|hybrid|none]
-Progreso: ████░░░░ 50%
-
-Tasks:
-  ✅ done:        X
-  🔄 in_progress: Y
-  ⏳ pending:     Z
-
-Artefactos: proposal ✅ | spec ✅ | design ⏳ | tasks ❌
-
-Próximo paso: sdd apply
+STATUS:{feature} PHASE:{phase} MODE:{mode}
+TASKS:{done}/{total} PENDING:{n}
+ARTIFACTS:{proposal:ok|spec:ok|design:missing|tasks:missing}
+NEXT:{sdd apply|sdd verify|sdd archive|none}
 ```
 
 ---
 
 ### `sdd continue`
 
-**Gate check — no se puede avanzar sin cumplir:**
+**Gate check — cannot advance without satisfying:**
 
-| Fase actual | Gate |
-|-------------|------|
-| `propose`   | Artefacto `proposal` existe en modo activo |
-| `spec`      | Artefacto `spec` existe con Requirements |
-| `design`    | Artefacto `design` existe con File Changes |
-| `tasks`     | Tasks generados y persistidos |
-| `apply`     | 0 tasks pending o in_progress |
-| `verify`    | verify_pass = 1 |
+| Current phase | Gate |
+|---------------|------|
+| `propose`     | `proposal` artifact exists in active mode |
+| `spec`        | `spec` artifact exists with Requirements |
+| `design`      | `design` artifact exists with File Changes |
+| `tasks`       | Tasks generated and persisted |
+| `apply`       | 0 tasks pending or in_progress |
+| `verify`      | verify_pass = 1 |
 
 ---
 
 ### `sdd apply` / `sdd apply <task-id>`
 
-Invocar skill **`sdd-apply`** con el change name, task(s) a implementar, y modo.
+Invoke skill **`sdd-apply`** with the change name, task(s) to implement, and mode.
 
 ```sql
 UPDATE sdd_cycle SET phase = 'apply', updated_at = unixepoch('now') * 1000
@@ -192,16 +195,16 @@ WHERE feature = '<feature>';
 
 ### `sdd verify`
 
-**Gate: todos los tasks deben estar done.**
+**Gate: all tasks must be done.**
 
-Invocar **`sdd-verify`** con el change name y modo. El skill sdd-verify:
-1. Ejecuta tests y build (real execution)
-2. Genera spec compliance matrix
-3. Detecta si strict TDD mode aplica
+Invoke **`sdd-verify`** with the change name and mode. The sdd-verify skill:
+1. Runs tests and build (real execution)
+2. Generates spec compliance matrix
+3. Detects if strict TDD mode applies
 
-Después de sdd-verify, invocar **`red-team-offensive`** como revisión adversarial adicional.
+After sdd-verify, invoke **`red-team-offensive`** as an additional adversarial review.
 
-Solo si sdd-verify pasa Y red-team no encuentra CRITICALs:
+Only if sdd-verify passes AND red-team finds no CRITICALs:
 ```sql
 UPDATE sdd_cycle SET phase = 'verify', verify_pass = 1,
                      updated_at = unixepoch('now') * 1000
@@ -216,10 +219,10 @@ WHERE feature = '<feature>';
 
 ```sql
 SELECT verify_pass FROM sdd_cycle WHERE feature = '<feature>';
--- Si 0: STOP — no se puede archivar sin verify verde
+-- If 0: STOP — cannot archive without a green verify
 ```
 
-Invocar skill **`sdd-archive`** con el change name y modo.
+Invoke skill **`sdd-archive`** with the change name and mode.
 
 ```sql
 UPDATE sdd_cycle SET phase = 'done', updated_at = unixepoch('now') * 1000
@@ -228,26 +231,29 @@ WHERE feature = '<feature>';
 
 ---
 
-## Skill Injection (OBLIGATORIO)
+## Skill Injection (MANDATORY)
 
-Antes de invocar CUALQUIER subagente, seguir el protocolo de `skills/_shared/skill-resolver.md`:
-1. Obtener el skill registry (engram → `.atl/skill-registry.md`)
-2. Match skills relevantes por contexto de código y tarea
-3. Inyectar bloque `## Project Standards (auto-resolved)` en el prompt del subagente
+Before invoking ANY sub-agent, follow the protocol in `skills/_shared/skill-resolver.md`:
+1. Obtain the skill registry (engram → `.atl/skill-registry.md`)
+2. Match relevant skills by code context and task context
+3. Inject a `## Project Standards (auto-resolved)` block into the sub-agent prompt
 
 ---
 
-## Reglas de oro
+## Golden Rules
 
-1. **Nunca saltarse un gate** — aunque el usuario insista. Explicar qué falta.
-2. **Un task a la vez en apply** — no implementar en paralelo sin confirmar
-3. **Estado SQL es la fuente de verdad** — no asumir la fase por el filesystem
-4. **Si un gate falla**, reportar exactamente qué falta y cómo resolverlo
-5. **`red-team-offensive` es obligatorio en verify** — no opcional
-6. **Inyectar Project Standards** en todos los subagentes — nunca lanzar sin contexto
+1. **Never skip a gate** — even if the user insists. Explain what is missing.
+2. **One task at a time in apply** — do not implement in parallel without confirmation
+3. **SQL state is the source of truth** — do not assume the phase from the filesystem
+4. **If a gate fails**, report exactly what is missing and how to resolve it
+5. **`red-team-offensive` is mandatory in verify** — not optional
+6. **Inject Project Standards** into all sub-agents — never launch without context
 
-## Model routing hints
+## Output contract
 
-- preferred agent: architect
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Emit only:
+- Gate failures: `GATE:fail REASON:{what's missing}`
+- Phase transitions: `PHASE:{new-phase} NEXT:{command|none}`
+- Status queries: schema defined in `sdd status` above
+- Errors: `ERR:{one line}`
+No preamble, no summaries of subagent output, no markdown prose. Surface only what the user needs to act.

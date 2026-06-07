@@ -1,35 +1,35 @@
 ---
 name: sdd-proposal
 description: >
-  Alias legacy de compatibilidad para la fase de propuesta de SDD.
-  Trigger: solo cuando exista una referencia antigua a `sdd-proposal`; en flujo nuevo usar `sdd-propose`.
+  Legacy compatibility alias for the SDD proposal phase.
+  Trigger: only when an old prompt, script, or legacy documentation explicitly
+  references `sdd-proposal`; use `sdd-propose` for all new flows.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
-  version: "3.0"
+  version: "1.2"
 ---
 
-# 🛡️ Execution Contract: sdd-proposal
+## Status
 
-## 🎯 Intent
-Legacy compatibility alias. This skill forwards all logic to `sdd-propose`.
+This skill is a legacy alias.
 
-## 🔍 Pre-conditions (Invariant Check)
-*   [ ] This skill should NEVER be invoked in a new workflow.
-*   [ ] If invoked, it MUST load and delegate to `skills/common/sdd-propose/SKILL.md`.
+- **Canonical skill**: `sdd-propose`
+- **Use this skill only** if an old prompt, script, or legacy documentation explicitly names it
+- **Do not** create new references to `sdd-proposal`
 
-## ⚙️ Execution Logic (Deterministic Steps)
-1.  **[Phase: Alias Resolve]** Load `sdd-propose` and execute its logic.
-2.  **[Phase: Compatibility Return]** Return results with `sdd-propose` format, but acknowledge legacy naming if required by context.
+## What to Do
 
-## 🏁 Post-conditions (Guarante 💎)
-*   [ ] Result is identical to `sdd-propose`.
-*   [ ] No new references to this skill are created.
-*   [ ] Documentation is updated to point to `sdd-propose`.
+1. Load and follow `skills/common/sdd-propose/SKILL.md`
+2. Preserve name compatibility in the summary if the legacy context requires it
+3. Return the result using the format and persistence defined by `sdd-propose`
 
-## ⚠️ Failure Modes & Recovery
-*   **IF** this skill is called in a new workflow **THEN** alert and suggest using `sdd-propose`.
+## Rules
 
-## 🛠️ Traceability (Inputs/Outputs)
-*   **Inputs:** `change-name` | `exploration` | `mode` | `existing-specs`
-*   **Outputs:** `proposal.md` | `capabilities-list` | `summary`
+- Treat `sdd-propose` as the source of truth
+- Do not diverge in format, persistence, or contract
+- If updating documentation, replace `sdd-proposal` with `sdd-propose`
+
+## Output contract
+
+Follow the output contract of `sdd-propose` exactly. No additional prose.

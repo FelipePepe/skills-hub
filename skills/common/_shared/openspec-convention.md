@@ -22,6 +22,24 @@ openspec/
         └── verify-report.md <- from sdd-verify
 ```
 
+## state.yaml Worktree Fields (optional)
+
+When the orchestrator uses git worktrees, store enough state to resume after compaction:
+
+```yaml
+worktrees:
+  strategy: inline | task-worktree | batch-worktree
+  base_branch: develop
+  canonical_branch: sdd/<change>
+  tasks:
+    "1.1":
+      branch: sdd/<change>/1-1
+      path: ../<repo>.sdd/<change>/1-1
+      status: active | integrated | abandoned
+```
+
+See `skills/_shared/sdd-worktree.md` for policy.
+
 ## Artifact File Paths
 
 | Skill | Creates / Reads | Path |

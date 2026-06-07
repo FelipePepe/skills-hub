@@ -79,8 +79,7 @@ If the docs MCP is missing or fails:
 - `https://developers.openai.com/api/docs/guides/latest-model.md`
 - Official OpenAI docs search on `developers.openai.com`
 
-## Model routing hints
+## Output contract
 
-- preferred agent: researcher
-- preferred model: ollama/qwen3.6:27b
-- routing intent: hint only; the skill must not switch models directly
+Answer the question directly with citation. No preamble.
+Format: `[source-url] — {answer}`. If multiple sources: one line per source, then one-line synthesis.

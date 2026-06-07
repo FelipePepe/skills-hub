@@ -1,53 +1,68 @@
 ---
 name: session-start
 description: >
-  Always-active session initialization protocol. Reads engram memory, verifies GitFlow branch state, and checks SDD context at the start of every session.
+  Always-active session initialization protocol. Reads engram memory, verifies
+  GitFlow branch state, and checks SDD context at the start of every session.
   Trigger: Always active — load in every session automatically.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
-  version: "3.0"
+  version: "1.2"
 ---
 
-# 🛡️ Execution Contract: session-start
+## When to Use
 
-## 🎯 Intent
-Execute the mandatory initialization protocol at the beginning of every session to ensure context, state, and safety before any work begins.
+ALWAYS ACTIVE — execute this at the very beginning of every session, before any other action.
 
-## 🔍 Pre-conditions (Invariant Check)
-*   [ ] Session is starting (new message from user).
-*   [ ] Git hooks path is accessible (`~/.copilot/hooks/...`).
-*   [ ] Engram service is available (if configured).
+## Protocol
 
-## ⚙️ Execution Logic (Deterministic Steps)
-1.  **[Phase: Hook Execution]** Run `session-start.sh` to capture initial git and session state.
-2.  **[Phase: GitFlow Check]** Run `gitflow-check.sh`.
-    *   **IF** exit code != 0 **THEN** STOP and prompt for branch creation.
-    *   **IF** no git repo **THEN** initialize git (`main` → `develop` → `feature/<name>`).
-    *   **IF** branch is correct **THEN** proceed.
-3.  **[Phase: SDD Context Check]** Check for `openspec/config.yaml`.
-    *   **IF** exists: Check for active changes (`openspec/changes/`). Resume if found.
-    *   **IF** not found: Skip SDD steps.
-4.  **[Phase: Engram Load]** Call `engram-mem_context` with inferred project ID.
-5.  **[Phase: Work Discovery]** Look for pending tasks (`in_progress`, `blocked`, unfinished items).
-6.  **[Phase: Report]** Summarize to user:
-    *   Current branch.
-    *   Active SDD change (if any) with phase.
-    *   Pending engram work (if any).
-    *   Ask for next action.
+At session start, run ALL steps in this exact order:
 
-## 🏁 Post-conditions (Guarante 💎)
-*   [ ] Git branch is valid before any code edit.
-*   [ ] SDD change is resumed or initialized if active.
-*   [ ] Engram context is loaded.
-*   [ ] User is informed of pending work.
-*   [ ] No step is skipped (even for quick requests).
+### Step 1 — Run session-start hook
+```bash
+bash ~/.copilot/hooks/copilot/session-start.sh
+```
+Use the output to call `engram-mem_session_start` with the project id and directory.
 
-## ⚠️ Failure Modes & Recovery
-*   **IF** git is uninitialized **THEN** initialize it as part of the workflow.
-*   **IF** engram is unavailable **THEN** continue with local context.
-*   **IF** no SDD context and user requests feature **THEN** prompt to run `sdd new` or override.
+### Step 2 — Check GitFlow branch (MANDATORY before any code change)
+```bash
+bash ~/.copilot/hooks/copilot/gitflow-check.sh
+```
+- If exit code != 0: **STOP**. Create the correct feature branch before touching any file.
+- If "No es un repositorio git": **initialize git first** (`git init`), then set up `main` + `develop` + `feature/<name>` before writing any code.
+- If ✓ OK: proceed.
 
-## 🛠️ Traceability (Inputs/Outputs)
-*   **Inputs:** `session-start` | `git-state` | `engram-context`
-*   **Outputs:** `status-report` | `branch-state` | `next-action-prompt`
+### Step 3 — Check SDD context (MANDATORY before implementing any feature)
+Check if the project uses SDD by looking for an `openspec/` directory:
+```bash
+ls openspec/config.yaml 2>/dev/null && cat openspec/config.yaml || echo "No SDD config found"
+```
+- If `openspec/` exists: **SDD is active for this project.**
+  - Check for an active change: `ls openspec/changes/` — if there's a change without `archived_at`, resume it with `sdd status`.
+  - If there is NO active change and the user asks to implement a feature: **run `sdd new "<feature>"` BEFORE writing any code.**
+  - Remind the user: *"This project uses SDD — should I start with `sdd new` or is there an active change?"*
+- If no `openspec/`: SDD is not configured, skip this step.
+
+### Step 4 — Read engram context
+**Only run if** Step 1 returned a valid project id OR Step 3 found an active change. Otherwise skip.
+```
+engram-mem_context project="{current-project}"
+```
+
+### Step 5 — Report to user
+Emit exactly this schema, then ask what to do next in one sentence:
+```
+BRANCH:{name} SDD:{change@phase|none} PENDING:{item|none}
+```
+No headers, no bullets, no explanation. Omit PENDING if none.
+
+## Critical Rules
+
+- **Never skip any step**, even for quick requests
+- Step 2 is the gate — no file edit before GitFlow check passes
+- Engram unavailability is not a blocker — skip Step 4 gracefully and continue
+
+## Output contract
+
+Respond ONLY in the schema defined in Step 5. No preamble, no markdown headers,
+no explanation of what you did. One schema line + one question sentence. Nothing else.

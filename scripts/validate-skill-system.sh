@@ -24,7 +24,7 @@ echo "========================================"
 
 validate_skill() {
     local skill_path="$1"
-    local skill_name=$(basename "$skill_path")
+    local skill_name; skill_name=$(basename "$skill_path")
     local skill_md="${skill_path}/SKILL.md"
     
     if [[ ! -f "$skill_md" ]]; then
@@ -250,8 +250,7 @@ if command -v nvidia-smi &> /dev/null; then
         
         # Parse memory usage
         gpu_memory=$(echo "$gpu_info" | head -1 | cut -d',' -f2 | tr -d '[:space:]')
-        gpu_used=$(echo "$gpu_info" | head -1 | cut -d',' -f3 | tr -d '[:space:]')
-        
+
         log_info "Total VRAM: $gpu_memory"
         log_info "VRAM usage may change as scripts run"
     else

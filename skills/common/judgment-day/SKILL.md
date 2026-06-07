@@ -105,7 +105,7 @@ All judge and fix-agent outputs must include a final `Skill Resolution` line ind
 
 ## Language
 
-- Mirror the user’s language when possible
+- Always respond in English
 - Keep verdict tables concise and scannable
 - Do not soften confirmed CRITICAL issues
 
@@ -143,8 +143,7 @@ Confirm:
 - optionally launch Fix Agent
 - re-judge only when the protocol says so
 
-## Model routing hints
+## Output contract
 
-- preferred agent: orchestrator
-- preferred model: default
-- routing intent: hint only; the skill must not switch models directly
+Use the format from `references/output-format.md`. No preamble, no commentary outside that format.
+Between rounds emit only: `ROUND:{n} CONFIRMED:{c} SUSPECTS:{s} — fixing|done`
