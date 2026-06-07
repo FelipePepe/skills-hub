@@ -56,8 +56,11 @@ skills_hub_source_sync_map "$MAP_FILE"
 skills_hub_assert_local "$ROOT_DIR" "clon del repo"
 
 rsync_base=( -a --delete )
+rsync_file=( -a )
 $DRY_RUN && rsync_base+=( --dry-run --itemize-changes )
+$DRY_RUN && rsync_file+=( --dry-run --itemize-changes )
 $VERBOSE && rsync_base+=( -v )
+$VERBOSE && rsync_file+=( -v )
 
 skills_hub_info "Copiando skills a las apps detectadas...$([[ "$DRY_RUN" == true ]] && echo ' [dry-run]')"
 
@@ -116,6 +119,65 @@ done < <(
       const install = app.installPath?.[P] ?? "";
       const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
       console.log([app.id, install, detect, sources].join("\t"));
+    }
+  ' "$APPS_FILE"
+)
+
+skills_hub_info "Copiando agentes a las apps detectadas...$([[ "$DRY_RUN" == true ]] && echo ' [dry-run]')"
+
+# Extrae de apps.json: id<TAB>agentInstallPath<TAB>detectPaths(,)<TAB>agentSources(,)
+# Solo apps con agentSources definido.
+while IFS=$'\t' read -r app_id agent_install_path detect_csv agent_sources_csv; do
+  [[ -n "$app_id" ]] || continue
+  [[ -n "$agent_sources_csv" ]] || continue
+
+  if [[ -n "$APP_FILTER" && "$app_id" != "$APP_FILTER" ]]; then
+    continue
+  fi
+
+  agent_install_path="$(eval echo "$agent_install_path")"
+
+  detected=false
+  IFS=',' read -r -a detect_list <<< "$detect_csv"
+  for dp in "${detect_list[@]}"; do
+    [[ -n "$dp" ]] || continue
+    dp="$(eval echo "$dp")"
+    if [[ -e "$dp" ]]; then detected=true; break; fi
+  done
+
+  if [[ "$detected" == false && "$INCLUDE_MISSING" == false ]]; then
+    skills_hub_info "  $app_id (agentes): no detectada, se omite."
+    continue
+  fi
+
+  skills_hub_assert_local "$agent_install_path" "destino de agentes '$app_id'"
+  $DRY_RUN || mkdir -p "$agent_install_path"
+
+  skills_hub_info "  $app_id (agentes) -> $agent_install_path"
+
+  IFS=',' read -r -a agent_source_list <<< "$agent_sources_csv"
+  for source_dir in "${agent_source_list[@]}"; do
+    [[ -n "$source_dir" ]] || continue
+    abs_source="$ROOT_DIR/$source_dir"
+    [[ -d "$abs_source" ]] || { skills_hub_warn "agentSource inexistente, se omite -> $abs_source"; continue; }
+
+    while IFS= read -r -d '' agent_file; do
+      agent_basename="$(basename "$agent_file")"
+      [[ "$agent_basename" == _* || "$agent_basename" == .* ]] && continue
+      rsync "${rsync_file[@]}" "$agent_file" "$agent_install_path/$agent_basename"
+    done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -name "*.md" -type f -print0 | sort -z)
+  done
+done < <(
+  node -e '
+    const fs = require("node:fs");
+    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const P = "linux";
+    for (const app of data.apps) {
+      const agentSources = Array.isArray(app.agentSources) ? app.agentSources.join(",") : "";
+      if (!agentSources) continue;
+      const install = app.agentInstallPath?.[P] ?? "";
+      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
+      console.log([app.id, install, detect, agentSources].join("\t"));
     }
   ' "$APPS_FILE"
 )
