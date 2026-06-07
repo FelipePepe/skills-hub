@@ -39,6 +39,10 @@
         "linux": "~/.claude/skills",
         "windows": "%USERPROFILE%/.claude/skills"
       },
+      "agentInstallPath": {
+        "linux": "~/.claude/agents",
+        "windows": "%USERPROFILE%/.claude/agents"
+      },
       "detectPaths": {
         "linux": [
           "~/.claude",
@@ -52,6 +56,10 @@
       "sources": [
         "skills/common",
         "skills/claude-only"
+      ],
+      "agentSources": [
+        "agents/common",
+        "agents/claude-only"
       ],
       "configFiles": [
         {

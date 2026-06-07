@@ -44,7 +44,6 @@ while IFS=$'\t' read -r app_id install_path detect_csv; do
   state=$([[ "$detected" == true ]] && echo "detected" || echo "missing")
   echo "- $app_id: $state"
   [[ -n "$install_path" ]] && echo "  install: $install_path"
-  # Verifica que el destino, si existe, sea local.
   [[ -d "$install_path" ]] && skills_hub_assert_local "$install_path" "destino de '$app_id'"
 done < <(
   node -e '
@@ -53,6 +52,37 @@ done < <(
     const P = "linux";
     for (const app of data.apps) {
       const install = app.installPath?.[P] ?? "";
+      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
+      console.log([app.id, install, detect].join("\t"));
+    }
+  ' "$APPS_FILE"
+)
+
+skills_hub_info "Doctor: rutas de instalacion de agentes..."
+while IFS=$'\t' read -r app_id agent_install_path detect_csv; do
+  [[ -n "$app_id" ]] || continue
+  agent_install_path="$(eval echo "$agent_install_path")"
+
+  detected=false
+  IFS=',' read -r -a detect_list <<< "$detect_csv"
+  for dp in "${detect_list[@]}"; do
+    [[ -n "$dp" ]] || continue
+    dp="$(eval echo "$dp")"
+    if [[ -e "$dp" ]]; then detected=true; break; fi
+  done
+
+  state=$([[ "$detected" == true ]] && echo "detected" || echo "missing")
+  echo "- $app_id (agents): $state"
+  echo "  agents: $agent_install_path"
+  [[ -d "$agent_install_path" ]] && skills_hub_assert_local "$agent_install_path" "destino de agentes '$app_id'"
+done < <(
+  node -e '
+    const fs = require("node:fs");
+    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const P = "linux";
+    for (const app of data.apps) {
+      if (!app.agentInstallPath) continue;
+      const install = app.agentInstallPath[P] ?? "";
       const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
       console.log([app.id, install, detect].join("\t"));
     }
