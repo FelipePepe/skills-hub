@@ -1,8 +1,8 @@
 ---
 name: casa-vault
 description: >
-  Crea proyectos en Infisical (vault de secretos) para nuevos proyectos. Reemplaza la creación manual de .env.
-  Trigger: cuando se inicia un nuevo proyecto y necesita secretos/variables de entorno.
+  Creates projects in Infisical (secrets vault) for new projects. Replaces manual .env creation.
+  Trigger: when a new project is started and needs secrets/environment variables.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
@@ -14,36 +14,36 @@ metadata:
 
 ## When to Use
 
-- Se va a crear un nuevo proyecto y necesita variables de entorno / secretos
-- El usuario dice "crea el vault para X" o "inicializa infisical para X"
-- Un proyecto necesita DATABASE_URL, JWT_SECRET, API_KEY, etc.
+- A new project is being created and it needs environment variables / secrets
+- The user says "create the vault for X" or "initialize infisical for X"
+- A project needs DATABASE_URL, JWT_SECRET, API_KEY, etc.
 
-## Infraestructura
+## Infrastructure
 
-| Servicio | URL | Máquina |
-|----------|-----|---------|
+| Service | URL | Machine |
+|---------|-----|---------|
 | Infisical | http://infisical.casa | maya (192.168.1.55) |
-| API local | http://localhost:8888 | maya (desde maya) |
+| Local API | http://localhost:8888 | maya (from maya) |
 
-## Comando
+## Command
 
 ```bash
-# Crear vault para un proyecto con environments por defecto (dev, staging, prod)
+# Create vault for a project with default environments (dev, staging, prod)
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa vault init <project-name>'
 
-# Con environments personalizados
+# With custom environments
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa vault init <project-name> --envs dev,prod'
 ```
 
-## Lo que hace
+## What It Does
 
-1. Autentica en Infisical API (http://localhost:8888) como admin
-2. Crea el proyecto con el nombre dado
-3. Crea los environments especificados
-4. Crea una Machine Identity con Universal Auth para acceso programático
-5. Imprime `clientId` y `clientSecret` para usar en el proyecto
+1. Authenticates to the Infisical API (http://localhost:8888) as admin
+2. Creates the project with the given name
+3. Creates the specified environments
+4. Creates a Machine Identity with Universal Auth for programmatic access
+5. Prints `clientId` and `clientSecret` for use in the project
 
-## Output esperado
+## Expected Output
 
 ```
 ✔ Project created: my-project (slug: my-project)
@@ -59,16 +59,16 @@ Next steps:
      await client.auth().universalAuth.login({ clientId, clientSecret })
 ```
 
-## Tras crear el vault
+## After Creating the Vault
 
-El agente debe:
-1. Añadir `clientId` y `clientSecret` al proyecto **solo como variables bootstrap** en un `.env` mínimo
-2. Todos los secretos reales van a Infisical directamente
-3. Ver skill `infisical-vault` para el patrón de uso en código
+The agent must:
+1. Add `clientId` and `clientSecret` to the project **only as bootstrap variables** in a minimal `.env`
+2. All real secrets go directly to Infisical
+3. See skill `infisical-vault` for the code usage pattern
 
-## Credenciales admin (solo para este CLI)
+## Admin Credentials (only for this CLI)
 
-Están embebidas en el CLI de casa. No exponer en código de proyecto.
+They are embedded in the casa CLI. Do not expose them in project code.
 
 ## Model routing hints
 

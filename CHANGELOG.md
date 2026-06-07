@@ -7,6 +7,14 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [2.2.0] - 2026-06-07
+
+### Añadido
+
+- `bin/copilot-credits.js`: nueva CLI local para analizar el consumo de AI Credits de GitHub Copilot. Lee `~/.copilot/session-state/<id>/events.jsonl`, aplica la tabla de precios oficial de GitHub y muestra un resumen por modelo con tokens, créditos y coste en USD. Soporta `--days`, `--model`, `--sessions`, `--json`.
+- Comando `copilot-credits` registrado en el campo `bin` de `package.json`.
+- Sección `## Análisis de créditos de Copilot` en `README.md` con referencia de uso, ejemplo de salida y explicación de la fuente de datos.
+
 ## [2.1.0] - 2026-06-07
 
 ### Añadido
@@ -84,7 +92,8 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.1.0...HEAD
+[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/FelipePepe/skills-hub/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/FelipePepe/skills-hub/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/FelipePepe/skills-hub/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/FelipePepe/skills-hub/releases/tag/v1.1.0
