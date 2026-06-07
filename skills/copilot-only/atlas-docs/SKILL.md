@@ -1,10 +1,11 @@
 ---
 name: atlas-docs
 description: >
-  Crea y actualiza documentos en el vault de Atlas (Obsidian) en la intranet .casa.
-  Garantiza que todos los documentos tengan wikilinks bidireccionales para el grafo de conocimiento.
-  Trigger: Cuando el usuario pide crear o actualizar documentos en atlas.casa, el vault Obsidian,
-  o cuando se implementa algo nuevo en la intranet que debe quedar documentado.
+  Creates and updates documents in the Atlas (Obsidian) vault on the .casa intranet.
+  Ensures all documents have bidirectional wikilinks for the knowledge graph.
+  Trigger: when the user asks to create or update documents in atlas.casa, the
+  Obsidian vault, or when something new is implemented on the intranet that needs
+  to be documented.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
@@ -16,27 +17,27 @@ metadata:
 
 ## When to Use
 
-- El usuario dice "actualiza los documentos de atlas.casa" o "documenta esto en Atlas"
-- Se acaba de implementar algo nuevo en la intranet (nuevo servicio, dominio, feature)
-- El usuario pide crear una nueva nota en el vault
-- Se detecta que una nota no tiene enlaces a otras notas relacionadas
-- Se pregunta por el estado de la documentación
+- The user says "update the atlas.casa docs" or "document this in Atlas"
+- Something new was just implemented on the intranet (new service, domain, feature)
+- The user asks to create a new note in the vault
+- A note is detected without links to other related notes
+- The user asks about documentation state
 
-## Infraestructura del Vault
+## Vault Infrastructure
 
-| Dato | Valor |
+| Data | Value |
 |------|-------|
-| **Máquina** | pihole2 — `192.168.1.54` |
-| **Ruta vault** | `/home/sandman/Obsidian/` |
-| **Usuario SSH** | `felipe` (usa `sudo tee` para escribir como `sandman`) |
+| **Machine** | pihole2 — `192.168.1.54` |
+| **Vault path** | `/home/sandman/Obsidian/` |
+| **SSH user** | `felipe` (uses `sudo tee` to write as `sandman`) |
 | **App** | `atlas.casa` (React + obsidian-api backend) |
 
-### Estructura de carpetas
+### Folder Structure
 
 ```
 /home/sandman/Obsidian/
 ├── Stack/
-│   ├── _INDEX.md          ← Índice maestro de todo el vault
+│   ├── _INDEX.md          ← Master index of the entire vault
 │   ├── AI-ML/             ← LangChain, Ollama, CrewAI, RAG, Whisper, Vosk...
 │   ├── Auth/              ← JWT, BcryptJS, TOTP-2FA
 │   ├── Backend/           ← Express, FastAPI, SpringBoot, Hono, Kafka
@@ -47,9 +48,9 @@ metadata:
 │   ├── ORM/               ← DrizzleORM, SpringDataJPA
 │   ├── Testing/           ← Vitest, Playwright, Pytest, JUnit
 │   └── Tools/             ← ESLint, Prettier, Zod, Swagger, Drizzle-Kit
-├── Proyectos/             ← Notas de proyectos concretos
-└── Setup/                 ← Infraestructura, dispositivos, servicios
-    ├── _INDEX.md (o red en Red-Local-Servicios.md)
+├── Projects/              ← Notes for concrete projects
+└── Setup/                 ← Infrastructure, devices, services
+    ├── _INDEX.md (or network in Red-Local-Servicios.md)
     ├── Dispositivos.md
     ├── Red-Local-Servicios.md
     ├── Agent-Skills.md
@@ -58,29 +59,29 @@ metadata:
     └── KDE-Connect.md
 ```
 
-## Reglas de Wikilinks — CRÍTICO
+## Wikilink Rules — CRITICAL
 
-Obsidian resuelve wikilinks por **nombre de archivo** (sin ruta, sin `.md`).
+Obsidian resolves wikilinks by **filename** (no path, no `.md`).
 
 ```markdown
-[[NombreNota]]                          ← enlace simple
-[[NombreNota|Texto visible]]            ← enlace con alias
-[[CarpetaExplicita/NombreNota|Alias]]   ← enlace con ruta (para ambigüedad)
+[[NoteName]]                          ← simple link
+[[NoteName|Visible text]]             ← link with alias
+[[ExplicitFolder/NoteName|Alias]]     ← link with path (for disambiguation)
 ```
 
-### Reglas obligatorias
+### Mandatory Rules
 
-1. **Todo documento debe tener al menos 2 wikilinks** a otros documentos del vault
-2. **Los enlaces deben ser bidireccionales**: si A enlaza a B, B debe enlazar a A
-3. **Sección "## Ver también"** al final de TODA nota — siempre
-4. **Stack notes**: incluir "## Stack relacionado" con tecnologías hermanas
-5. **Proyectos**: enlazar a las tecnologías del Stack que usan
-6. **Setup**: enlazarse entre sí (Dispositivos ↔ Red-Local-Servicios ↔ Proyectos relevantes)
-7. **`Stack/_INDEX.md`**: actualizar cuando se añade una nota nueva
+1. **Every document must have at least 2 wikilinks** to other vault documents
+2. **Links must be bidirectional**: if A links to B, B must link to A
+3. **"## See Also" section** at the end of EVERY note — always
+4. **Stack notes**: include "## Related Stack" with sibling technologies
+5. **Projects**: link to the Stack technologies they use
+6. **Setup**: cross-link each other (Dispositivos ↔ Red-Local-Servicios ↔ relevant Projects)
+7. **`Stack/_INDEX.md`**: update when a new note is added
 
-### Nombres de archivo exactos (para wikilinks correctos)
+### Exact Filenames (for correct wikilinks)
 
-Los nombres de los archivos sin extensión son los identifiers:
+Filenames without extension are the identifiers:
 
 **Stack/Frontend:** React, Angular, AngularMaterial, NextJS, Vite, TailwindCSS, RadixUI, ShadcnUI, TanStackQuery, FramerMotion, Recharts  
 **Stack/Backend:** ExpressJS, FastAPI, SpringBoot, Hono, Kafka  
@@ -93,40 +94,40 @@ Los nombres de los archivos sin extensión son los identifiers:
 **Stack/DevOps:** Docker, GitHubActions, Prometheus, Grafana, Vercel, SonarQube  
 **Stack/Tools:** ESLint, Prettier, Zod, Swagger, Drizzle-Kit  
 **Setup:** Dispositivos, Red-Local-Servicios, Agent-Skills, Syncthing-RPi, Dropbox-Sync, KDE-Connect  
-**Proyectos:** obsidian-clone (Mente), netscan, dotnet-cache-poc, dotnet-framework-cache-evolution
+**Projects:** obsidian-clone (Mente), netscan, dotnet-cache-poc, dotnet-framework-cache-evolution
 
-## Protocolo de Trabajo
+## Work Protocol
 
-### Paso 1 — Descubrir estado actual
+### Step 1 — Discover Current State
 ```bash
 ssh felipe@192.168.1.54 "find /home/sandman/Obsidian -name '*.md' | sort"
 ssh felipe@192.168.1.54 "grep -r '\[\[' /home/sandman/Obsidian/Setup/ --include='*.md' -l"
 ```
 
-### Paso 2 — Auditar enlaces faltantes
-Para cada nota a crear/actualizar, identificar:
-- ¿Qué otras notas del vault la mencionan o deberían mencionarla?
-- ¿Tiene sección "## Ver también"?
-- ¿Está en `_INDEX.md`?
+### Step 2 — Audit Missing Links
+For each note to create/update, identify:
+- Which other vault notes mention it or should mention it?
+- Does it have a "## See Also" section?
+- Is it in `_INDEX.md`?
 
-### Paso 3 — Escribir/actualizar notas
+### Step 3 — Write/Update Notes
 ```bash
-# Siempre con sudo tee (los archivos son de sandman, nos conectamos como felipe)
-ssh felipe@192.168.1.54 'sudo tee /home/sandman/Obsidian/CARPETA/Nota.md > /dev/null << '"'"'EOF'"'"'
-[contenido markdown con wikilinks]
+# Always with sudo tee (files belong to sandman, we connect as felipe)
+ssh felipe@192.168.1.54 'sudo tee /home/sandman/Obsidian/FOLDER/Note.md > /dev/null << '"'"'EOF'"'"'
+[markdown content with wikilinks]
 EOF
 echo "OK"'
 ```
 
-### Paso 4 — Actualizar notas que deben enlazar a la nueva
-Si creas `Proyectos/nueva-herramienta.md` que usa React y TypeScript:
-- Actualizar `Stack/Frontend/React.md` → añadir en "## Proyectos que lo usan"
-- Actualizar `Stack/Languages/TypeScript.md` → idem
-- Actualizar `Stack/_INDEX.md` → añadir en sección Proyectos
+### Step 4 — Update Notes That Should Link to the New One
+If you create `Projects/new-tool.md` that uses React and TypeScript:
+- Update `Stack/Frontend/React.md` → add to "## Projects Using It"
+- Update `Stack/Languages/TypeScript.md` → same
+- Update `Stack/_INDEX.md` → add in the Projects section
 
-### Paso 5 — Verificar en atlas.casa
+### Step 5 — Verify in atlas.casa
 ```bash
-curl -s http://atlas.casa/api/notes | python3 -c "import json,sys; notes=json.load(sys.stdin); print(f'{len(notes)} notas en el vault')"
+curl -s http://atlas.casa/api/notes | python3 -c "import json,sys; notes=json.load(sys.stdin); print(f'{len(notes)} notes in vault')"
 ```
 
 ## Templates
@@ -134,125 +135,125 @@ curl -s http://atlas.casa/api/notes | python3 -c "import json,sys; notes=json.lo
 ### Template: Stack Note
 
 ```markdown
-# {Nombre}
+# {Name}
 
-> {Descripción en una línea}. Usado con [[{Relacionado1}]] y [[{Relacionado2}]].
+> {One-line description}. Used with [[{Related1}]] and [[{Related2}]].
 
-## ¿Qué es?
-{Descripción de 2-3 líneas. Incluir al menos 2 wikilinks a tecnologías relacionadas.}
+## What Is It?
+{2-3 line description. Include at least 2 wikilinks to related technologies.}
 
-## Stack relacionado
+## Related Stack
 [[Tech1]] · [[Tech2]] · [[Tech3]]
 
-## Instalación
+## Installation
 ```bash
-{comando de instalación}
+{install command}
 ```
 
-## Uso básico
+## Basic Usage
 ```{lang}
-{ejemplo mínimo funcional}
+{minimal working example}
 ```
 
-## Proyectos que lo usan
-- [[Proyectos/nombre-proyecto|Nombre Proyecto]] — {cómo se usa}
+## Projects Using It
+- [[Projects/project-name|Project Name]] — {how it is used}
 
-## Ver también
-- [[TecnologíaRelacionada1]] — {relación}
-- [[TecnologíaRelacionada2]] — {relación}
-- [[Red-Local-Servicios]] — {solo si aplica a la intranet}
+## See Also
+- [[RelatedTechnology1]] — {relationship}
+- [[RelatedTechnology2]] — {relationship}
+- [[Red-Local-Servicios]] — {only if it applies to the intranet}
 ```
 
-### Template: Proyecto Note
+### Template: Project Note
 
 ```markdown
-# {Nombre Proyecto}
+# {Project Name}
 
-**Última actualización:** {YYYY-MM-DD}
+**Last updated:** {YYYY-MM-DD}
 
-## Descripción
-{Qué hace el proyecto. Enlazar tecnologías del stack usadas.}
+## Description
+{What the project does. Link the stack technologies used.}
 
 ## Stack
 
-| Capa | Tecnología |
-|------|-----------|
+| Layer | Technology |
+|-------|-----------|
 | Frontend | [[React]], [[Vite]], [[TypeScript]] |
 | Backend | [[ExpressJS\|Express]], [[TypeScript]] |
 | ...
 
-## Arquitectura
+## Architecture
 ```
-{diagrama ASCII o descripción}
+{ASCII diagram or description}
 ```
 
-## Estado del proyecto
+## Project State
 - [x] Feature 1
-- [ ] Feature 2 (pendiente)
+- [ ] Feature 2 (pending)
 
 ## Deploy
 ```bash
-{comandos de deploy}
+{deploy commands}
 ```
 
-## Ver también
-- [[Red-Local-Servicios]] — configuración nginx
-- [[Dispositivos]] — máquinas involucradas
-- [[Stack relacionado]] — tecnologías usadas
+## See Also
+- [[Red-Local-Servicios]] — nginx configuration
+- [[Dispositivos]] — machines involved
+- [[Related Stack]] — technologies used
 ```
 
 ### Template: Setup Note
 
 ```markdown
-# {Servicio/Config}
+# {Service/Config}
 
-**Última actualización:** {YYYY-MM-DD}
+**Last updated:** {YYYY-MM-DD}
 
-## Descripción
-{Qué es y para qué sirve en la intranet.}
+## Description
+{What it is and what it does on the intranet.}
 
-## Infraestructura
+## Infrastructure
 
-| Dato | Valor |
+| Data | Value |
 |------|-------|
-| Máquina | [[Dispositivos\|pihole2]] (192.168.1.54) |
-| Dominio | `servicio.casa` |
+| Machine | [[Dispositivos\|pihole2]] (192.168.1.54) |
+| Domain | `service.casa` |
 | ...
 
-## Configuración
-{detalles}
+## Configuration
+{details}
 
-## Comandos útiles
+## Useful Commands
 ```bash
-{comandos}
+{commands}
 ```
 
-## Ver también
-- [[Dispositivos]] — inventario de la red
-- [[Red-Local-Servicios]] — configuración nginx
-- [[Proyectos/proyecto-relacionado]] — {si aplica}
+## See Also
+- [[Dispositivos]] — network inventory
+- [[Red-Local-Servicios]] — nginx configuration
+- [[Projects/related-project]] — {if applicable}
 ```
 
-## Convenciones de Fechas y Formato
+## Date and Format Conventions
 
-- Fecha: `**Última actualización:** YYYY-MM-DD`
-- Encabezado H1 obligatorio en cada nota
-- Tablas para datos estructurados (inventarios, endpoints, comandos)
-- Bloques de código con lenguaje especificado (` ```bash `, ` ```tsx `, etc.)
-- Emojis opcionales en títulos de sección (solo en `_INDEX.md`)
+- Date: `**Last updated:** YYYY-MM-DD`
+- H1 heading required in every note
+- Tables for structured data (inventories, endpoints, commands)
+- Code blocks with language specified (` ```bash `, ` ```tsx `, etc.)
+- Emojis optional in section headings (only in `_INDEX.md`)
 
-## Dominios .casa actuales (para referencias en notas)
+## Current .casa Domains (for references in notes)
 
-| Dominio | Servicio | Máquina |
-|---------|---------|---------|
-| `atlas.casa` | App de notas (Atlas) | pihole2 |
-| `obsidian.casa` | Alias legacy Atlas | pihole2 |
-| `portal.casa` | Dashboard intranet | pihole2 |
+| Domain | Service | Machine |
+|--------|---------|---------|
+| `atlas.casa` | Notes app (Atlas) | pihole2 |
+| `obsidian.casa` | Legacy Atlas alias | pihole2 |
+| `portal.casa` | Intranet dashboard | pihole2 |
 | `ha.casa` | Home Assistant | pihole2 |
 | `nas.casa` | FileBrowser NAS | maya |
-| `maya.casa` | Equipo maya | maya |
-| `pihole2.casa` | Panel Pi-hole 2 | pihole2 |
-| `pihole1.casa` | Panel Pi-hole 1 | pihole1 |
+| `maya.casa` | maya machine | maya |
+| `pihole2.casa` | Pi-hole 2 panel | pihole2 |
+| `pihole1.casa` | Pi-hole 1 panel | pihole1 |
 | `clockwork.casa` | clockworkpi | clockwork |
 | `router.casa` | Router | 192.168.1.1 |
 

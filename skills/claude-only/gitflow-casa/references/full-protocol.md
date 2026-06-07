@@ -3,95 +3,95 @@
 ---
 name: gitflow-casa
 description: >
-  Aplica gitflow correctamente en cualquier repositorio: feature/* → develop →
-  release → main. Revisa el estado git actual, detecta violaciones del flujo,
-  guía cada paso (branch, commit, merge, tag) y gestiona lefthook (instalación,
-  hooks pre-commit: gitleaks, prettier, eslint). Trigger: el usuario quiere
-  hacer un commit, merge, release, configurar hooks, o dice "sigo gitflow?",
-  "cómo lo subo", "qué rama toca", "configura lefthook".
+  Applies GitFlow correctly in any repository: feature/* → develop → release → main.
+  Checks the current git state, detects flow violations, guides every step (branch,
+  commit, merge, tag), and manages lefthook (install, pre-commit hooks: gitleaks,
+  prettier, eslint). Trigger: the user wants to commit, merge, release, configure hooks,
+  or asks "am I following gitflow?", "how do I push", "which branch do I use",
+  "configure lefthook".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.1"
+  version: "1.2"
 ---
 
-## Cuándo usar este skill
+## When to Use This Skill
 
-- El usuario quiere commitear, mergear o publicar cambios
-- El usuario pregunta en qué rama está o qué rama toca
-- Se detecta que hay cambios en una rama incorrecta (ej: commits en `main` directamente)
-- Al arrancar trabajo nuevo sobre un repo
-- El usuario quiere configurar o verificar lefthook en un proyecto
+- The user wants to commit, merge, or publish changes
+- The user asks which branch they are on or which branch to use
+- Changes are detected on the wrong branch (e.g. commits directly on `main`)
+- Starting new work on a repo
+- The user wants to configure or verify lefthook in a project
 
 ---
 
-## Modelo de ramas
+## Branch Model
 
 ```
-main        ← solo recibe merges de release/* o hotfix/*. Nunca commits directos.
-develop     ← integración. Recibe merges de feature/* y hotfix/*.
-feature/*   ← trabajo nuevo. Sale de develop, vuelve a develop.
-release/*   ← preparación de versión. Sale de develop, mergea a main Y develop.
-hotfix/*    ← fix urgente en producción. Sale de main, mergea a main Y develop.
+main        ← only receives merges from release/* or hotfix/*. Never direct commits.
+develop     ← integration. Receives merges from feature/* and hotfix/*.
+feature/*   ← new work. Branches from develop, returns to develop.
+release/*   ← version preparation. Branches from develop, merges to main AND develop.
+hotfix/*    ← urgent production fix. Branches from main, merges to main AND develop.
 ```
 
-**Regla crítica**: Nunca hacer `git commit` directamente en `main` ni en `develop`.
+**Critical rule**: Never run `git commit` directly on `main` or `develop`.
 
 ---
 
-## Paso 1 — Diagnóstico inicial
+## Step 1 — Initial Diagnosis
 
 ```bash
-git branch --show-current          # rama actual
-git status                         # cambios pendientes
-git log --oneline -5               # últimos commits
+git branch --show-current          # current branch
+git status                         # pending changes
+git log --oneline -5               # last commits
 git branch -a | grep -E "main|develop|feature|release|hotfix"
 ```
 
-Evaluar:
-- ¿Estamos en la rama correcta para lo que se quiere hacer?
-- ¿Hay commits en `main` o `develop` que deberían estar en una `feature/*`?
-- ¿Existe rama `develop`? Si no, crearla desde `main`.
+Evaluate:
+- Are we on the correct branch for the intended work?
+- Are there commits on `main` or `develop` that should be on a `feature/*`?
+- Does the `develop` branch exist? If not, create it from `main`.
 
 ---
 
-## Paso 2 — Flujos habituales
+## Step 2 — Common Flows
 
-### Trabajo nuevo (feature)
+### New Work (feature)
 
 ```bash
 git checkout develop
-git pull origin develop            # sincronizar antes de ramificar
-git checkout -b feature/<nombre>   # nombre en kebab-case, descriptivo
+git pull origin develop            # sync before branching
+git checkout -b feature/<name>     # kebab-case, descriptive name
 
-# ... trabajo, commits ...
-git add <archivos>
-git commit -m "feat(<scope>): descripción"
+# ... work, commits ...
+git add <files>
+git commit -m "feat(<scope>): description"
 
-# Cuando está listo:
+# When ready:
 git checkout develop
-git merge --no-ff feature/<nombre>
+git merge --no-ff feature/<name>
 git push origin develop
-git branch -d feature/<nombre>
+git branch -d feature/<name>
 ```
 
-### Publicar versión (release)
+### Publish a Version (release)
 
 ```bash
 git checkout develop
 git pull origin develop
-git checkout -b release/<semver>   # ej: release/1.2.0
+git checkout -b release/<semver>   # e.g. release/1.2.0
 
-# Ajustes de versión, CHANGELOG, últimos fixes...
+# Version bumps, CHANGELOG, last fixes...
 git commit -m "chore: bump version to <semver>"
 
-# Mergear a main
+# Merge to main
 git checkout main
 git merge --no-ff release/<semver>
 git tag -a v<semver> -m "Release <semver>"
 git push origin main --tags
 
-# Mergear de vuelta a develop
+# Merge back to develop
 git checkout develop
 git merge --no-ff release/<semver>
 git push origin develop
@@ -99,75 +99,75 @@ git push origin develop
 git branch -d release/<semver>
 ```
 
-### Fix urgente (hotfix)
+### Urgent Fix (hotfix)
 
 ```bash
 git checkout main
 git pull origin main
-git checkout -b hotfix/<descripcion>
+git checkout -b hotfix/<description>
 
 # Fix + commit
-git commit -m "fix(<scope>): descripción del fix"
+git commit -m "fix(<scope>): description of the fix"
 
-# Mergear a main
+# Merge to main
 git checkout main
-git merge --no-ff hotfix/<descripcion>
+git merge --no-ff hotfix/<description>
 git tag -a v<semver-patch> -m "Hotfix <semver-patch>"
 git push origin main --tags
 
-# Mergear a develop
+# Merge to develop
 git checkout develop
-git merge --no-ff hotfix/<descripcion>
+git merge --no-ff hotfix/<description>
 git push origin develop
 
-git branch -d hotfix/<descripcion>
+git branch -d hotfix/<description>
 ```
 
 ---
 
-## Convención de mensajes de commit
+## Commit Message Convention
 
-### Formato completo
+### Full Format
 
 ```
-<tipo>(<scope>): <descripción>        ← subject: máx 72 caracteres
+<type>(<scope>): <description>        ← subject: max 72 characters
 
-<cuerpo>                              ← opcional, separado por línea en blanco
+<body>                                ← optional, separated by blank line
 
-<footer>                              ← opcional: breaking changes, issues
+<footer>                              ← optional: breaking changes, issues
 ```
 
-### Reglas del subject (obligatorias)
+### Subject Rules (mandatory)
 
-| Regla | Correcto | Incorrecto |
-|-------|----------|-----------|
-| Imperativo en presente | `add login page` | `added login page` / `adds login page` |
-| Minúsculas | `fix cors header` | `Fix CORS header` |
-| Sin punto final | `refactor auth module` | `refactor auth module.` |
-| Máx 72 caracteres | — | líneas largas dificultan `git log --oneline` |
-| Scope en minúsculas y kebab-case | `feat(board-detail)` | `feat(BoardDetail)` |
+| Rule | Correct | Incorrect |
+|------|---------|-----------|
+| Imperative present tense | `add login page` | `added login page` / `adds login page` |
+| Lowercase | `fix cors header` | `Fix CORS header` |
+| No trailing period | `refactor auth module` | `refactor auth module.` |
+| Max 72 characters | — | long lines make `git log --oneline` hard to read |
+| Scope in lowercase kebab-case | `feat(board-detail)` | `feat(BoardDetail)` |
 
-### Tipos
+### Types
 
-| Tipo | Cuándo usarlo |
-|------|--------------|
-| `feat` | Nueva funcionalidad visible para el usuario |
-| `fix` | Corrección de un bug |
-| `refactor` | Cambio interno sin alterar comportamiento ni añadir features |
-| `perf` | Mejora de rendimiento |
-| `test` | Añadir o corregir tests |
-| `docs` | Solo documentación (CLAUDE.md, README, comentarios) |
-| `style` | Formato, espacios, comas — sin cambio de lógica |
-| `chore` | Tareas de mantenimiento: bump de versión, config, dependencias |
-| `ci` | Cambios en pipelines de CI/CD |
-| `revert` | Revertir un commit anterior |
+| Type | When to use |
+|------|-------------|
+| `feat` | New user-facing functionality |
+| `fix` | Bug fix |
+| `refactor` | Internal change without altering behavior or adding features |
+| `perf` | Performance improvement |
+| `test` | Add or fix tests |
+| `docs` | Documentation only (CLAUDE.md, README, comments) |
+| `style` | Formatting, spaces, commas — no logic change |
+| `chore` | Maintenance tasks: version bump, config, dependencies |
+| `ci` | CI/CD pipeline changes |
+| `revert` | Revert a prior commit |
 
-### Cuerpo (cuándo escribirlo)
+### Body (when to write it)
 
-Escribir cuerpo cuando el subject no es suficiente para entender el **por qué**:
-- La decisión no es obvia
-- Se descartaron alternativas relevantes
-- Hay contexto de negocio o técnico que no queda en el código
+Write a body when the subject alone is not enough to understand the **why**:
+- The decision is not obvious
+- Relevant alternatives were discarded
+- There is business or technical context not visible in the code
 
 ```
 refactor(db): replace in-memory store with drizzle + postgresql
@@ -182,12 +182,12 @@ Closes #12
 ### Footer
 
 ```
-BREAKING CHANGE: <descripción del cambio incompatible>
+BREAKING CHANGE: <description of the incompatible change>
 Closes #<issue>
 Co-authored-by: Name <email>
 ```
 
-### Ejemplos completos
+### Full Examples
 
 ```
 feat(auth): add TOTP MFA as optional second factor
@@ -217,54 +217,54 @@ feat(board-detail): implement CDK drag-and-drop for card reordering
 Closes #34
 ```
 
-### Lo que NO es un buen mensaje de commit
+### What is NOT a good commit message
 
 ```
 ❌  fix stuff
 ❌  WIP
-❌  cambios varios
-❌  arreglé el bug de ayer
+❌  various changes
+❌  fixed yesterday's bug
 ❌  feat: implemented the new feature for the drag and drop functionality in the board detail component
 ```
 
 ---
 
-## Detección de violaciones
+## Violation Detection
 
-Si se detecta alguna de estas situaciones, advertir antes de continuar:
+If any of these situations are detected, warn before continuing:
 
-| Situación | Riesgo | Acción |
-|-----------|--------|--------|
-| Commits directos en `main` | Rompe el historial de releases | Crear rama `hotfix/*` y cherry-pick |
-| Commits directos en `develop` | Dificulta rollback | Crear `feature/*` retroactiva si aplica |
-| `feature/*` muy desincronizada de `develop` | Conflictos al mergear | `git rebase develop` o `git merge develop` |
-| Sin rama `develop` | No hay gitflow real | Crear `develop` desde el commit actual de `main` |
-| Tag de versión en rama que no es `main` | Versión no trazable | Mover el tag tras mergear a `main` |
+| Situation | Risk | Action |
+|-----------|------|--------|
+| Direct commits on `main` | Breaks release history | Create `hotfix/*` branch and cherry-pick |
+| Direct commits on `develop` | Makes rollback harder | Create retroactive `feature/*` if applicable |
+| `feature/*` far behind `develop` | Conflicts on merge | `git rebase develop` or `git merge develop` |
+| No `develop` branch | No real gitflow | Create `develop` from current `main` commit |
+| Version tag on non-`main` branch | Version not traceable | Move the tag after merging to `main` |
 
 ---
 
-## Lefthook — hooks de pre-commit
+## Lefthook — Pre-commit Hooks
 
-### Diagnóstico
-
-```bash
-# ¿Está lefthook instalado en el repo?
-ls .git/hooks/pre-commit 2>/dev/null && echo "hooks instalados" || echo "sin hooks"
-cat lefthook.yml 2>/dev/null || echo "sin lefthook.yml"
-```
-
-### Instalación en un repo nuevo
+### Diagnosis
 
 ```bash
-# 1. Añadir como devDependency (o usar npx)
-npm install --save-dev lefthook   # o: npm install -g lefthook
-
-# 2. Crear lefthook.yml en la raíz del repo
-# 3. Instalar los hooks en .git/hooks/
-npx lefthook install
+# Is lefthook installed in the repo?
+ls .git/hooks/pre-commit 2>/dev/null && echo "hooks installed" || echo "no hooks"
+cat lefthook.yml 2>/dev/null || echo "no lefthook.yml"
 ```
 
-### `lefthook.yml` estándar para proyectos casa
+### Installation in a New Repo
+
+```bash
+# 1. Add as devDependency
+pnpm add -D lefthook
+
+# 2. Create lefthook.yml in the repo root
+# 3. Install hooks in .git/hooks/
+pnpm lefthook install
+```
+
+### Standard `lefthook.yml` for casa projects
 
 ```yaml
 pre-commit:
@@ -275,13 +275,13 @@ pre-commit:
 
     prettier:
       glob: "*.{ts,html,scss,json,md}"
-      run: npx prettier --write {staged_files}
+      run: pnpm dlx prettier --write {staged_files}
       stage_fixed: true
 
     lint-backend:
       root: backend/
       glob: "src/**/*.ts"
-      run: npm run lint -- --max-warnings 0
+      run: pnpm run lint -- --max-warnings 0
 
     lint-frontend:
       root: frontend/
@@ -289,20 +289,20 @@ pre-commit:
       run: node_modules/.bin/ng lint --quiet
 ```
 
-**Ajustar según el proyecto:**
-- Solo frontend (sin backend): eliminar `lint-backend`
-- Solo backend (sin Angular): cambiar `lint-frontend` por `npm run lint`
-- Sin prettier global: mover prettier a cada `root` con su propio config
+**Adjust for the project:**
+- Frontend only (no backend): remove `lint-backend`
+- Backend only (no Angular): change `lint-frontend` to `pnpm run lint`
+- No global prettier: move prettier under each `root` with its own config
 
-### Hooks disponibles
+### Available Hooks
 
-| Hook | Cuándo se ejecuta | Uso habitual |
-|------|------------------|-------------|
-| `pre-commit` | Antes de cada commit | lint, format, secrets scan |
-| `commit-msg` | Al escribir el mensaje | Validar formato convencional commits |
-| `pre-push` | Antes de push | Tests, build check |
+| Hook | When it runs | Typical use |
+|------|-------------|-------------|
+| `pre-commit` | Before each commit | lint, format, secrets scan |
+| `commit-msg` | When writing the message | Validate conventional commit format |
+| `pre-push` | Before push | Tests, build check |
 
-### `commit-msg` para conventional commits (recomendado)
+### `commit-msg` for Conventional Commits (recommended)
 
 ```yaml
 commit-msg:
@@ -310,43 +310,43 @@ commit-msg:
     validate:
       run: |
         MSG=$(head -1 {1})
-        # Tipo válido, scope opcional en kebab-case, descripción en minúsculas, máx 72 chars, sin punto final
+        # Valid type, optional scope in kebab-case, lowercase description, max 72 chars, no trailing period
         echo "$MSG" | grep -qP "^(feat|fix|refactor|perf|test|docs|style|chore|ci|revert)(\([a-z0-9-]+\))?: [a-z].{0,69}[^.]$" \
           || (echo "
-        ❌ Commit rechazado. Formato requerido:
-           tipo(scope): descripción en imperativo, minúsculas, máx 72 chars, sin punto final
+        ❌ Commit rejected. Required format:
+           type(scope): imperative description, lowercase, max 72 chars, no trailing period
 
-           Tipos: feat | fix | refactor | perf | test | docs | style | chore | ci | revert
-           Ejemplo: feat(auth): add TOTP MFA support
+           Types: feat | fix | refactor | perf | test | docs | style | chore | ci | revert
+           Example: feat(auth): add TOTP MFA support
         " && exit 1)
 ```
 
-### Comandos útiles
+### Useful Commands
 
 ```bash
-npx lefthook install          # instalar/reinstalar hooks
-npx lefthook run pre-commit   # ejecutar hooks manualmente sin commitear
-npx lefthook uninstall        # eliminar hooks de .git/hooks/
+pnpm lefthook install          # install/reinstall hooks
+pnpm lefthook run pre-commit   # run hooks manually without committing
+pnpm lefthook uninstall        # remove hooks from .git/hooks/
 
-# Saltar hooks puntualmente (solo si hay una razón muy justificada):
-git commit --no-verify -m "..."   # ⚠️ usar con criterio
+# Skip hooks temporarily (only if there is a very good reason):
+git commit --no-verify -m "..."   # ⚠️ use with care
 ```
 
-### Solución de problemas frecuentes
+### Common Troubleshooting
 
-| Problema | Causa | Solución |
-|----------|-------|---------|
-| Hook no ejecuta | `lefthook install` no se corrió | `npx lefthook install` |
-| `ng: not found` en hook de frontend | ng no está en PATH del hook | Usar `node_modules/.bin/ng` |
-| Prettier reformatea y el commit falla | `stage_fixed: true` no está | Añadir `stage_fixed: true` al comando prettier |
-| gitleaks falla porque no está instalado | Binario ausente | `brew install gitleaks` o `apt install gitleaks` |
+| Problem | Cause | Solution |
+|---------|-------|---------|
+| Hook does not run | `lefthook install` was not run | `pnpm lefthook install` |
+| `ng: not found` in frontend hook | ng not in hook PATH | Use `node_modules/.bin/ng` |
+| Prettier reformats and commit fails | `stage_fixed: true` is missing | Add `stage_fixed: true` to the prettier command |
+| gitleaks fails because it is not installed | Binary missing | `brew install gitleaks` or `apt install gitleaks` |
 
 ---
 
-## Repos conocidos con gitflow
+## Known Repos with GitFlow
 
-| Repo | Ruta | Ramas principales |
-|------|------|------------------|
+| Repo | Path | Main branches |
+|------|------|--------------|
 | poc-trello | `/mnt/nas/sources/poc-trello` | main, develop |
 | engram | `/mnt/nas/sources/engram` | main, develop |
 | openclaw | `/mnt/nas/sources/openclaw` | main, develop |

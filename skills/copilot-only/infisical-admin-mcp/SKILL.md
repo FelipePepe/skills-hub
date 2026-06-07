@@ -1,42 +1,42 @@
 ---
 name: infisical-admin-mcp
 description: >
-  Provisiona proyectos y credenciales bootstrap en Infisical usando el MCP global
-  `infisical-admin`. Trigger: cuando el usuario pide crear un proyecto/vault en
-  Infisical, sacar `clientId` y `clientSecret`, crear o reutilizar machine identities,
-  inicializar Universal Auth, o automatizar tareas de administración de Infisical
-  sin ir manualmente a la UI.
+  Provisions projects and bootstrap credentials in Infisical using the global
+  `infisical-admin` MCP. Trigger: when the user asks to create a project/vault in
+  Infisical, get `clientId` and `clientSecret`, create or reuse machine identities,
+  initialize Universal Auth, or automate Infisical administration tasks without
+  going through the UI manually.
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
   version: "1.0"
 ---
 
-Usa el MCP global `infisical-admin` como camino preferido para operaciones de provisioning
-en Infisical. No vayas primero a la UI ni a flujos manuales si el MCP cubre la tarea.
+Use the global MCP `infisical-admin` as the preferred path for provisioning operations
+in Infisical. Do not go to the UI or manual flows first if the MCP covers the task.
 
-## Cuándo usar esta skill
+## When to Use This Skill
 
-- El usuario pide `clientId` y `clientSecret`
-- El usuario quiere crear o inicializar un proyecto/vault en Infisical
-- El usuario quiere crear o reutilizar una machine identity
-- El usuario quiere automatizar Universal Auth o bootstrap credentials
+- The user asks for `clientId` and `clientSecret`
+- The user wants to create or initialize a project/vault in Infisical
+- The user wants to create or reuse a machine identity
+- The user wants to automate Universal Auth or bootstrap credentials
 
-## Tools MCP preferidas
+## Preferred MCP Tools
 
 - `infisical_list_projects`
 - `infisical_bootstrap_project`
 - `infisical_ensure_credentials`
 
-## Flujo recomendado
+## Recommended Flow
 
-1. Si no está claro si el proyecto existe, usa `infisical_list_projects`.
-2. Si el usuario quiere crear o preparar todo desde cero, usa `infisical_bootstrap_project`.
-3. Si el proyecto ya existe y solo faltan credenciales, usa `infisical_ensure_credentials`.
-4. Devuelve al usuario `projectId`, `identityId`, `clientId` y `clientSecret` cuando aplique.
+1. If it is not clear whether the project exists, use `infisical_list_projects`.
+2. If the user wants to create or set up everything from scratch, use `infisical_bootstrap_project`.
+3. If the project already exists and only credentials are missing, use `infisical_ensure_credentials`.
+4. Return `projectId`, `identityId`, `clientId`, and `clientSecret` to the user when applicable.
 
-## Reglas
+## Rules
 
-- Trata `clientSecret` como dato sensible.
-- No escribas secretos reales en `.env` salvo credenciales bootstrap explícitamente permitidas por el proyecto.
-- Si otra skill de Infisical aplica también, usa esta skill primero para provisioning y luego la otra para integración en código.
+- Treat `clientSecret` as sensitive data.
+- Do not write real secrets to `.env` except for bootstrap credentials explicitly permitted by the project.
+- If another Infisical skill also applies, use this skill first for provisioning and then the other for code integration.

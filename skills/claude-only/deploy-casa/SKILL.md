@@ -1,48 +1,48 @@
 ---
 name: deploy-casa
 description: >
-  Despliega una aplicación web en la intranet .casa: compila el frontend, copia
-  los artefactos a /mnt/nas/webs/<dominio>/, configura nginx en maya, añade DNS
-  en ambos Pi-holes y registra la app en portal.casa.
-  Trigger: El usuario pide "despliega", "instala en nginx", "añade a portal.casa",
-  "publica en la intranet" o similares.
+  Deploys a web application to the .casa intranet: compiles the frontend, copies
+  artifacts to /mnt/nas/webs/<domain>/, configures nginx on maya, adds DNS on
+  both Pi-holes, and registers the app in portal.casa.
+  Trigger: user says "deploy", "install on nginx", "add to portal.casa",
+  "publish on the intranet", or similar.
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.0"
+  version: "1.1"
 ---
 
-## Cuándo usar este skill
+## When to use this skill
 
-- El usuario pide desplegar una app web en la red local `.casa`
-- El usuario dice "instala en nginx", "añade a portal.casa", "publica en la intranet"
-- Se acaba de desarrollar un frontend nuevo y se quiere servir en la red
+- The user wants to deploy a web app on the `.casa` local network
+- The user says "install on nginx", "add to portal.casa", "publish on the intranet"
+- A new frontend was just developed and needs to be served on the network
 
 ---
 
-## Infraestructura de referencia
+## Reference infrastructure
 
-| Máquina | IP | Rol |
-|---------|----|-----|
-| maya | 192.168.1.55 | Servidor nginx, NAS montado en `/mnt/nas` |
-| pihole1 | 192.168.1.53 | DNS primario |
-| pihole2 | 192.168.1.54 | DNS secundario, portal.casa |
+| Machine | IP | Role |
+|---------|----|------|
+| maya | 192.168.1.55 | nginx server, NAS mounted at `/mnt/nas` |
+| pihole1 | 192.168.1.53 | Primary DNS |
+| pihole2 | 192.168.1.54 | Secondary DNS, portal.casa |
 
-**Rutas clave en maya:**
+**Key paths on maya:**
 
-| Ruta | Propósito |
-|------|-----------|
-| `/mnt/nas/webs/<dominio>/` | Raíz de producción de frontends estáticos |
-| `/mnt/nas/sources/<proyecto>/` | Código fuente |
-| `/etc/nginx/sites-available/` | Configs nginx |
-| `/etc/dnsmasq.d/local.conf` | DNS en cada Pi-hole (vía SSH) |
-| `/etc/hosts` | Workaround DNS local de maya |
-| `/mnt/nas/webs/portal.casa/index.html` | Dashboard portal.casa |
+| Path | Purpose |
+|------|---------|
+| `/mnt/nas/webs/<domain>/` | Production root for static frontends |
+| `/mnt/nas/sources/<project>/` | Source code |
+| `/etc/nginx/sites-available/` | nginx configs |
+| `/etc/dnsmasq.d/local.conf` | DNS on each Pi-hole (via SSH) |
+| `/etc/hosts` | Local DNS workaround on maya |
+| `/mnt/nas/webs/portal.casa/index.html` | portal.casa dashboard |
 
-**Puertos ocupados en maya:**
+**Occupied ports on maya:**
 
-| Puerto | Servicio |
-|--------|---------|
+| Port | Service |
+|------|---------|
 | 3000 | obsidian-api |
 | 3001 | poc-trello backend |
 | 9100 | node_exporter |
@@ -50,57 +50,57 @@ metadata:
 
 ---
 
-## Protocolo de despliegue
+## Deployment protocol
 
-### Paso 1 — Recopilar información
+### Step 1 — Gather information
 
-Antes de empezar, determinar:
-- **Dominio**: `<nombre>.casa` (seguir patrón existente: `trello.casa`, `oficina.casa`…)
-- **Tipo**: solo frontend estático / frontend + backend Node.js
-- **Framework frontend**: Angular (`ng build`), React/Vite (`npm run build`), otro
-- **Puerto del backend** (si aplica): elegir uno libre en maya
+Before starting, determine:
+- **Domain**: `<name>.casa` (follow existing pattern: `trello.casa`, `oficina.casa`…)
+- **Type**: static frontend only / frontend + Node.js backend
+- **Frontend framework**: Angular (`pnpm exec ng build`), React/Vite (`pnpm run build`), other
+- **Backend port** (if applicable): choose a free port on maya
 
-### Paso 2 — Compilar frontend
+### Step 2 — Build frontend
 
 ```bash
-cd /mnt/nas/sources/<proyecto>/frontend   # o raíz si es SPA directa
+cd /mnt/nas/sources/<project>/frontend   # or root if direct SPA
 
-# Instalar dependencias si node_modules no existe
-npm install
+# Install dependencies if node_modules doesn't exist
+pnpm install
 
 # Angular
-node_modules/.bin/ng build --configuration production
+pnpm exec ng build --configuration production
 
 # Vite / React
-npm run build
+pnpm run build
 ```
 
-**Directorio de salida habitual:**
-- Angular: `dist/<nombre>/browser/`
+**Typical output directory:**
+- Angular: `dist/<name>/browser/`
 - Vite: `dist/`
 
-### Paso 3 — Copiar a producción en NAS
+### Step 3 — Copy to production on NAS
 
 ```bash
-mkdir -p /mnt/nas/webs/<dominio>.casa
-cp -r <ruta-dist>/. /mnt/nas/webs/<dominio>.casa/
+mkdir -p /mnt/nas/webs/<domain>.casa
+cp -r <dist-path>/. /mnt/nas/webs/<domain>.casa/
 ```
 
-### Paso 4 — Configurar nginx en maya
+### Step 4 — Configure nginx on maya
 
-Crear `/etc/nginx/sites-available/<dominio>.casa`:
+Create `/etc/nginx/sites-available/<domain>.casa`:
 
 ```nginx
 server {
     listen 80;
-    server_name <dominio>.casa;
+    server_name <domain>.casa;
 
-    root /mnt/nas/webs/<dominio>.casa;
+    root /mnt/nas/webs/<domain>.casa;
     index index.html;
 
-    # Solo si hay backend Node.js:
+    # Only if there is a Node.js backend:
     location /api/ {
-        proxy_pass http://127.0.0.1:<puerto-backend>;
+        proxy_pass http://127.0.0.1:<backend-port>;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -113,45 +113,45 @@ server {
 ```
 
 ```bash
-sudo ln -sf /etc/nginx/sites-available/<dominio>.casa /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/<domain>.casa /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-### Paso 5 — Añadir DNS en ambos Pi-holes
+### Step 5 — Add DNS on both Pi-holes
 
 ```bash
-# En pihole1 (192.168.1.53) y pihole2 (192.168.1.54):
+# On pihole1 (192.168.1.53) and pihole2 (192.168.1.54):
 for host in 192.168.1.53 192.168.1.54; do
-  ssh $host "echo 'address=/<dominio>.casa/192.168.1.55' | sudo tee -a /etc/dnsmasq.d/local.conf && sudo systemctl restart pihole-FTL && echo ok"
+  ssh $host "echo 'address=/<domain>.casa/192.168.1.55' | sudo tee -a /etc/dnsmasq.d/local.conf && sudo systemctl restart pihole-FTL && echo ok"
 done
 ```
 
-> ⚠️ **NO usar `/etc/pihole/custom.list`** — no funciona en esta instalación.
-> El DNS real está en `/etc/dnsmasq.d/local.conf` en cada Pi-hole.
+> ⚠️ **DO NOT use `/etc/pihole/custom.list`** — it does not work in this installation.
+> The actual DNS is in `/etc/dnsmasq.d/local.conf` on each Pi-hole.
 
-### Paso 6 — Añadir entrada en /etc/hosts de maya
+### Step 6 — Add entry to /etc/hosts on maya
 
 ```bash
-echo "192.168.1.55 <dominio>.casa" | sudo tee -a /etc/hosts
+echo "192.168.1.55 <domain>.casa" | sudo tee -a /etc/hosts
 ```
 
-> ⚠️ **Obligatorio**: maya tiene `mdns4_minimal [NOTFOUND=return]` en `/etc/nsswitch.conf`
-> que impide resolver dominios `.casa` vía DNS. Sin esta entrada, maya misma no resuelve el dominio.
+> ⚠️ **Required**: maya has `mdns4_minimal [NOTFOUND=return]` in `/etc/nsswitch.conf`
+> which prevents resolving `.casa` domains via DNS. Without this entry, maya itself cannot resolve the domain.
 
-### Paso 7 — Backend Node.js (si aplica)
+### Step 7 — Node.js backend (if applicable)
 
-Crear servicio systemd en `/etc/systemd/system/<proyecto>.service`:
+Create systemd service at `/etc/systemd/system/<project>.service`:
 
 ```ini
 [Unit]
-Description=<proyecto> backend
+Description=<project> backend
 After=network.target postgresql.service
 
 [Service]
 Type=simple
 User=felipe
-WorkingDirectory=/mnt/nas/sources/<proyecto>/backend
-EnvironmentFile=/mnt/nas/sources/<proyecto>/backend/.env
+WorkingDirectory=/mnt/nas/sources/<project>/backend
+EnvironmentFile=/mnt/nas/sources/<project>/backend/.env
 ExecStart=/home/felipe/.nvm/versions/node/v22.22.0/bin/node dist/src/server.js
 Restart=on-failure
 RestartSec=5
@@ -160,86 +160,86 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-> ⚠️ El entry point compilado es `dist/src/server.js`, **no** `dist/server.js`
-> (tsc respeta la estructura de `src/`).
+> ⚠️ The compiled entry point is `dist/src/server.js`, **not** `dist/server.js`
+> (tsc preserves the `src/` directory structure).
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now <proyecto>
-sudo systemctl status <proyecto>
+sudo systemctl enable --now <project>
+sudo systemctl status <project>
 ```
 
-**Tras cada build hay que copiar assets estáticos manualmente** (tsc no los incluye):
+**After each build, copy static assets manually** (tsc doesn't include them):
 ```bash
-# Ejemplo: openapi.yaml
+# Example: openapi.yaml
 cp -r src/openapi dist/src/openapi
 ```
 
-### Paso 8 — Añadir card en portal.casa
+### Step 8 — Add card to portal.casa
 
-Editar `/mnt/nas/webs/portal.casa/index.html`:
+Edit `/mnt/nas/webs/portal.casa/index.html`:
 
-1. Incrementar `<span class="section-badge">N</span>` en la sección "Servicios"
-2. Añadir card antes del cierre `</div></div>` de la sección:
+1. Increment `<span class="section-badge">N</span>` in the "Services" section
+2. Add card before the closing `</div></div>` of the section:
 
 ```html
-<a class="card" href="http://<dominio>.casa" data-check="http://<dominio>.casa" data-name="<palabras clave de búsqueda>">
+<a class="card" href="http://<domain>.casa" data-check="http://<domain>.casa" data-name="<search keywords>">
   <div class="card-top"><div class="card-icon">🎯</div><div class="dot checking"></div></div>
-  <div class="card-name"><Nombre visible></div>
-  <div class="card-desc"><Descripción breve.></div>
-  <div class="card-meta"><span class="card-url"><dominio>.casa</span><span class="badge">maya</span></div>
+  <div class="card-name"><Visible Name></div>
+  <div class="card-desc"><Brief description.></div>
+  <div class="card-meta"><span class="card-url"><domain>.casa</span><span class="badge">maya</span></div>
 </a>
 ```
 
-### Paso 9 — Verificación final
+### Step 9 — Final verification
 
 ```bash
-# Frontend accesible
-curl -s -H "Host: <dominio>.casa" http://192.168.1.55/ | head -3
+# Frontend accessible
+curl -s -H "Host: <domain>.casa" http://192.168.1.55/ | head -3
 
-# API (si aplica)
-curl -s http://localhost:<puerto-backend>/health
+# API (if applicable)
+curl -s http://localhost:<backend-port>/health
 
-# DNS desde otro dispositivo de la red
-# (desde maya usar la IP directa porque nsswitch.conf interfiere)
+# DNS from another device on the network
+# (from maya use the IP directly because nsswitch.conf interferes)
 ```
 
 ---
 
-## Checklists rápidos
+## Quick checklists
 
-### Deploy solo frontend
-- [ ] `npm install` + build
-- [ ] Copiar dist a `/mnt/nas/webs/<dominio>.casa/`
-- [ ] Nginx site + reload
-- [ ] DNS en pihole1 y pihole2 (`dnsmasq.d/local.conf` + restart pihole-FTL)
-- [ ] `/etc/hosts` en maya
-- [ ] Card en portal.casa
+### Frontend-only deploy
+- [ ] `pnpm install` + build
+- [ ] Copy dist to `/mnt/nas/webs/<domain>.casa/`
+- [ ] nginx site + reload
+- [ ] DNS on pihole1 and pihole2 (`dnsmasq.d/local.conf` + restart pihole-FTL)
+- [ ] `/etc/hosts` on maya
+- [ ] Card in portal.casa
 
-### Deploy frontend + backend Node.js
-- Todo lo anterior, más:
-- [ ] `.env` con puerto libre (ver tabla de puertos)
-- [ ] `npm run build` en backend
-- [ ] Copiar assets estáticos a dist (`openapi.yaml`, etc.)
-- [ ] Systemd service con entry point `dist/src/server.js`
-- [ ] `sudo systemctl enable --now <proyecto>`
-- [ ] Proxy `/api/` en nginx apuntando al puerto del backend
+### Frontend + Node.js backend deploy
+- Everything above, plus:
+- [ ] `.env` with a free port (see port table)
+- [ ] `pnpm run build` on backend
+- [ ] Copy static assets to dist (`openapi.yaml`, etc.)
+- [ ] Systemd service with entry point `dist/src/server.js`
+- [ ] `sudo systemctl enable --now <project>`
+- [ ] Proxy `/api/` in nginx pointing to the backend port
 
 ---
 
-## Actualizar un despliegue existente
+## Updating an existing deployment
 
 ```bash
-# 1. Recompilar frontend
-cd /mnt/nas/sources/<proyecto>/frontend && node_modules/.bin/ng build --configuration production
+# 1. Rebuild frontend
+cd /mnt/nas/sources/<project>/frontend && pnpm exec ng build --configuration production
 
-# 2. Sincronizar a producción
-cp -r dist/<nombre>/browser/. /mnt/nas/webs/<dominio>.casa/
+# 2. Sync to production
+cp -r dist/<name>/browser/. /mnt/nas/webs/<domain>.casa/
 
-# 3. Si hay backend: recompilar y reiniciar
-cd /mnt/nas/sources/<proyecto>/backend && npm run build
-cp -r src/openapi dist/src/openapi   # assets estáticos
-sudo systemctl restart <proyecto>
+# 3. If there is a backend: rebuild and restart
+cd /mnt/nas/sources/<project>/backend && pnpm run build
+cp -r src/openapi dist/src/openapi   # static assets
+sudo systemctl restart <project>
 ```
 
-No hace falta tocar nginx, DNS ni portal.casa en actualizaciones.
+No need to touch nginx, DNS, or portal.casa on updates.
