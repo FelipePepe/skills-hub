@@ -31,6 +31,7 @@ Mantener todas las skills versionadas en un solo repositorio y **distribuirlas a
 - `opencode/opencode.managed.json`: fragmento gestionado de `opencode.json` (json-merge).
 - `opencode/AGENTS.md`: bloque gestionado para `.opencode/AGENTS.md`.
 - `bin/skills-hub.js`: CLI instalable del repo.
+- `bin/copilot-credits.js`: CLI de análisis de AI Credits de GitHub Copilot.
 - `scripts/sync.sh`: instalador por **copia** (rsync) + config gestionada de OpenCode.
 - `scripts/install-opencode-config.mjs`: instala la config gestionada de OpenCode (merge).
 - `scripts/check.sh`: detecta drift entre el repo y las copias instaladas.
@@ -95,6 +96,41 @@ Notas:
 
 - respeta `config/apps.json` como fuente de exposición por plataforma
 - usa `pnpm skills-hub ...` dentro del repo; `pnpm exec` no expone el binario del paquete raíz
+
+## Análisis de créditos de Copilot
+
+`copilot-credits` es una CLI local que lee los archivos de sesión de GitHub Copilot y calcula el consumo de **AI Credits** aplicando la tabla de precios oficial de GitHub. No sube ningún dato; todo el procesamiento es local.
+
+```bash
+copilot-credits              # últimos 30 días
+copilot-credits --days=90
+copilot-credits --model=claude-sonnet-4.6
+copilot-credits --sessions   # desglose por sesión
+copilot-credits --json       # salida JSON
+```
+
+Salida de ejemplo:
+
+```
+GitHub Copilot AI Credits Usage
+Period : 2026-03-15 → 2026-06-07 (last 90 days)
+Sessions: 71  |  Plan monthly allotment: Pro=1,500  Pro+=7,000  Max=20,000
+
+MODEL                    REQUESTS    INPUT TOKENS    CACHE READ   CACHE WRITE  OUTPUT TOKENS    CREDITS       USD
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+claude-sonnet-4.5             744      48,834,450    43,778,114     2,585,949        447,037    17604.0   $176.04
+gpt-5.4                       190      18,304,795    16,253,184             0        105,399     5140.6    $51.41
+claude-haiku-4.5              576      33,611,939    31,858,398             0        178,865     3769.2    $37.69
+claude-sonnet-4.6             262      10,974,559    10,221,750             0         74,362     3710.6    $37.11
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+TOTAL                       1,773     111,728,535   102,111,446     2,585,949        805,670    30224.9   $302.25
+```
+
+**Fuente de datos:** `~/.copilot/session-state/<id>/events.jsonl` — el campo `session.shutdown` que Copilot escribe al cerrar cada sesión contiene el desglose de tokens por modelo.
+
+**Precios:** tabla oficial de GitHub (`docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing`). Los modelos sin entrada en la tabla se marcan con `*` y usan un precio estimado.
+
+**1 AI Credit = $0.01 USD.** El allotment mensual incluido depende del plan: Pro 1.500 · Pro+ 7.000 · Max 20.000 · Business 1.900 · Enterprise 3.900 (cifras a junio 2026).
 
 ## Flujo profesional recomendado
 

@@ -1,13 +1,14 @@
 {
   "name": "skills-hub",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "private": true,
   "description": "CLI para instalar y exponer el catalogo de skills en las apps locales compatibles.",
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@10.33.2",
   "bin": {
-    "skills-hub": "./bin/skills-hub.js"
+    "skills-hub": "./bin/skills-hub.js",
+    "copilot-credits": "./bin/copilot-credits.js"
   },
   "scripts": {
     "skills-hub": "node ./bin/skills-hub.js",
