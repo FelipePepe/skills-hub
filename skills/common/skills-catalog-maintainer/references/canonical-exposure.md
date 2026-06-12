@@ -7,6 +7,7 @@ This repository is the authoring source of truth.
 - edit skills only inside `skills/`
 - edit app exposure rules in `config/apps.json`
 - edit sync/copy legacy mappings in `config/sync-map.sh`
+- use `skills/backend` and `skills/frontend` only for shared domain skills; keep app-specific skills in platform-specific sources
 
 ## Exposure targets
 

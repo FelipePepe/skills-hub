@@ -23,6 +23,8 @@ Mantener todas las skills versionadas en un solo repositorio y **distribuirlas a
 ## Estructura
 
 - `skills/common`: skills compartidas por todas las plataformas (el caso por defecto).
+- `skills/backend`: skills compartidas para trabajo backend, APIs, datos, infraestructura y servicios.
+- `skills/frontend`: skills compartidas para trabajo frontend, UI, UX, componentes y experiencias web.
 - `skills/copilot-only`: skills exclusivas de Copilot/OpenCode (excepción).
 - `skills/claude-only`: skills exclusivas de Claude (excepción).
 - `prompts`: prompts globales e instrucciones (contenido copiable legacy).
@@ -134,7 +136,10 @@ Reglas:
 ## Criterio de clasificación
 
 - Por defecto una skill va a `skills/common`: la consumen Claude, Copilot y agents.
+- Si una skill es compartida pero claramente de dominio backend, va a `skills/backend`.
+- Si una skill es compartida pero claramente de dominio frontend, va a `skills/frontend`.
 - Solo va a `skills/copilot-only` o `skills/claude-only` si **depende** de esa plataforma concreta.
+- Si una skill es de dominio y ademas depende de una plataforma concreta, prima la dependencia de plataforma: usar `skills/copilot-only` o `skills/claude-only`.
 - No mezclar configuración de máquina dentro de `skills/`; eso queda en el tooling o fuera del repo.
 
 ## Convención global de package manager

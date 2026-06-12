@@ -20,6 +20,8 @@ metadata:
 | Situation | Action |
 |---|---|
 | New reusable skill | Place it in `skills/common` if platform-agnostic |
+| Shared backend skill | Place it in `skills/backend` |
+| Shared frontend skill | Place it in `skills/frontend` |
 | Platform-specific behavior | Keep it in `skills/copilot-only` or equivalent |
 | SKILL grows too much | Split support material into `references/` or `assets/` |
 | Renaming a skill | Update folder, frontmatter, docs, and routing references together |
@@ -38,7 +40,9 @@ metadata:
 
 ### 1. Classify correctly
 
-- `skills/common` for portable skills
+- `skills/common` for portable skills with no clear backend/frontend domain
+- `skills/backend` for portable backend, API, data, infrastructure, and service workflows
+- `skills/frontend` for portable frontend, UI, UX, component, and web experience workflows
 - `skills/copilot-only` for Copilot/OpenCode specific workflows
 - keep support content near the skill in `references/` or `assets/`
 

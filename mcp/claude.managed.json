@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "grafos": {
+      "command": "node",
+      "args": [
+        "--experimental-sqlite",
+        "__HOME__/sources/grafos/mcp/dist/mcp/src/index.js"
+      ]
+    }
+  }
+}

@@ -19,6 +19,8 @@
       },
       "sources": [
         "skills/common",
+        "skills/backend",
+        "skills/frontend",
         "skills/copilot-only"
       ],
       "configFiles": [
@@ -51,6 +53,8 @@
       },
       "sources": [
         "skills/common",
+        "skills/backend",
+        "skills/frontend",
         "skills/claude-only"
       ],
       "configFiles": [
@@ -61,6 +65,14 @@
             "windows": "%USERPROFILE%/.claude/CLAUDE.md"
           },
           "strategy": "copy"
+        },
+        {
+          "source": "mcp/claude.managed.json",
+          "target": {
+            "linux": "~/.claude.json",
+            "windows": "%USERPROFILE%/.claude.json"
+          },
+          "strategy": "json-merge"
         }
       ]
     },
@@ -82,7 +94,9 @@
         ]
       },
       "sources": [
-        "skills/common"
+        "skills/common",
+        "skills/backend",
+        "skills/frontend"
       ]
     },
     {
@@ -120,6 +134,33 @@
           },
           "strategy": "markdown-managed-block",
           "blockId": "opencode-routing"
+        }
+      ]
+    },
+    {
+      "id": "vscode",
+      "description": "VS Code user-level MCP configuration (GitHub Copilot Chat)",
+      "installPath": {
+        "linux": "~/.config/Code/User",
+        "windows": "%USERPROFILE%/AppData/Roaming/Code/User"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.config/Code/User"
+        ],
+        "windows": [
+          "%USERPROFILE%/AppData/Roaming/Code/User"
+        ]
+      },
+      "sources": [],
+      "configFiles": [
+        {
+          "source": "mcp/vscode.managed.json",
+          "target": {
+            "linux": "~/.config/Code/User/mcp.json",
+            "windows": "%USERPROFILE%/AppData/Roaming/Code/User/mcp.json"
+          },
+          "strategy": "json-merge"
         }
       ]
     }

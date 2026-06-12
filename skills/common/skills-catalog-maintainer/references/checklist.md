@@ -1,6 +1,6 @@
 # Skills Catalog Maintenance Checklist
 
-- confirm the skill belongs in `common` vs platform-specific sources
+- confirm the skill belongs in `common`, `backend`, `frontend`, or platform-specific sources
 - confirm folder name equals frontmatter `name`
 - keep `SKILL.md` under 300 lines
 - move long templates/examples/tables to `references/` or `assets/`

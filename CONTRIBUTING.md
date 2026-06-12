@@ -17,7 +17,7 @@ Mantener este repositorio como fuente unica de verdad para sincronizar skills y 
 - En skills JS/TS nuevas, preferir `pnpm` y documentar `minimumReleaseAge` cuando la skill cubra setup/bootstrap.
 - Si se cambia la logica de instalacion, mantener alineados `bin/skills-hub.js` y `scripts/sync.sh`.
 - Las skills se instalan por copia (rsync), nunca por symlink; ni el clon ni los destinos pueden vivir en un NAS.
-- Por defecto una skill va a `skills/common`; usar `copilot-only`/`claude-only` solo si depende de esa plataforma.
+- Por defecto una skill va a `skills/common`; usar `skills/backend` o `skills/frontend` si es compartida pero claramente de ese dominio; usar `copilot-only`/`claude-only` solo si depende de esa plataforma.
 - Tratar `skills/` como fuente canonica y las rutas de apps como destinos de exposicion (copias).
 - Evitar colisiones de nombre entre skills expuestas a una misma app.
 
@@ -53,6 +53,8 @@ Ver:
 ## Convenciones de cambios
 
 - `skills/common`: contenido compartido.
+- `skills/backend`: contenido compartido orientado a backend, APIs, datos, infraestructura y servicios.
+- `skills/frontend`: contenido compartido orientado a frontend, UI, UX, componentes y experiencias web.
 - `skills/copilot-only`: contenido exclusivo de Copilot.
 - `skills/claude-only`: contenido exclusivo de Claude.
 - `prompts/`: prompts e instrucciones para VS Code.

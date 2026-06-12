@@ -111,7 +111,7 @@ function buildTokenMap(apps, platform) {
   const copilotSkillsDir = copilot?.installPath?.[platform]
     ? expandHome(copilot.installPath[platform])
     : expandHome("~/.copilot/skills");
-  return { __COPILOT_SKILLS_DIR__: copilotSkillsDir };
+  return { __COPILOT_SKILLS_DIR__: copilotSkillsDir, __HOME__: os.homedir() };
 }
 
 async function installConfigFiles(app, tokenMap, platform) {

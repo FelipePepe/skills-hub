@@ -1,0 +1,30 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "grafos-anthropic-key",
+      "description": "Anthropic API key (grafos memory)",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "grafos-voyage-key",
+      "description": "Voyage API key (grafos memory)",
+      "password": true
+    }
+  ],
+  "servers": {
+    "grafos": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "--experimental-sqlite",
+        "__HOME__/sources/grafos/mcp/dist/mcp/src/index.js"
+      ],
+      "env": {
+        "ANTHROPIC_API_KEY": "${input:grafos-anthropic-key}",
+        "VOYAGE_API_KEY": "${input:grafos-voyage-key}"
+      }
+    }
+  }
+}
