@@ -61,8 +61,8 @@ The server registration is distributed by skills-hub managed config
 
 - grafos cloned at `~/sources/grafos` and built (`cd mcp && pnpm install && pnpm build`)
 - Node 22+ (`node:sqlite`)
-- Claude Code: export `ANTHROPIC_API_KEY` and `VOYAGE_API_KEY` in the shell
-  environment (the server inherits them; they are never written to config)
-- VS Code: keys are prompted on first start via `inputs` and stored securely
+- Ollama reachable on the intranet (default `http://192.168.1.60:11434`, override
+  with `OLLAMA_BASE_URL`) with models `llama3.2` and `nomic-embed-text` pulled.
+  No API keys — extraction and embeddings are fully local.
 
 The database is per machine and must live on local disk, never on the NAS.
