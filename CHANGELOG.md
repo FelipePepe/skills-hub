@@ -7,6 +7,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [2.4.0] - 2026-06-14
+
+### Añadido
+
+- `DDIA_Skills/` y `token-efficient-skills-pack/` añadidos a `.gitignore`.
+
 ## [2.3.0] - 2026-06-14
 
 ### Añadido
@@ -16,8 +22,6 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - `pnpm bootstrap` registrado en `package.json`.
 - Integración de grafos en `session-start` y `session-end` (claude-only + common): `grafos_recall` al inicio de sesión, `grafos_remember` al cierre. Ambos condicionales — no bloquean si grafos no está disponible.
 - Pack DDIA en `skills/common/ddia-*`: 15 skills compartidas para diseño y revisión de sistemas data-intensive, incluyendo router, modelos de datos, almacenamiento, replicación, sharding, transacciones, sistemas distribuidos, consenso, batch, streaming y ética de datos.
-
-
 ## [2.2.0] - 2026-06-07
 
 ### Añadido
