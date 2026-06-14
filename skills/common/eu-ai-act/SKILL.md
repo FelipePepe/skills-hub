@@ -1,61 +1,63 @@
 ---
 name: eu-ai-act
 description: >
-  Detecta y aplica el Reglamento de IA de la Unión Europea (AI Act) en proyectos con sistemas de inteligencia artificial.
-  Proactivamente al iniciar un proyecto con dependencias de IA, detectar imports de librerías de ML, o cuando el usuario menciona IA, modelos, datos, compliance o regulación.
+  Detects and applies the EU Artificial Intelligence Act (AI Act) in projects with
+  artificial intelligence systems. Proactively when starting a project with AI
+  dependencies, detecting ML library imports, or when the user mentions AI, models,
+  data, compliance, or regulation.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
   version: "1.0"
 ---
 
-## Cuándo usar
+## When to Use
 
-- El proyecto tiene dependencias de IA/ML (OpenAI, Anthropic, LangChain, TensorFlow, PyTorch, etc.)
-- El código usa APIs de modelos de lenguaje o generación de contenido
-- El usuario menciona IA, compliance regulatorio, datos de entrenamiento, o regulaciones
-- Se detectan imports de librerías de ML/AI en el código fuente
-- Se trabaja con biometría, reconocimiento facial, inferencia de emociones, o scoring
+- The project has AI/ML dependencies (OpenAI, Anthropic, LangChain, TensorFlow, PyTorch, etc.)
+- The code uses language model or content generation APIs
+- The user mentions AI, regulatory compliance, training data, or regulations
+- ML/AI library imports are detected in the source code
+- The project works with biometrics, facial recognition, emotion inference, or scoring
 
-## Scope guard
+## Scope Guard
 
-- NO usar para proyectos sin componentes de IA/ML
-- NO usar para generalidades sobre programación sin IA
-- Si no hay sistema de IA, NO hay obligaciones del AI Act que aplicar
+- Do NOT use for projects without AI/ML components
+- Do NOT use for general programming topics without AI
+- If there is no AI system, there are NO applicable AI Act obligations
 
-## Detección
+## Detection
 
-Al iniciar el proyecto, escanear proactivamente:
+When starting the project, proactively scan:
 
-1. **Dependencias**: `package.json`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`
+1. **Dependencies**: `package.json`, `requirements.txt`, `pyproject.toml`, `Cargo.toml`
    - Keywords: `openai`, `anthropic`, `langchain`, `tensorflow`, `pytorch`, `transformers`, `replicate`, `ollama`, `groq`, `cohere`, `mistral`
-2. **Imports en código**: buscar patrones de import de librerías de IA
-3. **Uso de APIs externas**: llamadas a endpoints de modelos de IA
-4. **Datos sensibles**: procesamiento de datos biométricos, de salud, financieros, o de menores
+2. **Imports in code**: look for AI library import patterns
+3. **External API usage**: calls to AI model endpoints
+4. **Sensitive data**: processing of biometric, health, financial, or children's data
 
-## Flujo de trabajo
+## Workflow
 
-1. **Clasificar** el riesgo del sistema de IA usando `references/risk-matrix.md`
-2. **Evaluar** obligaciones según el nivel de riesgo (prohibido / alto riesgo / transparencia / ninguno)
-3. **Aplicar** el checklist correspondiente desde `references/compliance-checklist.md`
-4. **Verificar** deadlines aplicables en `references/deadlines.md`
-5. **Generar** un resumen de compliance al final del desarrollo
+1. **Classify** the AI system risk using `references/risk-matrix.md`
+2. **Evaluate** obligations according to the risk level (prohibited / high risk / transparency / none)
+3. **Apply** the corresponding checklist from `references/compliance-checklist.md`
+4. **Verify** applicable deadlines in `references/deadlines.md`
+5. **Generate** a compliance summary at the end of development
 
-## Reglas críticas
+## Critical Rules
 
-- **Sistemas prohibidos**: Nunca ayudar a implementar funcionalidades de riesgo inaceptable
-- **Alto riesgo**: Si el sistema califica como high-risk, el código DEBE incluir:
-  - Documentación técnica integrada (comentarios explicando el sistema de IA)
-  - Logging de decisiones del modelo
-  - Mecanismos de supervisión humana
-  - Validación de calidad de datos de entrada
-- **Transparencia**: El código DEBE incluir marcas de metadatos para contenido generado por IA (Watermarking, etiquetas)
-- **Datos personales**: Priorizar minimización de datos y anonimización
-- **GPAI models**: Si se usa un modelo de propósito general, aplicar obligaciones de transparencia de entrenamiento
+- **Prohibited systems**: Never help implement unacceptable-risk functionality
+- **High risk**: If the system qualifies as high-risk, the code MUST include:
+  - Integrated technical documentation (comments explaining the AI system)
+  - Model decision logging
+  - Human oversight mechanisms
+  - Input data quality validation
+- **Transparency**: The code MUST include metadata marks for AI-generated content (Watermarking, labels)
+- **Personal data**: Prioritize data minimization and anonymization
+- **GPAI models**: If using a general-purpose model, apply training transparency obligations
 
 ## Output
 
-Al revisar código con IA, proporcionar:
+When reviewing code with AI, provide:
 
 ```
 🇪🇺 EU AI Act Compliance Report
@@ -70,8 +72,8 @@ Recommendations:
 ────────────────────────────────────
 ```
 
-## Recursos
+## Resources
 
-- [`references/risk-matrix.md`](references/risk-matrix.md) — Clasificación de riesgo detallada
-- [`references/compliance-checklist.md`](references/compliance-checklist.md) — Checklist accionable por nivel
-- [`references/deadlines.md`](references/deadlines.md) — Cronología regulatoria
+- [`references/risk-matrix.md`](references/risk-matrix.md) — Detailed risk classification
+- [`references/compliance-checklist.md`](references/compliance-checklist.md) — Actionable checklist by level
+- [`references/deadlines.md`](references/deadlines.md) — Regulatory timeline

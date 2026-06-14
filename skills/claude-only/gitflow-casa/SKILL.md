@@ -1,26 +1,25 @@
 ---
 name: gitflow-casa
 description: >
-  Aplica GitFlow correctamente en cualquier repositorio: feature/* → develop →
-  release → main. Revisa rama/estado, detecta violaciones, guía commits,
-  merges, tags y lefthook. Trigger: commit, merge, release, hooks, "qué rama
-  toca", "cómo lo subo", "sigo gitflow?".
+  Applies GitFlow correctly in any repository: feature/* → develop → release → main.
+  Checks branch/state, detects violations, guides commits, merges, tags, and lefthook.
+  Trigger: commit, merge, release, hooks, "which branch", "how do I push", "am I following gitflow?".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.2"
+  version: "1.3"
 ---
 
-## Cuándo usar
+## When to Use
 
-- El usuario quiere commitear, mergear, publicar o etiquetar una versión.
-- Pregunta qué rama toca o si el repo cumple GitFlow.
-- Hay cambios o commits en ramas incorrectas.
-- Quiere configurar/verificar lefthook.
+- The user wants to commit, merge, publish, or tag a version.
+- Asks which branch to use or whether the repo follows GitFlow.
+- There are changes or commits on the wrong branch.
+- Wants to configure or verify lefthook.
 
-## Protocolo rápido
+## Quick Protocol
 
-1. Diagnosticar antes de tocar nada:
+1. Diagnose before touching anything:
 
 ```bash
 git branch --show-current
@@ -29,44 +28,45 @@ git log --oneline -5
 git branch -a | grep -E "main|develop|feature|release|hotfix"
 ```
 
-2. Aplicar modelo:
+2. Apply the branch model:
 
 ```text
-main      ← releases/hotfixes, nunca commits directos
-develop   ← integración
-feature/* ← sale de develop y vuelve a develop
-release/* ← sale de develop, mergea a main y develop
-hotfix/*  ← sale de main, mergea a main y develop
+main      ← releases/hotfixes only, never direct commits
+develop   ← integration
+feature/* ← branches from develop, merges back to develop
+release/* ← branches from develop, merges to main and develop
+hotfix/*  ← branches from main, merges to main and develop
 ```
 
-3. Si se va a trabajar en código nuevo:
+3. Starting new work:
 
 ```bash
 git checkout develop
 git pull origin develop
-git checkout -b feature/<nombre-kebab-case>
+git checkout -b feature/<kebab-case-name>
 ```
 
-4. Commit convencional:
+4. Conventional commit:
 
 ```text
-<tipo>(<scope>): <descripción imperativa en minúsculas sin punto>
+<type>(<scope>): <imperative description in lowercase, no trailing period>
 ```
 
-Tipos: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `chore`, `ci`, `revert`.
+Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `chore`, `ci`, `revert`.
 
-5. Si hay release/hotfix o lefthook, leer el protocolo completo.
+5. For release/hotfix or lefthook, load the full protocol.
 
-## Referencia detallada
+## Detailed Reference
 
-Para comandos completos de release/hotfix, reglas de commit, `lefthook.yml`, hooks y troubleshooting, cargar:
+For complete release/hotfix commands, commit rules, `lefthook.yml`, hooks, and troubleshooting, load:
 
 - `references/full-protocol.md`
 
-## Reglas
+## Rules
 
-- Nunca hacer commit directo en `main` ni `develop`.
-- Si falta `develop`, proponer crearlo desde `main` antes de seguir.
-- Si hay cambios sin commitear, no cambiar de rama sin protegerlos primero.
-- Si detectas una violación de GitFlow, explicar el riesgo y proponer el arreglo mínimo.
-- No saltar hooks salvo justificación explícita del usuario.
+- ONLY use `pnpm` — never `npm` or `npx`. Use `pnpm dlx` instead of `npx`.
+- Never commit directly to `main` or `develop`.
+- If `develop` is missing, propose creating it from `main` before continuing.
+- If there are uncommitted changes, do not switch branches without protecting them first.
+- If you detect a GitFlow violation, explain the risk and propose the minimal fix.
+- Do not skip hooks unless the user explicitly justifies it.

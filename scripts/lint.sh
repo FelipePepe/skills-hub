@@ -19,8 +19,10 @@ while IFS= read -r -d '' file; do
 done < <(find "$ROOT_DIR/scripts" "$ROOT_DIR/bin" -type f \( -name '*.mjs' -o -name '*.js' \) -print0 | sort -z)
 skills_hub_require_file "$ROOT_DIR/scripts/validate-skills.sh"
 skills_hub_require_file "$ROOT_DIR/scripts/doctor-skills.sh"
+skills_hub_require_file "$ROOT_DIR/scripts/security-scan-skills.sh"
 bash "$ROOT_DIR/scripts/validate-skills.sh"
 bash "$ROOT_DIR/scripts/doctor-skills.sh"
+bash "$ROOT_DIR/scripts/security-scan-skills.sh"
 skills_hub_validate_json "$APPS_FILE"
 
 if command -v shellcheck >/dev/null 2>&1; then

@@ -51,6 +51,14 @@ Use the hook output to call `engram-mem_session_summary` with the following form
 - path/to/file.md — [role in the work]
 ```
 
+### Step 2b — Grafos memory (if available)
+
+**If `grafos_remember` is available**: call it with a one-line session summary before closing:
+```
+grafos_remember("Session <date> · <project>: <what was done>. Files: <list>. Next: <pending>.")
+```
+Skip gracefully if unavailable.
+
 ### Step 3 — Close the session
 ```
 engram-mem_session_end

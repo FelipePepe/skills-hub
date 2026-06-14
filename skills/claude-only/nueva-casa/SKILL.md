@@ -1,74 +1,74 @@
 ---
 name: nueva-casa
 description: >
-  Registra un servicio ya existente en la intranet .casa: añade DNS en ambos
-  Pi-holes, crea la config nginx en maya (reverse proxy o estático) y añade la
-  card en portal.casa. Sin compilación — para servicios que ya corren en algún
-  puerto o IP de la red. Trigger: "añade X a la intranet", "crea el dominio
-  X.casa", "apunta X.casa a este puerto", "registra el servicio en portal".
+  Registers an existing service on the .casa intranet: adds DNS on both Pi-holes,
+  creates the nginx config on maya (reverse proxy or static), and adds the card to
+  portal.casa. No compilation — for services already running on a port or IP on the
+  network. Trigger: "add X to the intranet", "create domain X.casa", "point X.casa
+  to this port", "register service in portal".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
   version: "1.0"
 ---
 
-## Cuándo usar este skill
+## When to Use This Skill
 
-- Hay un servicio corriendo (Docker, Node, Python…) y se quiere acceder por `nombre.casa`
-- Se quiere añadir un alias `.casa` para una IP/puerto existente
-- `deploy-casa` es excesivo porque no hay nada que compilar ni desplegar
-
----
-
-## Información necesaria antes de empezar
-
-1. **Nombre del dominio**: `<nombre>.casa`
-2. **IP destino**: ¿en qué máquina corre? (maya=192.168.1.55, pihole2=192.168.1.54…)
-3. **Puerto**: si es reverse proxy, ¿en qué puerto escucha el servicio?
-4. **Tipo nginx**: reverse proxy a un puerto / servir ficheros estáticos ya existentes
-5. **Descripción y emoji** para la card en portal.casa
+- A service is already running (Docker, Node, Python…) and needs to be accessed via `name.casa`
+- You want to add a `.casa` alias for an existing IP/port
+- `deploy-casa` is overkill because there is nothing to compile or deploy
 
 ---
 
-## Infraestructura de referencia
+## Required Information Before Starting
 
-| Máquina | IP | Nginx |
+1. **Domain name**: `<name>.casa`
+2. **Target IP**: which machine is it running on? (maya=192.168.1.55, pihole2=192.168.1.54…)
+3. **Port**: if reverse proxy, which port does the service listen on?
+4. **Nginx type**: reverse proxy to a port / serve existing static files
+5. **Description and emoji** for the portal.casa card
+
+---
+
+## Reference Infrastructure
+
+| Machine | IP | Nginx |
 |---------|----|-------|
 | maya | 192.168.1.55 | `/etc/nginx/sites-available/` |
 | pihole2 | 192.168.1.54 | SSH + nginx |
 
-**DNS**: `/etc/dnsmasq.d/local.conf` en pihole1 (192.168.1.53) y pihole2 (192.168.1.54)
+**DNS**: `/etc/dnsmasq.d/local.conf` on pihole1 (192.168.1.53) and pihole2 (192.168.1.54)
 
 ---
 
-## Paso 1 — DNS en ambos Pi-holes
+## Step 1 — DNS on Both Pi-holes
 
 ```bash
 for host in 192.168.1.53 192.168.1.54; do
-  ssh $host "echo 'address=/<nombre>.casa/<IP-destino>' \
+  ssh $host "echo 'address=/<name>.casa/<target-IP>' \
     | sudo tee -a /etc/dnsmasq.d/local.conf \
     && sudo systemctl restart pihole-FTL \
     && echo ok"
 done
 ```
 
-> ⚠️ Usar siempre `dnsmasq.d/local.conf`. NO usar `/etc/pihole/custom.list`.
+> ⚠️ Always use `dnsmasq.d/local.conf`. Do NOT use `/etc/pihole/custom.list`.
 
 ---
 
-## Paso 2 — Nginx en la máquina destino
+## Step 2 — Nginx on the Target Machine
 
-### Caso A: Reverse proxy (servicio en un puerto local)
+### Case A: Reverse Proxy (service on a local port)
 
-En `/etc/nginx/sites-available/<nombre>.casa` (en maya o via SSH si está en pihole2):
+In `/etc/nginx/sites-available/<name>.casa` (on maya or via SSH if it's on pihole2):
 
 ```nginx
 server {
     listen 80;
-    server_name <nombre>.casa;
+    server_name <name>.casa;
 
     location / {
-        proxy_pass http://127.0.0.1:<puerto>;
+        proxy_pass http://127.0.0.1:<port>;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -78,14 +78,14 @@ server {
 }
 ```
 
-### Caso B: Ficheros estáticos en NAS
+### Case B: Static Files on NAS
 
 ```nginx
 server {
     listen 80;
-    server_name <nombre>.casa;
+    server_name <name>.casa;
 
-    root /mnt/nas/webs/<nombre>.casa;
+    root /mnt/nas/webs/<name>.casa;
     index index.html;
 
     location / {
@@ -94,72 +94,72 @@ server {
 }
 ```
 
-### Activar y recargar
+### Enable and Reload
 
 ```bash
-# En maya:
-sudo ln -sf /etc/nginx/sites-available/<nombre>.casa /etc/nginx/sites-enabled/
+# On maya:
+sudo ln -sf /etc/nginx/sites-available/<name>.casa /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 
-# En pihole2 (via SSH):
-ssh 192.168.1.54 "sudo ln -sf /etc/nginx/sites-available/<nombre>.casa /etc/nginx/sites-enabled/ && sudo nginx -t && sudo systemctl reload nginx"
+# On pihole2 (via SSH):
+ssh 192.168.1.54 "sudo ln -sf /etc/nginx/sites-available/<name>.casa /etc/nginx/sites-enabled/ && sudo nginx -t && sudo systemctl reload nginx"
 ```
 
 ---
 
-## Paso 3 — /etc/hosts en maya
+## Step 3 — /etc/hosts on maya
 
 ```bash
-echo "<IP-destino> <nombre>.casa" | sudo tee -a /etc/hosts
+echo "<target-IP> <name>.casa" | sudo tee -a /etc/hosts
 ```
 
-> ⚠️ Obligatorio para que maya misma resuelva el dominio (`mdns4_minimal` en nsswitch.conf bloquea el DNS para `.casa`).
+> ⚠️ Required so that maya itself can resolve the domain (`mdns4_minimal` in nsswitch.conf blocks DNS for `.casa`).
 
 ---
 
-## Paso 4 — Card en portal.casa
+## Step 4 — Card in portal.casa
 
-Editar `/mnt/nas/webs/portal.casa/index.html`:
+Edit `/mnt/nas/webs/portal.casa/index.html`:
 
-1. Incrementar el badge de la sección correspondiente (`Servicios`, `Infraestructura`, etc.)
-2. Insertar antes del cierre `</div></div>` de esa sección:
+1. Increment the badge of the corresponding section (`Services`, `Infrastructure`, etc.)
+2. Insert before the closing `</div></div>` of that section:
 
 ```html
-<a class="card" href="http://<nombre>.casa" data-check="http://<nombre>.casa" data-name="<keywords búsqueda>">
+<a class="card" href="http://<name>.casa" data-check="http://<name>.casa" data-name="<search keywords>">
   <div class="card-top"><div class="card-icon"><emoji></div><div class="dot checking"></div></div>
-  <div class="card-name"><Nombre visible></div>
-  <div class="card-desc"><Descripción breve.></div>
-  <div class="card-meta"><span class="card-url"><nombre>.casa</span><span class="badge"><máquina-host></span></div>
+  <div class="card-name"><Visible Name></div>
+  <div class="card-desc"><Brief description.></div>
+  <div class="card-meta"><span class="card-url"><name>.casa</span><span class="badge"><host-machine></span></div>
 </a>
 ```
 
-**Secciones disponibles en portal.casa**: `Servicios`, `Infraestructura`, `Máquinas`
+**Available sections in portal.casa**: `Services`, `Infrastructure`, `Machines`
 
 ---
 
-## Paso 5 — Verificación
+## Step 5 — Verification
 
 ```bash
-# DNS resuelve en Pi-holes
-ssh 192.168.1.53 "nslookup <nombre>.casa 127.0.0.1 2>/dev/null | grep Address | tail -1"
+# DNS resolves on Pi-holes
+ssh 192.168.1.53 "nslookup <name>.casa 127.0.0.1 2>/dev/null | grep Address | tail -1"
 
-# Nginx responde (bypasando DNS de maya con Host header)
-curl -s -H "Host: <nombre>.casa" http://<IP-destino>/ | head -3
+# Nginx responds (bypassing maya DNS with Host header)
+curl -s -H "Host: <name>.casa" http://<target-IP>/ | head -3
 
-# Card en portal
-curl -s http://portal.casa | grep -o '<nombre>.casa'
+# Card in portal
+curl -s http://portal.casa | grep -o '<name>.casa'
 ```
 
 ---
 
-## Dominios .casa actuales (referencia)
+## Current .casa Domains (Reference)
 
-| Dominio | IP | Máquina | Tipo |
-|---------|----|---------|------|
-| portal.casa | 192.168.1.54 | pihole2 | estático NAS |
+| Domain | IP | Machine | Type |
+|--------|----|---------|------|
+| portal.casa | 192.168.1.54 | pihole2 | static NAS |
 | ha.casa | 192.168.1.54 | pihole2 | reverse proxy |
 | atlas.casa | 192.168.1.54 | pihole2 | reverse proxy |
-| oficina.casa | 192.168.1.54 | pihole2 | estático NAS |
+| oficina.casa | 192.168.1.54 | pihole2 | static NAS |
 | nas.casa | 192.168.1.54 | pihole2 | reverse proxy |
-| trello.casa | 192.168.1.55 | maya | estático NAS + proxy API |
-| maya.casa | 192.168.1.55 | maya | estático |
+| trello.casa | 192.168.1.55 | maya | static NAS + API proxy |
+| maya.casa | 192.168.1.55 | maya | static |

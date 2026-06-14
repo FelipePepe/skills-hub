@@ -97,6 +97,12 @@ Notas:
 - respeta `config/apps.json` como fuente de exposición por plataforma
 - usa `pnpm skills-hub ...` dentro del repo; `pnpm exec` no expone el binario del paquete raíz
 
+## Pack DDIA
+
+El catálogo incluye skills `ddia-*` en `skills/common` para tareas de diseño y revisión de sistemas data-intensive inspiradas en DDIA 2e. Usa `ddia-skill-router` cuando la pregunta atraviese varias áreas; carga una skill específica cuando el riesgo principal sea claro.
+
+Áreas cubiertas: requisitos no funcionales, trade-offs de arquitectura, modelos de datos, almacenamiento/índices, encoding/evolución, replicación, sharding, transacciones, sistemas distribuidos, consistencia/consenso, batch, streaming, filosofía de datos derivados y ética de datos.
+
 ## Análisis de créditos de Copilot
 
 `copilot-credits` es una CLI local que lee los archivos de sesión de GitHub Copilot y calcula el consumo de **AI Credits** aplicando la tabla de precios oficial de GitHub. No sube ningún dato; todo el procesamiento es local.

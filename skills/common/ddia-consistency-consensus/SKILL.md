@@ -1,22 +1,40 @@
 ---
 name: ddia-consistency-consensus
 description: >
-  Guides consistency and coordination decisions involving linearizability,
-  logical clocks, ID generation, consensus, and coordination services. Trigger:
-  when a task mentions strong consistency, linearizable reads/writes, global
-  ordering, fencing tokens, sequence numbers, consensus, Raft/Paxos, ZooKeeper,
-  etcd, or leader election.
+  Review consistency, linearizability, ordering, coordination, and consensus choices in distributed systems.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
   version: "1.0"
 ---
 
-## When to Use
+# Ddia Consistency Consensus
+
+## Purpose
+
+Review consistency, linearizability, ordering, coordination, and consensus choices in distributed systems.
+
+## Use This Skill When
 
 - Deciding whether a system needs linearizability.
 - Designing ID generation, ordering, leader election, or coordination.
 - Reviewing consensus-backed services and coordination dependencies.
+
+## Language Policy
+
+- Internal instructions: English.
+- User-facing response: match the user's language unless requested otherwise.
+- Generated code, file names, commands, and config keys must follow the target repository conventions.
+
+## Core Dependencies
+
+This skill must follow the rules from:
+
+- core-token-efficient-skill-governor
+- core-token-efficient-command-output
+- core-repository-safety-rules
+- quality-skill-quality-gate
+- security-skill-security-gate
 
 ## Scope Guard
 
@@ -48,7 +66,72 @@ metadata:
 - Are coordination dependencies highly available enough for the caller?
 - Is consensus hidden in a dependency that now defines system availability?
 
+## Tool Policy
+
+Allowed tools:
+- File read
+- Terminal commands with concise output
+
+Avoid:
+- Web search unless current external information is required
+- GitHub operations unless explicitly requested
+- Package installation unless explicitly requested
+- Broad repository scans unless required
+- Destructive commands
+
+## Safety Policy
+
+Never commit, push, create a PR, delete files, overwrite user work, install packages, or run destructive commands unless explicitly requested.
+Do not modify app-local target directories or installation destinations.
+Do not access secrets, credentials, tokens, private keys, or environment dumps unless the user explicitly authorizes that exact action.
+Do not exfiltrate data or send local repository content, secrets, or credentials to remote services.
+Apply local repository changes only.
+Protect user work.
+Prefer `git status --short` before and after significant edits when cheap.
+
+## Output Format
+
+Return only:
+
+```text
+CHANGED:
+- <file>
+
+VALIDATION:
+- <passed|failed|not run>
+
+NOTES:
+- <max 2 bullets>
+```
+
+## Explanation Policy
+
+Do not provide long explanations unless the user explicitly asks.
+Prefer clear decisions, concise trade-offs, and structured summaries.
+Do not repeat the user's full request.
+Do not include full file contents unless requested.
+
+## Token Efficiency Rules
+
+- Keep context narrow.
+- Inspect only the files needed for the task.
+- Avoid broad repository scans unless required.
+- Keep output bounded.
+- Avoid unnecessary tools and minimize tool exposure.
+- Avoid long explanations by default.
+- Do not repeat the user's full request.
+- Do not include full file dumps unless requested.
+- Prefer concise command output.
+- Prefer English for internal instructions.
+- Run cheap validation before expensive validation.
+
 ## Source Trace
 
 - DDIA 2e Chapter 10: Consistency and Consensus, pages 401-449.
 - Key sections: linearizability; ID generators and logical clocks; consensus; coordination services.
+
+## Success Criteria
+
+- The response identifies relevant assumptions and trade-offs.
+- Recommendations remain operational and bounded.
+- No long verbatim DDIA excerpts are included.

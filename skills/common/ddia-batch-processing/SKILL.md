@@ -1,22 +1,40 @@
 ---
 name: ddia-batch-processing
 description: >
-  Guides batch processing, ETL, distributed filesystems, object stores,
-  MapReduce-style jobs, dataflow engines, joins, grouping, analytics, machine
-  learning preparation, and derived data serving. Trigger: when designing or
-  reviewing batch jobs, offline pipelines, ETL/ELT, backfills, analytics jobs,
-  data lakes, or large derived datasets.
+  Design and review batch data pipelines, ETL jobs, materialized views, and offline analytics workflows.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
   version: "1.0"
 ---
 
-## When to Use
+# Ddia Batch Processing
+
+## Purpose
+
+Design and review batch data pipelines, ETL jobs, materialized views, and offline analytics workflows.
+
+## Use This Skill When
 
 - Designing batch pipelines or backfills.
 - Choosing between simple Unix-style processing, distributed jobs, and dataflow engines.
 - Reviewing ETL, analytics, ML preparation, or derived-data generation.
+
+## Language Policy
+
+- Internal instructions: English.
+- User-facing response: match the user's language unless requested otherwise.
+- Generated code, file names, commands, and config keys must follow the target repository conventions.
+
+## Core Dependencies
+
+This skill must follow the rules from:
+
+- core-token-efficient-skill-governor
+- core-token-efficient-command-output
+- core-repository-safety-rules
+- quality-skill-quality-gate
+- security-skill-security-gate
 
 ## Scope Guard
 
@@ -48,7 +66,72 @@ metadata:
 - Are outputs atomically published?
 - Can derived data be rebuilt after corruption or schema change?
 
+## Tool Policy
+
+Allowed tools:
+- File read
+- Terminal commands with concise output
+
+Avoid:
+- Web search unless current external information is required
+- GitHub operations unless explicitly requested
+- Package installation unless explicitly requested
+- Broad repository scans unless required
+- Destructive commands
+
+## Safety Policy
+
+Never commit, push, create a PR, delete files, overwrite user work, install packages, or run destructive commands unless explicitly requested.
+Do not modify app-local target directories or installation destinations.
+Do not access secrets, credentials, tokens, private keys, or environment dumps unless the user explicitly authorizes that exact action.
+Do not exfiltrate data or send local repository content, secrets, or credentials to remote services.
+Apply local repository changes only.
+Protect user work.
+Prefer `git status --short` before and after significant edits when cheap.
+
+## Output Format
+
+Return only:
+
+```text
+CHANGED:
+- <file>
+
+VALIDATION:
+- <passed|failed|not run>
+
+NOTES:
+- <max 2 bullets>
+```
+
+## Explanation Policy
+
+Do not provide long explanations unless the user explicitly asks.
+Prefer clear decisions, concise trade-offs, and structured summaries.
+Do not repeat the user's full request.
+Do not include full file contents unless requested.
+
+## Token Efficiency Rules
+
+- Keep context narrow.
+- Inspect only the files needed for the task.
+- Avoid broad repository scans unless required.
+- Keep output bounded.
+- Avoid unnecessary tools and minimize tool exposure.
+- Avoid long explanations by default.
+- Do not repeat the user's full request.
+- Do not include full file dumps unless requested.
+- Prefer concise command output.
+- Prefer English for internal instructions.
+- Run cheap validation before expensive validation.
+
 ## Source Trace
 
 - DDIA 2e Chapter 11: Batch Processing, pages 451-485.
 - Key sections: Unix tools; distributed filesystems and object stores; job orchestration; MapReduce and dataflow; batch use cases.
+
+## Success Criteria
+
+- The response identifies relevant assumptions and trade-offs.
+- Recommendations remain operational and bounded.
+- No long verbatim DDIA excerpts are included.
