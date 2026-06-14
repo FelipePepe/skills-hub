@@ -18,7 +18,8 @@
     "check": "./scripts/check.sh",
     "sync": "./scripts/sync.sh",
     "install:skills": "node ./bin/skills-hub.js install",
-    "status:skills": "node ./bin/skills-hub.js status"
+    "status:skills": "node ./bin/skills-hub.js status",
+    "bootstrap": "./scripts/bootstrap.sh"
   },
   "engines": {
     "node": ">=20"

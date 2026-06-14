@@ -72,6 +72,7 @@ Run in parallel:
 - Direct read of the **Atlas (Obsidian)** vault at `/mnt/nas/Obsidian/`:
   - `Projects/<name>.md` — project entity page, if it exists (architectural state).
   - If the `atlas_search` MCP is available, also use it. If not, use `grep`/`find` in the vault.
+- **If `grafos_recall` is available**: call `grafos_recall("<project> session decisions files")` — returns graph entities and relations relevant to the current project. Add any returned context to the briefing. Grafos unavailability is not a blocker — skip gracefully.
 
 Cross-check dates:
 - If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift".

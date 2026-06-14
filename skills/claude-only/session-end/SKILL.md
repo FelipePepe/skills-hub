@@ -100,6 +100,16 @@ Mandatory format for `content` (engram and atlas):
 
 Run saves in parallel when they are independent (multiple `mem_save` in a single turn).
 
+### Step 4b — Grafos Memory (if available)
+
+**Only if `grafos_remember` is available**: call it once with a compact session summary:
+
+```
+grafos_remember("Session <YYYY-MM-DD> · <project>: <one-line summary of what was done>. Files changed: <list>. Decisions: <list>. Next: <pending item if any>.")
+```
+
+This creates graph nodes/edges from the session — allowing `grafos_recall` in future sessions to recover context without reading JSONL. Grafos unavailability is not a blocker — skip gracefully.
+
 ### Step 5 — Project Journal (if applicable)
 
 If the project has `docs/journal/sessions/` and the session was substantial (not trivial):
@@ -116,6 +126,7 @@ If the project does NOT have `docs/journal/` → skip this step.
 ### Step 6 — Summary to User
 
 Display a table of what was saved:
+
 
 | Destination | Title / Page | Type | Action |
 |-------------|-------------|------|--------|
