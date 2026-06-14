@@ -7,10 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [2.4.0] - 2026-06-14
+
 ### Añadido
 
 - Pack DDIA en `skills/common/ddia-*`: 15 skills compartidas para diseño y revisión de sistemas data-intensive, incluyendo router, modelos de datos, almacenamiento, replicación, sharding, transacciones, sistemas distribuidos, consenso, batch, streaming y ética de datos.
-
 
 ## [2.2.0] - 2026-06-07
 
