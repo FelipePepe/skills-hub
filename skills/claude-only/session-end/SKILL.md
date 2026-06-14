@@ -127,6 +127,7 @@ If the project does NOT have `docs/journal/` → skip this step.
 
 Display a table of what was saved:
 
+
 | Destination | Title / Page | Type | Action |
 |-------------|-------------|------|--------|
 | Engram | ... | bugfix | save |
