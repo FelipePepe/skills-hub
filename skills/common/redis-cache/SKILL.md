@@ -41,10 +41,10 @@ Cache-aside covers 90% of cases. Default to it.
 
 | Client | Use when |
 |--------|----------|
-| `redis` (node-redis v4) | Single instance or Redis Cloud. Modern async/await API. |
-| `ioredis` | Cluster, Sentinel, or you need built-in retry logic with backoff. |
+| `redis` (node-redis v5) | Single instance or Redis Cloud. Modern async/await API, built-in client-side caching (RESP3). |
+| `ioredis` | Cluster, Sentinel, or you need fine-grained retry control. |
 
-Both are type-safe with TypeScript. Prefer `redis` (node-redis v4) unless cluster or sentinel is required.
+Both are type-safe with TypeScript. Prefer `redis` (node-redis v5) unless cluster or sentinel is required.
 
 ### 4. Key naming
 
@@ -78,14 +78,33 @@ Invalidate explicitly on mutation — do not rely on TTL alone for write-heavy d
 
 ## Implementation Patterns
 
-### Cache-aside (node-redis v4, TypeScript)
+### Client setup (node-redis v5, TypeScript)
 
 ```typescript
 import { createClient } from 'redis';
-import { z } from 'zod';
 
-const redis = createClient({ url: process.env.REDIS_URL });
-await redis.connect();
+// .on("error") MUST come before .connect() — socket errors won't surface otherwise
+const redis = await createClient({
+  url: process.env.REDIS_URL,
+  socket: {
+    reconnectStrategy: (retries) =>
+      Math.min(Math.pow(2, retries) * 50 + Math.floor(Math.random() * 200), 2000),
+  },
+})
+  .on('error', (err) => console.error('[redis] socket error:', err))
+  .connect();
+
+// Graceful shutdown: quit() sends QUIT then disconnects; destroy() drops immediately
+process.on('SIGTERM', () => redis.quit());
+```
+
+> **Error types**: `.on('error')` fires only for socket-level errors (connection drops, parse failures).
+> Redis protocol errors (NOAUTH, WRONGTYPE, key-missing) reject the command Promise — handle with `.catch()` per call.
+
+### Cache-aside (TypeScript)
+
+```typescript
+import { z } from 'zod';
 
 const UserSchema = z.object({ id: z.string(), name: z.string(), email: z.string() });
 type User = z.infer<typeof UserSchema>;
@@ -93,16 +112,16 @@ type User = z.infer<typeof UserSchema>;
 async function getUser(id: string): Promise<User> {
   const key = `myapp:user:${id}`;
 
-  const cached = await redis.get(key).catch(() => null); // never throw on cache failure
+  const cached = await redis.get(key).catch(() => null); // best-effort read
   if (cached) return UserSchema.parse(JSON.parse(cached));
 
-  const user = await db.findUser(id); // source of truth
+  const user = await db.findUser(id);
   await redis.set(key, JSON.stringify(user), { EX: 300 }).catch(() => {}); // best-effort write
   return user;
 }
 
 async function invalidateUser(id: string): Promise<void> {
-  await redis.del(`myapp:user:${id}`).catch(() => {});
+  await redis.unlink(`myapp:user:${id}`).catch(() => {}); // UNLINK is async, non-blocking
 }
 ```
 
@@ -110,8 +129,19 @@ async function invalidateUser(id: string): Promise<void> {
 
 ```typescript
 async function touchSession(sessionId: string): Promise<void> {
-  await redis.expire(`myapp:session:${sessionId}`, 1800); // reset to 30 min on access
+  await redis.expire(`myapp:session:${sessionId}`, 1800);
 }
+```
+
+### Optional: client-side caching (v5 + RESP3)
+
+Reduces round-trips for hot keys — Redis server invalidates the local cache on change:
+
+```typescript
+const redis = await createClient({
+  RESP: 3,
+  clientSideCache: { ttl: 60_000, maxEntries: 500, evictPolicy: 'LRU' },
+}).on('error', (err) => console.error('[redis] socket error:', err)).connect();
 ```
 
 ## Core Rules
