@@ -3,3 +3,4 @@
 *.swp
 DDIA_Skills/
 token-efficient-skills-pack/
+node_modules/
