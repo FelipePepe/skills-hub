@@ -7,6 +7,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [2.5.0] - 2026-06-26
+
+### Añadido
+
+- `skills/common/redis-cache`: nueva skill portable para caching con Redis en Node.js/TypeScript. Cubre selección de estrategia (cache-aside/write-through/write-behind), diseño de claves, política de TTL, patrones de cliente node-redis v5 (RESP3, client-side caching), manejo de fallos y pitfalls comunes.
+
 ## [2.4.0] - 2026-06-14
 
 ### Añadido
