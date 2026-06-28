@@ -6,8 +6,8 @@ description: >
   Trigger: Always active — load in every session automatically.
 license: Apache-2.0
 metadata:
-  author: gentleman-programming
-  version: "1.2"
+  author: Felipe Pérez (Sandman_owl)
+  version: "1.3"
 ---
 
 ## When to Use
@@ -18,18 +18,24 @@ ALWAYS ACTIVE — execute this at the very beginning of every session, before an
 
 At session start, run ALL steps in this exact order:
 
-### Step 1 — Run session-start hook
+### Step 1 — Collect session context
 ```bash
-bash ~/.copilot/hooks/copilot/session-start.sh
+git rev-parse --show-toplevel 2>/dev/null && git branch --show-current && git log --oneline -5 && git status --short
 ```
-Use the output to call `engram-mem_session_start` with the project id and directory.
+- `PROJECT` = basename of the repo root (or `pwd` if no git)
+- `BRANCH` = current branch (or `no-git` if no repository)
+- Call `engram-mem_session_start` with `id="{PROJECT}-{YYYYMMDD-HHMM}"` and `directory="{pwd}"`.
 
 ### Step 2 — Check GitFlow branch (MANDATORY before any code change)
 ```bash
-bash ~/.copilot/hooks/copilot/gitflow-check.sh
+git branch --show-current 2>/dev/null || echo "no-git"
 ```
-- If exit code != 0: **STOP**. Create the correct feature branch before touching any file.
-- If "No es un repositorio git": **initialize git first** (`git init`), then set up `main` + `develop` + `feature/<name>` before writing any code.
+- If no git repo: **initialize git first** (`git init`), then create `main` + `develop` + `feature/<name>` before writing any code.
+- If branch is `main`, `master`, or `develop`: **STOP**. Create a working branch first:
+  ```bash
+  git checkout develop && git checkout -b feature/<descriptive-name>
+  ```
+- If branch does not match `^(feature|fix|hotfix|chore|release|docs|test|refactor)/`: **STOP**. Rename or create a compliant branch. Valid types: `feature | fix | hotfix | chore | release | docs | test | refactor`.
 - If ✓ OK: proceed.
 
 ### Step 3 — Check SDD context (MANDATORY before implementing any feature)
