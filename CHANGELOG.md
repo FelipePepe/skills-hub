@@ -7,6 +7,16 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [2.6.0] - 2026-06-28
+
+### Añadido
+
+- `skills/claude-only/session-start`: bloque de intake al final del briefing — 4 preguntas (goal, constraints, approach, blockers). Claude se detiene y espera respuesta antes de comenzar cualquier tarea. v1.1.
+
+### Arreglado
+
+- `skills/common/session-start`: reemplaza llamadas a `bash ~/.copilot/hooks/copilot/*.sh` con comandos git nativos — la skill ahora funciona en Claude, agents y Copilot sin dependencias de plataforma. Corrige campo `author` (era `gentleman-programming`). v1.3.
+
 ## [2.5.0] - 2026-06-26
 
 ### Añadido

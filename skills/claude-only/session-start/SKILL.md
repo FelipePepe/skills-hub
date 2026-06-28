@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.0"
+  version: "1.1"
 ---
 
 ## When to Use This Skill
@@ -113,6 +113,22 @@ Return a structured summary:
 
 If conflicts are detected (outdated engram, checkboxes vs IMPLEMENTATION_SUMMARY, red tests), add an **⚠ Attention** section with the detail.
 
+After the briefing, always end with a **session intake** — ask these questions to collect everything needed before starting work. Present them as a compact block, not a wall of text:
+
+```
+### Before we start — a few questions:
+
+1. **Goal** — What do you want to accomplish today?
+2. **Constraints** — Any deadline, scope limit, or thing to avoid?
+3. **Approach** — Should I propose a plan first, or dive straight in?
+   - Need SDD cycle? (spec, tasks, phases)
+   - Architecture decision that warrants DDIA tradeoff analysis?
+   - Something else I should load before starting?
+4. **Blockers** — Anything waiting on a PR, external dependency, or another person?
+```
+
+STOP after showing the intake. Do not assume answers, propose code, or begin any task until the user replies. Questions 2–4 are optional — if the user only answers question 1, that is enough to proceed.
+
 ---
 
 ## Operational Rules
@@ -166,4 +182,14 @@ If conflicts are detected (outdated engram, checkboxes vs IMPLEMENTATION_SUMMARY
 If you want to continue: open spec 007 extending A07/A10 to Java/C#/Go/Rust, or an iterative auditor calibration session (1-2h). If the goal is to consolidate: commit current state (there are docs/, specs/, src/ untracked).
 
 ⚠ Engram was outdated as of 2026-05-18 — synced in the previous session. OK.
+
+### Before we start — a few questions:
+
+1. **Goal** — What do you want to accomplish today?
+2. **Constraints** — Any deadline, scope limit, or thing to avoid?
+3. **Approach** — Should I propose a plan first, or dive straight in?
+   - Need SDD cycle? (spec, tasks, phases)
+   - Architecture decision that warrants DDIA tradeoff analysis?
+   - Something else I should load before starting?
+4. **Blockers** — Anything waiting on a PR, external dependency, or another person?
 ```
