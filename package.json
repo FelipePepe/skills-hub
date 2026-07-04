@@ -17,6 +17,7 @@
     "lint": "./scripts/lint.sh",
     "doctor": "./scripts/doctor.sh",
     "doctor:skills": "./scripts/doctor-skills.sh",
+    "registry:skills": "node ./bin/skills-hub.js registry list",
     "check": "./scripts/check.sh",
     "sync": "./scripts/sync.sh",
     "install:skills": "node ./bin/skills-hub.js install",

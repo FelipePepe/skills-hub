@@ -74,4 +74,7 @@ done < <(
   ' "$APPS_FILE"
 )
 
+skills_hub_info "Skills doctor: validando skill registry..."
+node "$ROOT_DIR/scripts/skill-registry.mjs" check
+
 skills_hub_info "Skills doctor OK."
