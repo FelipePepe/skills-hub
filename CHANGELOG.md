@@ -7,6 +7,19 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [2.7.0] - 2026-07-04
+
+### Añadido
+
+- `skills-hub registry list|refresh|check [--json]`: registro index-first de skills inspirado en el modelo de carga progresiva de DeerFlow. `refresh` genera `.skills-hub/skill-registry.md` con nombre, descripción, scope, apps efectivas, coste aproximado en tokens y ruta exacta de cada `SKILL.md` (índice, no resumen de reglas).
+- Exposición efectiva por app: cuando una fuente de plataforma (`claude-only`/`copilot-only`) contiene una skill homónima de `common`, gana la última fuente declarada en `config/apps.json` (semántica rsync). Los overrides se listan en la sección `Overrides` del índice.
+- `registry check`: warnings de gobernanza y de límites de Copilot Agent Skills (name ≤64 en minúsculas/dígitos/guiones; description obligatoria ≤1024; description ≥40; cuerpo ≤300 líneas). Integrado en `doctor-skills.sh`.
+- Contrato de tokens de salida en `behavior/copilot/copilot-instructions.md` y `behavior/claude/CLAUDE.md` (answer-first, sin eco de código, diffs en lugar de archivos completos).
+
+### Arreglado
+
+- `skills/common/remotion-to-hyperframes`: description reducida de 1240 a <1024 caracteres — superaba el límite de VS Code Copilot Agent Skills y la skill se ignoraba en silencio.
+
 ## [2.6.0] - 2026-06-28
 
 ### Añadido
@@ -123,7 +136,12 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.2.0...HEAD
+[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/FelipePepe/skills-hub/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/FelipePepe/skills-hub/compare/v2.5.0...v2.6.0
+[2.5.0]: https://github.com/FelipePepe/skills-hub/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/FelipePepe/skills-hub/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.com/FelipePepe/skills-hub/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/FelipePepe/skills-hub/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/FelipePepe/skills-hub/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/FelipePepe/skills-hub/compare/v1.1.0...v2.0.0
