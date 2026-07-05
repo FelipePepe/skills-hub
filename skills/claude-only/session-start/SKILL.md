@@ -1,16 +1,18 @@
 ---
 name: session-start
 description: >
-  Activates the session workflow: detects the active project, checks git state,
-  reads the last journal and state docs, detects the active spec with pending tasks,
-  queries context in Engram and Atlas, and optionally runs quick tests/benchmarks.
-  Returns a resumption briefing with next-step suggestions. Trigger: user says
+  Activates the session workflow: detects the active project, ensures a CodeGraph
+  index and pulls a structural overview, checks git state, reads the last journal
+  and state docs, detects the active spec with pending tasks, queries context in
+  Engram and Atlas, and optionally runs quick tests/benchmarks. Returns a
+  resumption briefing — or an onboarding briefing on first contact with a
+  project — with next-step suggestions. Trigger: user says
   "start session", "session start", "resuming", "where did we leave off",
   "project state", "bring me up to speed", "session start".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.1"
+  version: "1.4"
 ---
 
 ## When to Use This Skill
@@ -28,7 +30,7 @@ Do NOT use if:
 
 ## Startup Protocol
 
-Execute steps in this order. **Parallelize** independent calls in the same turn (git + reads + mem_context + atlas_search are all independent).
+Execute steps in this order. **Parallelize** independent calls in the same turn (git + reads + mem_context + atlas_search are all independent). CodeGraph `init`/`sync` must complete before `status`/`files` — those queries read the index the first two write.
 
 ### Step 1 — Detect the Active Project
 
@@ -37,7 +39,45 @@ Execute steps in this order. **Parallelize** independent calls in the same turn 
 - If there is a `CLAUDE.md` in `~/.claude/`: already loaded automatically — do not re-read
 - Canonical project name = directory name or `package.json::name`/`pyproject.toml::project.name`
 
-### Step 2 — Git State
+### Step 2 — CodeGraph Structural Context
+
+Resolve the project root (`git rev-parse --show-toplevel || pwd`), then:
+
+1. Check for `<project-root>/.codegraph/`.
+2. If missing AND the root is a real project (has `.git` or a package manifest): run
+   `codegraph init <project-root>` once. Never init in `$HOME`, temp directories, or
+   non-project folders. This is the ONLY write session-start is allowed to perform.
+   - **Silence the spinner**: the init progress bar floods the transcript with ANSI
+     frames. Redirect and show only the summary:
+     `codegraph init <root> > /tmp/cg-init.log 2>&1; tail -3 /tmp/cg-init.log`
+     (use `--quiet` instead if the CLI version supports it).
+   - **After a fresh init**: `codegraph init` drops a self-ignoring
+     `.codegraph/.gitignore` (`*` + `!.gitignore`) — the data files never reach git,
+     but that one file is MEANT to be committed so the ignore travels with the repo.
+     If `git status` shows `?? .codegraph/`, suggest committing
+     `.codegraph/.gitignore` in the briefing — do NOT commit or edit anything
+     yourself (read-only rule).
+3. If the index already exists, run
+   `codegraph sync <root> > /tmp/cg-sync.log 2>&1; tail -3 /tmp/cg-sync.log` —
+   it ingests changes since the last index (a no-op when nothing changed), so the
+   structure below always reflects the CURRENT working tree. No mtime staleness
+   heuristics: comparing against the last commit misses uncommitted edits.
+4. Query the index for the briefing with deterministic, summary-level commands:
+   - `codegraph status` — files/nodes/edges counts + node-kind distribution
+   - `codegraph files` — annotated project tree (symbols per file): the layers line
+   - Do NOT use `codegraph explore` here: it is semantic search for editing tasks —
+     it matches a narrow symbol set and dumps verbatim source. Reserve it for when
+     the session goal is refactoring and blast-radius matters up front (then trim
+     with `| sed '/\*\*Source Code\*\*/q'`).
+5. Feed the result into the briefing's **Project state** section (structure line) — it
+   replaces broad Read/Glob/Grep exploration, do not do both.
+
+Fail gracefully: if `codegraph` is not installed, or init/sync/status fails, skip this
+step, note "CodeGraph unavailable" in ⚠ Attention, and fall back to normal file reads.
+On very large repos, init may take a while — mention it is running rather than stalling
+silently.
+
+### Step 3 — Git State
 
 Run in parallel in a single turn:
 
@@ -47,7 +87,7 @@ Run in parallel in a single turn:
 
 If there are uncommitted changes or stashes → flag them in the briefing.
 
-### Step 3 — State Documentation
+### Step 4 — State Documentation
 
 Read if they exist (in order, without failing if any is missing):
 
@@ -56,7 +96,7 @@ Read if they exist (in order, without failing if any is missing):
 3. `IMPLEMENTATION_SUMMARY.md` — capabilities and spec state
 4. `README.md` — only if the above do not exist
 
-### Step 4 — Active Spec (if the project follows SDD)
+### Step 5 — Active Spec (if the project follows SDD)
 
 - Look for `specs/NNN-*/tasks.md` (descending numeric order — the last is usually the active one)
 - For each spec, count `- [ ]` checkboxes (pending) vs `- [x]` (closed)
@@ -64,7 +104,7 @@ Read if they exist (in order, without failing if any is missing):
 
 CAUTION: unchecked checkboxes may be stale. Cross-reference with `IMPLEMENTATION_SUMMARY.md` or the journal before stating "spec X has Y pending tasks". If the summary says "closed" and checkboxes are unchecked → report the conflict, do not assume it is open.
 
-### Step 5 — Persistent Memory
+### Step 6 — Persistent Memory
 
 Run in parallel:
 
@@ -78,7 +118,7 @@ Cross-check dates:
 - If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift".
 - If `Projects/<name>.md` has `Last updated:` earlier than the project's last journal → flag Atlas drift in the briefing (reconciliation is `session-end` work).
 
-### Step 6 — Tests/Benchmark (optional, ask first)
+### Step 7 — Tests/Benchmark (optional, ask first)
 
 Do NOT run automatically. Ask the user:
 
@@ -89,7 +129,7 @@ If they say yes:
 - Respect venvs and paths documented in `CLAUDE.md` (e.g. vi-sdd uses `/home/sandman/.venvs/vi-sdd/bin/python`)
 - Report green/red + number of tests; if red, do NOT attempt to fix — only flag it
 
-### Step 7 — Briefing to User
+### Step 8 — Briefing to User
 
 Return a structured summary:
 
@@ -101,6 +141,7 @@ Return a structured summary:
 **Last session:** <journal date> — <title or first line>
 
 ### Project state
+- <bullet with structural overview from codegraph explore: modules/layers, entry points, hotspots>
 - <bullet with key metrics from STATE/IMPLEMENTATION_SUMMARY>
 - <bullet with active spec if any>
 
@@ -109,6 +150,33 @@ Return a structured summary:
 
 ### Suggested next step
 <1-2 concrete sentences based on the last journal and pending tasks>
+```
+
+**Onboarding variant — first contact.** When the first-contact heuristic fires (see
+Heuristics), the resumption template above makes no sense ("last session: none").
+Replace it with an onboarding briefing that teaches the project instead:
+
+```
+## First contact — <project>
+
+### What it is
+<README/CLAUDE.md: purpose in 2-3 lines>
+
+### Stack & conventions
+<manifests: language, framework, package manager, test runner>
+<CLAUDE.md rules that constrain how work is done here>
+
+### Structure
+<codegraph files tree: layers and where symbols concentrate>
+
+### Entry points & hotspots
+<main/server/app + top fan-in symbols — where to start reading>
+
+### How to run / test
+<build, test, dev commands — from CLAUDE.md or package scripts>
+
+### Health signals
+<tests present?, CI?, uncommitted work?, index stats from codegraph status>
 ```
 
 If conflicts are detected (outdated engram, checkboxes vs IMPLEMENTATION_SUMMARY, red tests), add an **⚠ Attention** section with the detail.
@@ -127,13 +195,18 @@ After the briefing, always end with a **session intake** — ask these questions
 4. **Blockers** — Anything waiting on a PR, external dependency, or another person?
 ```
 
+**Onboarding intake**: on first contact, prepend one extra question — "Is this your
+first time in this repo, or are you resuming work started elsewhere (no memory
+recorded on this machine)?" Engram-first-contact is not always user-first-contact;
+if they are resuming, keep the onboarding structure but skip the teaching tone.
+
 STOP after showing the intake. Do not assume answers, propose code, or begin any task until the user replies. Questions 2–4 are optional — if the user only answers question 1, that is enough to proceed.
 
 ---
 
 ## Operational Rules
 
-- **Write nothing to disk** during session-start. Read only.
+- **Write nothing to disk** during session-start. Read only. Single exception: `codegraph init` / `codegraph sync` (Step 2) — they only write inside `.codegraph/`, never touch project sources.
 - **Do not modify memories** (engram/atlas) in start — that is `session-end` work.
 - **Parallelize reads** whenever possible. Bash + Read + mem_context + atlas_search can go in the same turn.
 - **Fail gracefully**: if engram, atlas, or any file does not respond/exist → omit that section from the briefing, do not break the flow.
@@ -143,6 +216,13 @@ STOP after showing the intake. Do not assume answers, propose code, or begin any
 ---
 
 ## Heuristics
+
+**Is this first contact? (onboarding mode)**
+- ALL of these → first contact: mem_context has no observations for the project,
+  no journal/STATE/IMPLEMENTATION_SUMMARY, no Atlas entity page. Use the onboarding
+  briefing variant (Step 8) and prepend the first-time intake question.
+- Only SOME signals missing (e.g. journal exists but Engram is empty) → resumption
+  briefing; flag the missing store as drift instead of switching template.
 
 **Is there an active spec?**
 - `specs/NNN-*/tasks.md` exists with `- [ ]` pending AND the journal/STATE does not explicitly say "closed" → yes
