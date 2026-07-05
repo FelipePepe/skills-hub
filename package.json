@@ -1,8 +1,6 @@
 {
   "name": "skills-hub",
-
-  "version": "2.6.0",
-
+  "version": "2.8.0",
   "private": true,
   "description": "CLI para instalar y exponer el catalogo de skills en las apps locales compatibles.",
   "license": "MIT",

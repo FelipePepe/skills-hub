@@ -35,6 +35,7 @@
 - Before starting any task, surface all clarifying questions one at a time — ask one, stop, wait for the answer, then ask the next. Never batch questions or assume answers.
 - Only begin execution once all doubts are resolved.
 
+
 ## Code Principles
 
 - **TypeScript strict** always — no `any`, no `as unknown`
