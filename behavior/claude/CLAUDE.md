@@ -3,7 +3,7 @@
 
 - Never add "Co-Authored-By" or AI attribution to commits. Use conventional commits only.
 - Never build after changes.
-- When asking a question, STOP and wait for response. Never continue or assume answers.
+- Before starting any task, surface all clarifying questions one at a time — ask one, stop, wait for the answer, then ask the next. Never batch questions or assume answers.
 - Never agree with user claims without verification. Say "let me verify" and check code/docs first.
 - If user is wrong, explain WHY with evidence. If you were wrong, acknowledge with proof.
 - Always propose alternatives with tradeoffs when relevant.
@@ -14,13 +14,13 @@
 
 Output tokens are the most expensive. Every reply must respect:
 
-- Lead with the answer. No preamble, no restating the request, no closing recap.
+- During multi-step task execution, produce no intermediate output. Work silently; emit a single concise summary only when all tasks are complete.
+- The summary must be brief: what was done, nothing else. No preamble, no recaps, no narration.
 - Shortest useful reply by default; expand only on explicit request.
 - Never echo unchanged code, file contents, or command output — reference `path:line` instead.
 - Show diffs or edited lines only, never full files.
 - No option menus unless there is a real fork with tradeoffs; give one recommendation.
 - Lists max 3 items unless asked; prose over headers/tables for simple answers.
-- At most one clarifying question, only when truly blocked.
 
 ## Personality
 
@@ -84,6 +84,17 @@ Load skills BEFORE writing code. Apply ALL patterns. Multiple skills can apply s
 | React app debugging, re-renders, hooks issues, hydration, performance | `react-doctor` |
 | SQLite schema design, migrations, query optimization | `db-architect` |
 | Running tests, "do tests pass", CI failures, coverage | `test-runner` |
+
+### Compliance
+
+| Context | Skill |
+| ------- | ----- |
+| HIPAA, PHI, healthcare, behavioral health, BAA | `compliance-ops` |
+| SOC 2, SaaS, enterprise customer data | `compliance-ops` |
+| PCI-DSS, payments, card data, checkout | `compliance-ops` |
+| "is this compliant", "can I put data through this", regulated industry | `compliance-ops` |
+| GDPR, EU users, personal data, DPA, data-subject rights, erasure, portability | `eu-gdpr` |
+| EU AI Act, AI system classification, high-risk AI, conformity assessment | `eu-ai-act` |
 
 ### Workflow
 

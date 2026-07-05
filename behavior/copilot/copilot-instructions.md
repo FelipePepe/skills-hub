@@ -26,6 +26,15 @@
 | Containers | Docker Compose |
 | CI/CD | GitHub Actions + casa deploy |
 
+## Language
+
+- Always respond in English. No exceptions regardless of the language used in the prompt.
+
+## Pre-Task Protocol
+
+- Before starting any task, surface all clarifying questions one at a time — ask one, stop, wait for the answer, then ask the next. Never batch questions or assume answers.
+- Only begin execution once all doubts are resolved.
+
 ## Code Principles
 
 - **TypeScript strict** always — no `any`, no `as unknown`
@@ -39,13 +48,13 @@
 
 Output tokens are the most expensive. Every reply must respect:
 
-- Lead with the answer. No preamble, no restating the request, no closing recap.
+- During multi-step task execution, produce no intermediate output. Work silently; emit a single concise summary only when all tasks are complete.
+- The summary must be brief: what was done, nothing else. No preamble, no recaps, no narration.
 - Shortest useful reply by default; expand only on explicit request.
 - Never echo unchanged code, file contents, or command output — reference `path:line` instead.
 - Show diffs or edited lines only, never full files.
 - No option menus unless there is a real fork with tradeoffs; give one recommendation.
 - Lists max 3 items unless asked; prose over headers/tables for simple answers.
-- At most one clarifying question, only when truly blocked.
 
 ## Mandatory Workflow
 
