@@ -7,6 +7,23 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [2.8.0] - 2026-07-05
+
+### Añadido
+
+- `skills/common/compliance-ops`: guardrail de cumplimiento normativo con entrevista guiada para HIPAA, SOC 2, GDPR y PCI-DSS; 13 archivos de referencia bajo `references/`.
+- `agents/common/sdd-{explore,propose,spec,design,tasks,apply,verify,archive}`: 8 agentes de fase SDD versionados por primera vez con asignación de modelo (`opus`=design, `sonnet`=explore/propose/spec/apply/verify, `haiku`=tasks/archive) y Prompt Defense Baseline obligatorio.
+- `behavior/claude/CLAUDE.md`: sección `### Compliance` en la tabla de auto-carga de skills (`compliance-ops`, `eu-gdpr`, `eu-ai-act`); reglas de solo inglés, ejecución silenciosa con resumen al final, y preguntas una a una antes de empezar.
+- `behavior/copilot/copilot-instructions.md`: mismas reglas de comportamiento aplicadas (`## Language`, `## Pre-Task Protocol`, contrato de output actualizado).
+- `config/sync-map.sh`: entradas para `behavior/claude/CLAUDE.md` y `behavior/copilot/copilot-instructions.md` como fuentes versionadas.
+- `dependabot.yml`: `target-branch: develop` para respetar GitFlow.
+- `actions/checkout`: bump v6 → v7 en `quality.yml` y `release.yml`.
+
+### Cambiado
+
+- `sdd-propose`: modelo opus → sonnet (tarea de escritura estructurada, no arquitectura).
+- `sdd-tasks`: modelo sonnet → haiku (descomposición mecánica desde artefactos spec+design completos).
+
 ## [2.7.0] - 2026-07-04
 
 ### Añadido
@@ -136,7 +153,8 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...HEAD
+[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/FelipePepe/skills-hub/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/FelipePepe/skills-hub/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/FelipePepe/skills-hub/compare/v2.4.0...v2.5.0
