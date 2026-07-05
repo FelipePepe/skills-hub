@@ -44,6 +44,7 @@ pnpm install
 pnpm skills-hub status            # apps detectadas + auditoría del catálogo
 pnpm skills-hub install --dry-run # plan de copia sin tocar disco
 pnpm skills-hub install           # copia las skills a las apps locales
+pnpm skills-hub registry list     # indice de skills para delegadores/agentes
 pnpm skills-hub check             # ¿hay drift entre repo y copias?
 ```
 
@@ -81,6 +82,9 @@ pnpm skills-hub sync    # alias de install
 pnpm skills-hub status  # detección de apps + auditoría del catálogo
 pnpm skills-hub doctor
 pnpm skills-hub doctor-skills
+pnpm skills-hub registry list [--json]
+pnpm skills-hub registry refresh [--output=<path>]
+pnpm skills-hub registry check [--json]
 pnpm skills-hub lint
 pnpm skills-hub check
 ```
@@ -91,6 +95,38 @@ Flags de `install`/`sync`:
 - `--dry-run` muestra el plan sin tocar disco
 - `--include-missing` instala aunque la app no se detecte
 - `--verbose` detalla cada operación de rsync
+
+## Skill registry
+
+Inspirado por el modelo index-first de DeerFlow, `skills-hub` puede generar un
+índice local de skills sin compactar sus reglas:
+
+```bash
+pnpm skills-hub registry list
+pnpm skills-hub registry list --json
+pnpm skills-hub registry refresh
+pnpm skills-hub registry check
+```
+
+`registry refresh` escribe `.skills-hub/skill-registry.md` por defecto. Ese
+archivo es un índice para delegadores: incluye nombre, descripción, scope, apps
+expuestas, herramientas declaradas, coste aproximado en tokens y la ruta exacta
+de `SKILL.md`. La skill completa sigue siendo la fuente de verdad y debe leerse
+antes de ejecutar el trabajo.
+
+`registry check` valida el catálogo para el discovery progresivo (el modelo que
+usan VS Code Copilot Agent Skills y DeerFlow): nombre en minúsculas/dígitos/
+guiones y ≤64 caracteres, description obligatoria y ≤1024 caracteres (los
+límites de Copilot; si se superan la skill se ignora en silencio), description
+con triggers útiles (≥40 caracteres) y cuerpo ≤300 líneas. Todo se reporta como
+warnings sin bloquear.
+
+La exposición por app es la efectiva tras la instalación: cuando una fuente
+específica de plataforma (`skills/claude-only`, `skills/copilot-only`) contiene
+una skill con el mismo nombre que `skills/common`, la última fuente declarada en
+`config/apps.json` gana (mismo criterio que la copia por rsync). El registry
+lista esos casos en la sección `Overrides` y `registry check` los reporta como
+warnings sin bloquear; `doctor-skills` ejecuta `registry check` automáticamente.
 
 Notas:
 

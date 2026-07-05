@@ -19,6 +19,9 @@ Uso:
   skills-hub status  [--app=<id>] [--include-missing]
   skills-hub doctor
   skills-hub doctor-skills
+  skills-hub registry list [--json]
+  skills-hub registry refresh [--output=<path>]
+  skills-hub registry check [--json]
   skills-hub lint
   skills-hub check
 
@@ -33,6 +36,18 @@ function runRepoScript(scriptName, args = []) {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(rootDir, "scripts", scriptName);
     const child = spawn(scriptPath, args, { stdio: "inherit" });
+    child.on("exit", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${scriptName} termino con codigo ${code ?? 1}`));
+    });
+    child.on("error", reject);
+  });
+}
+
+function runNodeScript(scriptName, args = []) {
+  return new Promise((resolve, reject) => {
+    const scriptPath = path.join(rootDir, "scripts", scriptName);
+    const child = spawn(process.execPath, [scriptPath, ...args], { stdio: "inherit" });
     child.on("exit", (code) => {
       if (code === 0) resolve();
       else reject(new Error(`${scriptName} termino con codigo ${code ?? 1}`));
@@ -60,6 +75,9 @@ async function main() {
       return;
     case "doctor-skills":
       await runRepoScript("doctor-skills.sh", rest);
+      return;
+    case "registry":
+      await runNodeScript("skill-registry.mjs", rest);
       return;
     case "lint":
       await runRepoScript("lint.sh", rest);
