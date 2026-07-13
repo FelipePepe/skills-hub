@@ -52,7 +52,7 @@ Before writing ANY code:
 2. Read the design — understand HOW to structure the code
 3. Read existing code in affected files — understand current patterns
 4. Check the project's coding conventions from `config.yaml`
-5. If the project is React, load `skills/common/react-doctor/SKILL.md` and use it as a guardrail while changing components, hooks, and client state flows
+5. If the project is React, load `projects/workflow/skills/common/react-doctor/SKILL.md` and use it as a guardrail while changing components, hooks, and client state flows
 
 ### Step 3: Read Testing Capabilities and Resolve Mode
 

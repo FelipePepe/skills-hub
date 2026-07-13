@@ -5,3 +5,5 @@ DDIA_Skills/
 token-efficient-skills-pack/
 node_modules/
 .skills-hub/
+.codebase-memory/
+.codegraph/
