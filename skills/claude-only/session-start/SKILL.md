@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.1"
+  version: "1.2"
 ---
 
 ## When to Use This Skill
@@ -64,21 +64,35 @@ Read if they exist (in order, without failing if any is missing):
 
 CAUTION: unchecked checkboxes may be stale. Cross-reference with `IMPLEMENTATION_SUMMARY.md` or the journal before stating "spec X has Y pending tasks". If the summary says "closed" and checkboxes are unchecked → report the conflict, do not assume it is open.
 
-### Step 5 — Persistent Memory
+### Step 5 — Persistent Memory (Atlas-first)
 
-Run in parallel:
+Fetch in parallel, but treat **Atlas as the primary source of truth** — it's where `session-end` now saves by default:
 
-- `mem_context(project=<name>, limit=20)` — recent observations in Engram.
 - Direct read of the **Atlas (Obsidian)** vault at `/mnt/nas/Obsidian/`:
   - `Projects/<name>.md` — project entity page, if it exists (architectural state).
   - If the `atlas_search` MCP is available, also use it. If not, use `grep`/`find` in the vault.
+- `mem_context(project=<name>, limit=20)` — recent observations in Engram, for temporal/tactical detail Atlas doesn't carry (bugfixes, spec snapshots, in-progress state).
 - **If `grafos_recall` is available**: call `grafos_recall("<project> session decisions files")` — returns graph entities and relations relevant to the current project. Add any returned context to the briefing. Grafos unavailability is not a blocker — skip gracefully.
 
-Cross-check dates:
-- If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift".
-- If `Projects/<name>.md` has `Last updated:` earlier than the project's last journal → flag Atlas drift in the briefing (reconciliation is `session-end` work).
+If Atlas and Engram disagree on the same fact, **Atlas wins** — it's the later, more deliberate write. Use Engram to fill gaps (what happened recently) rather than to override Atlas's architectural state.
 
-### Step 6 — Tests/Benchmark (optional, ask first)
+Cross-check dates:
+- If `Projects/<name>.md` has `Last updated:` earlier than the project's last journal → flag Atlas drift in the briefing (reconciliation is `session-end` work).
+- If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift" (lower priority than Atlas drift).
+
+### Step 6 — Codebase Graph (codebase-memory-mcp)
+
+Run in parallel with Step 5 when the `codebase-memory` MCP tools are available in this session.
+
+- `list_projects` — check whether the current repo is indexed.
+- If indexed: `index_status` — compare the indexed commit against the HEAD commit from Step 2.
+  - Index behind HEAD → flag "Codebase graph stale, N commits behind" in the briefing. Do **not** re-index automatically (that is `session-end` work, and can take minutes on large repos).
+- If NOT indexed → note "Codebase graph not indexed for this project" in the briefing. Do not offer to index unless the user's request in this turn is explicitly structural.
+- If the user's opening request is structural ("what changed", "who calls X", "show me the architecture") → use `get_architecture`, `search_graph`, or `detect_changes` to enrich the briefing instead of grep/Explore.
+
+CAUTION: if the `codebase-memory` MCP is not connected this session, skip this step silently — do not block the briefing on it.
+
+### Step 7 — Tests/Benchmark (optional, ask first)
 
 Do NOT run automatically. Ask the user:
 
@@ -89,7 +103,7 @@ If they say yes:
 - Respect venvs and paths documented in `CLAUDE.md` (e.g. vi-sdd uses `/home/sandman/.venvs/vi-sdd/bin/python`)
 - Report green/red + number of tests; if red, do NOT attempt to fix — only flag it
 
-### Step 7 — Briefing to User
+### Step 8 — Briefing to User
 
 Return a structured summary:
 
@@ -99,6 +113,7 @@ Return a structured summary:
 **Branch:** <branch> · **Last commit:** <hash> <msg>
 **Uncommitted changes:** <N files> | <none>
 **Last session:** <journal date> — <title or first line>
+**Codebase graph:** indexed as of <commit/date> | stale (N behind) | not indexed | unavailable
 
 ### Project state
 - <bullet with key metrics from STATE/IMPLEMENTATION_SUMMARY>
@@ -136,7 +151,7 @@ STOP after showing the intake. Do not assume answers, propose code, or begin any
 - **Write nothing to disk** during session-start. Read only.
 - **Do not modify memories** (engram/atlas) in start — that is `session-end` work.
 - **Parallelize reads** whenever possible. Bash + Read + mem_context + atlas_search can go in the same turn.
-- **Fail gracefully**: if engram, atlas, or any file does not respond/exist → omit that section from the briefing, do not break the flow.
+- **Fail gracefully**: if engram, atlas, codebase-memory-mcp, or any file does not respond/exist → omit that section from the briefing, do not break the flow.
 - **Respect project language**: if CLAUDE.md specifies Spanish (like vi-sdd, homelab), the briefing goes in Spanish. English by default.
 - **Do not suggest code changes** in the briefing. The next-step suggestion is "which task to tackle", not "which line to edit".
 
@@ -157,6 +172,11 @@ STOP after showing the intake. Do not assume answers, propose code, or begin any
 - If `Projects/<project>.md` exists → always read it: it has stable architectural state + backlinks to relevant Stack technologies.
 - For small personal projects without an entity page, skip.
 
+**Is the codebase graph stale?**
+- `index_status` commit older than the HEAD commit from Step 2 → stale, report the gap in commits.
+- Not indexed at all is normal for a first session on a project — do not treat it as an error, just report it.
+- Never call `index_repository` during session-start — indexing is a write/compute action reserved for `session-end` (with confirmation) or an explicit user request.
+
 ---
 
 ## Example Output (vi-sdd, simulated)
@@ -167,6 +187,7 @@ STOP after showing the intake. Do not assume answers, propose code, or begin any
 **Branch:** main · **Last commit:** abc1234 chore: close spec 006
 **Uncommitted changes:** 12 untracked files (.artifacts/, .claude/, CLAUDE.md, docs/, specs/, src/, tests/)
 **Last session:** 2026-05-21 — Closed spec 006 (OWASP coverage). Macro F1 0.998, 317 tests.
+**Codebase graph:** stale (3 commits behind HEAD)
 
 ### Project state
 - 6 specs closed (001→006). 6-stage pipeline: prepare→scan→validate→dedup→prove→report.
