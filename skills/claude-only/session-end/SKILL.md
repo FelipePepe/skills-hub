@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.0"
+  version: "1.1"
 ---
 
 ## When to Use This Skill
@@ -69,6 +69,17 @@ Each candidate goes to ONE destination (not both unless there is an explicit rea
 - Tactical decisions within a spec
 
 **Quick rule**: if the answer to "will this still be true in 6 months?" is YES → atlas. If "it depends on the current state" → engram.
+
+### Step 2.5 — Codebase Graph Freshness (codebase-memory-mcp)
+
+Only if the `codebase-memory` MCP tools are available this session AND source files (not just docs/memory) were created, edited, or committed:
+
+- `list_projects` — check whether this repo has ever been indexed.
+  - Never indexed → skip this step entirely. Do not suggest indexing a project that has never used the graph.
+- If previously indexed: `index_status` — compare the indexed commit against the current HEAD (post-commit, if you committed this session).
+  - Behind HEAD → ask the user: "Codebase graph is N commits behind — re-index with `index_repository`? (may take a while on large repos)"
+  - Only run `index_repository` if the user confirms. Never re-index automatically — same caution as the Tests/Benchmark step in `session-start`.
+  - Up to date → nothing to do, no need to mention it.
 
 ### Step 3 — Check for Duplicates Before Saving
 
@@ -138,6 +149,7 @@ Display a table of what was saved:
 And briefly mention what was decided NOT to save and why (e.g. "trivial", "already in X").
 
 If a journal was created/modified: include the file path.
+If the codebase graph was re-indexed (Step 2.5): mention the new indexed commit; if it was flagged stale but the user declined to re-index, note that it's still pending.
 
 ---
 
@@ -146,7 +158,7 @@ If a journal was created/modified: include the file path.
 - **Do not invent** observations — only save what actually happened in the conversation.
 - **Do not duplicate** — always run `mem_search`/`atlas_search` first. Upsert with `topic_key`.
 - **Parallelism**: independent saves go in the same turn.
-- **Atlas conservative**: when in doubt, default to Engram. Only to Atlas if the decision is clearly architectural and stable.
+- **Atlas-first**: when in doubt, default to Atlas. Only use Engram if the candidate is clearly temporal/tactical (a snapshot tied to current state, a resolved bug, a spec metric) per the Step 2 table.
 - **Respect project language**: if the project's CLAUDE.md is in Spanish, titles and content go in Spanish too.
 - **Do not silence errors**: if engram/atlas fails, report to the user what was left pending.
 
