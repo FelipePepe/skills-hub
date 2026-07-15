@@ -5,7 +5,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
-PROJECTS_FILE="$ROOT_DIR/config/projects.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
 # shellcheck disable=SC1091 source=lib/common.sh
@@ -25,8 +24,6 @@ bash "$ROOT_DIR/scripts/validate-skills.sh"
 bash "$ROOT_DIR/scripts/doctor-skills.sh"
 bash "$ROOT_DIR/scripts/security-scan-skills.sh"
 skills_hub_validate_json "$APPS_FILE"
-skills_hub_validate_json "$PROJECTS_FILE"
-node "$ROOT_DIR/scripts/lib/catalog.mjs" check
 
 if command -v shellcheck >/dev/null 2>&1; then
   skills_hub_info "Lint: ejecutando shellcheck..."

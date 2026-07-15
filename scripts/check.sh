@@ -9,7 +9,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
-PROJECTS_FILE="$ROOT_DIR/config/projects.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
 # shellcheck disable=SC1091 source=lib/common.sh
@@ -37,11 +36,9 @@ done
 
 skills_hub_require_file "$MAP_FILE"
 skills_hub_require_file "$APPS_FILE"
-skills_hub_require_file "$PROJECTS_FILE"
 skills_hub_require_command rsync
 skills_hub_require_command node
 skills_hub_validate_json "$APPS_FILE"
-skills_hub_validate_json "$PROJECTS_FILE"
 skills_hub_source_sync_map "$MAP_FILE"
 
 skills_hub_assert_local "$ROOT_DIR" "clon del repo"
@@ -102,7 +99,20 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
       rm -f "$tmp_out"
     done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
   done
-done < <(node "$ROOT_DIR/scripts/lib/catalog.mjs" app-sources)
+done < <(
+  node -e '
+    const fs = require("node:fs");
+    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const P = "linux";
+    for (const app of data.apps) {
+      const sources = Array.isArray(app.sources) ? app.sources.join(",") : "";
+      if (!sources) continue;
+      const install = app.installPath?.[P] ?? "";
+      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
+      console.log([app.id, install, detect, sources].join("\t"));
+    }
+  ' "$APPS_FILE"
+)
 
 skills_hub_info "Verificando drift de agentes (repo -> copias instaladas)..."
 
@@ -159,26 +169,34 @@ while IFS=$'\t' read -r app_id agent_install_path detect_csv agent_sources_csv; 
       rm -f "$tmp_out"
     done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -name "*.md" -type f -print0 | sort -z)
   done
-done < <(node "$ROOT_DIR/scripts/lib/catalog.mjs" agent-sources)
+done < <(
+  node -e '
+    const fs = require("node:fs");
+    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const P = "linux";
+    for (const app of data.apps) {
+      const agentSources = Array.isArray(app.agentSources) ? app.agentSources.join(",") : "";
+      if (!agentSources) continue;
+      const install = app.agentInstallPath?.[P] ?? "";
+      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
+      console.log([app.id, install, detect, agentSources].join("\t"));
+    }
+  ' "$APPS_FILE"
+)
 
 for pair in "${SYNC_PAIRS[@]}"; do
   src_rel="${pair%%::*}"
   dst_abs="${pair##*::}"
   src_abs="$ROOT_DIR/$src_rel"
 
-  [[ -e "$src_abs" ]] || { echo "ERROR: origen inexistente -> $src_abs"; errors=1; continue; }
+  [[ -d "$src_abs" ]] || { echo "ERROR: origen inexistente -> $src_abs"; errors=1; continue; }
   if [[ ! -d "$dst_abs" ]]; then
     echo "WARN: destino inexistente -> $dst_abs (sync.sh lo creara)"
     continue
   fi
 
   tmp_out="$(mktemp)"
-  if [[ -d "$src_abs" ]]; then
-    rsync_source=( -ani --delete "$src_abs/" "$dst_abs/" )
-  else
-    rsync_source=( -ani "$src_abs" "$dst_abs" )
-  fi
-  if ! rsync "${rsync_source[@]}" > "$tmp_out"; then
+  if ! rsync -ani --delete "$src_abs/" "$dst_abs/" > "$tmp_out"; then
     echo "ERROR: fallo rsync al comparar $src_abs con $dst_abs"
     errors=1
   elif [[ -s "$tmp_out" ]]; then

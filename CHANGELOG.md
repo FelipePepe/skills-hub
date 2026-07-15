@@ -11,17 +11,17 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
-- `projects/workflow/skills/claude-only/session-start`: bloque de intake al final del briefing — 4 preguntas (goal, constraints, approach, blockers). Claude se detiene y espera respuesta antes de comenzar cualquier tarea. v1.1.
+- `skills/claude-only/session-start`: bloque de intake al final del briefing — 4 preguntas (goal, constraints, approach, blockers). Claude se detiene y espera respuesta antes de comenzar cualquier tarea. v1.1.
 
 ### Arreglado
 
-- `projects/workflow/skills/common/session-start`: reemplaza llamadas a `bash ~/.copilot/hooks/copilot/*.sh` con comandos git nativos — la skill ahora funciona en Claude, agents y Copilot sin dependencias de plataforma. Corrige campo `author` (era `gentleman-programming`). v1.3.
+- `skills/common/session-start`: reemplaza llamadas a `bash ~/.copilot/hooks/copilot/*.sh` con comandos git nativos — la skill ahora funciona en Claude, agents y Copilot sin dependencias de plataforma. Corrige campo `author` (era `gentleman-programming`). v1.3.
 
 ## [2.5.0] - 2026-06-26
 
 ### Añadido
 
-- `projects/workflow/skills/common/redis-cache`: nueva skill portable para caching con Redis en Node.js/TypeScript. Cubre selección de estrategia (cache-aside/write-through/write-behind), diseño de claves, política de TTL, patrones de cliente node-redis v5 (RESP3, client-side caching), manejo de fallos y pitfalls comunes.
+- `skills/common/redis-cache`: nueva skill portable para caching con Redis en Node.js/TypeScript. Cubre selección de estrategia (cache-aside/write-through/write-behind), diseño de claves, política de TTL, patrones de cliente node-redis v5 (RESP3, client-side caching), manejo de fallos y pitfalls comunes.
 
 ## [2.4.0] - 2026-06-14
 
@@ -33,11 +33,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
-- `projects/workflow/skills/common/critical-advisor`: skill de persona consejera con 7 reglas — cuestiona primero, etiqueta confianza, elimina frases de validación, mantiene posición bajo presión.
+- `skills/common/critical-advisor`: skill de persona consejera con 7 reglas — cuestiona primero, etiqueta confianza, elimina frases de validación, mantiene posición bajo presión.
 - `scripts/bootstrap.sh` + `scripts/patch-mcp.mjs`: instalación unificada para nueva máquina. Un solo comando (`pnpm bootstrap`) construye el MCP de grafos, sincroniza skills y parchea `~/.claude.json` y `~/.vscode/mcp/config.json` de forma idempotente.
 - `pnpm bootstrap` registrado en `package.json`.
 - Integración de grafos en `session-start` y `session-end` (claude-only + common): `grafos_recall` al inicio de sesión, `grafos_remember` al cierre. Ambos condicionales — no bloquean si grafos no está disponible.
-- Pack DDIA en `projects/workflow/skills/common/ddia-*`: 15 skills compartidas para diseño y revisión de sistemas data-intensive, incluyendo router, modelos de datos, almacenamiento, replicación, sharding, transacciones, sistemas distribuidos, consenso, batch, streaming y ética de datos.
+- Pack DDIA en `skills/common/ddia-*`: 15 skills compartidas para diseño y revisión de sistemas data-intensive, incluyendo router, modelos de datos, almacenamiento, replicación, sharding, transacciones, sistemas distribuidos, consenso, batch, streaming y ética de datos.
 ## [2.2.0] - 2026-06-07
 
 ### Añadido
@@ -51,9 +51,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Añadido
 
 - Sub-capa de sub-agentes en `agents/` (`common` y `claude-only`): 4 agentes instalados en `~/.claude/agents/` — `planner`, `silent-failure-hunter`, `security-reviewer`, `build-error-resolver` (#21).
-- `projects/workflow/skills/common/_shared/prompt-defense-baseline.md`: bloque canónico de defensa contra prompt injection, requerido en todas las definiciones de agente (#21).
+- `skills/common/_shared/prompt-defense-baseline.md`: bloque canónico de defensa contra prompt injection, requerido en todas las definiciones de agente (#21).
 - Soporte de `agentSources` y `agentInstallPath` en `config/apps.json` para la app `claude` (#21).
-- Skills de cumplimiento normativo europeo: `eu-ai-act` y `eu-gdpr` en `projects/workflow/skills/common` (#19).
+- Skills de cumplimiento normativo europeo: `eu-ai-act` y `eu-gdpr` en `skills/common` (#19).
 - Archivos de comportamiento versionados (`behavior/claude/CLAUDE.md`, `behavior/copilot/copilot-instructions.md`) con tabla de auto-carga de skills completa (#20).
 - `scripts/install-behavior.sh`: instalador de archivos de comportamiento (copia segura sin `--delete`) integrado en el pipeline de sync (#20).
 - `config/model-map.json`: configuración de scheduling de modelos según VRAM disponible.

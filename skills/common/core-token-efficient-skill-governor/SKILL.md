@@ -93,6 +93,6 @@ Do not include full file contents unless requested.
 
 ## Success Criteria
 
-- Skills remain flat direct children of the selected project's `skills/common`, `skills/copilot-only`, or `skills/claude-only`.
+- Skills remain flat direct children of `skills/common`, `skills/copilot-only`, or `skills/claude-only`.
 - New or edited skills have bounded outputs and safety policies.
 - Validation results are reported concisely.

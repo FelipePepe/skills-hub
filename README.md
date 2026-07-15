@@ -22,12 +22,11 @@ Mantener todas las skills versionadas en un solo repositorio y **distribuirlas a
 
 ## Estructura
 
-- `projects/casa`: proyecto con las skills específicas del intranet `.casa`.
-- `projects/workflow`: proyecto con las skills portables de desarrollo y operación.
-- Cada proyecto mantiene `skills/common`, `skills/copilot-only` y `skills/claude-only`.
+- `skills/common`: skills compartidas por todas las plataformas (el caso por defecto).
+- `skills/copilot-only`: skills exclusivas de Copilot/OpenCode (excepción).
+- `skills/claude-only`: skills exclusivas de Claude (excepción).
 - `prompts`: prompts globales e instrucciones (contenido copiable legacy).
 - `config/apps.json`: manifiesto de apps detectables, sus rutas y qué fuentes consume cada una.
-- `config/projects.json`: límites y fuentes de `casa` y `workflow`.
 - `config/sync-map.sh`: mapeos legacy para contenido copiable como `prompts`.
 - `opencode/opencode.managed.json`: fragmento gestionado de `opencode.json` (json-merge).
 - `opencode/AGENTS.md`: bloque gestionado para `.opencode/AGENTS.md`.
@@ -122,11 +121,10 @@ límites de Copilot; si se superan la skill se ignora en silencio), description
 con triggers útiles (≥40 caracteres) y cuerpo ≤300 líneas. Todo se reporta como
 warnings sin bloquear.
 
-La exposición por app es la efectiva tras la instalación. Cada app declara en
-`config/apps.json` los proyectos y variantes que consume; VS Code/Copilot usa
-solo `copilot-only`, mientras Claude y Agents mantienen sus variantes propias.
-El orden de proyectos y variantes se resuelve con `config/projects.json`
-(mismo criterio que la copia por rsync). El registry
+La exposición por app es la efectiva tras la instalación: cuando una fuente
+específica de plataforma (`skills/claude-only`, `skills/copilot-only`) contiene
+una skill con el mismo nombre que `skills/common`, la última fuente declarada en
+`config/apps.json` gana (mismo criterio que la copia por rsync). El registry
 lista esos casos en la sección `Overrides` y `registry check` los reporta como
 warnings sin bloquear; `doctor-skills` ejecuta `registry check` automáticamente.
 
@@ -137,7 +135,7 @@ Notas:
 
 ## Pack DDIA
 
-El catálogo incluye skills `ddia-*` en `projects/workflow/skills/common` para tareas de diseño y revisión de sistemas data-intensive inspiradas en DDIA 2e. Usa `ddia-skill-router` cuando la pregunta atraviese varias áreas; carga una skill específica cuando el riesgo principal sea claro.
+El catálogo incluye skills `ddia-*` en `skills/common` para tareas de diseño y revisión de sistemas data-intensive inspiradas en DDIA 2e. Usa `ddia-skill-router` cuando la pregunta atraviese varias áreas; carga una skill específica cuando el riesgo principal sea claro.
 
 Áreas cubiertas: requisitos no funcionales, trade-offs de arquitectura, modelos de datos, almacenamiento/índices, encoding/evolución, replicación, sharding, transacciones, sistemas distribuidos, consistencia/consenso, batch, streaming, filosofía de datos derivados y ética de datos.
 
@@ -198,9 +196,8 @@ Lee `CONTRIBUTING.md` y valida cambios locales antes de abrir PR:
 
 Este repo es la **fuente canónica** de authoring:
 
-- `projects/casa/` y `projects/workflow/` contienen las skills reales
-- `config/projects.json` define los límites y fuentes de cada proyecto
-- `config/apps.json` define qué proyectos y variantes expone cada app
+- `skills/` contiene las skills reales
+- `config/apps.json` define qué carpetas fuente expone cada app
 - `config/sync-map.sh` mantiene solo contenido legacy copiable
 
 Las rutas locales de apps (`~/.copilot/skills`, `~/.claude/skills`, `~/.agents/skills`, OpenCode) son **targets de exposición** (copias), no sitios de mantenimiento manual. Editar la copia instalada se considera drift y `check.sh` lo detecta.
@@ -214,9 +211,9 @@ Reglas:
 
 ## Criterio de clasificación
 
-- Una skill del intranet va a `projects/casa/skills/common`; una skill portable va a `projects/workflow/skills/common`.
-- Solo va a la variante `copilot-only` o `claude-only` del proyecto correspondiente si **depende** de esa plataforma concreta.
-- No mezclar configuración de máquina dentro de `projects/*/skills/`; eso queda en el tooling o fuera del repo.
+- Por defecto una skill va a `skills/common`: la consumen Claude, Copilot y agents.
+- Solo va a `skills/copilot-only` o `skills/claude-only` si **depende** de esa plataforma concreta.
+- No mezclar configuración de máquina dentro de `skills/`; eso queda en el tooling o fuera del repo.
 
 ## Convención global de package manager
 

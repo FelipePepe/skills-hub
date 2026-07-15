@@ -55,6 +55,7 @@ ls openspec/config.yaml 2>/dev/null && cat openspec/config.yaml || echo "No SDD 
 engram-mem_context project="{current-project}"
 ```
 
+**If `grafos_recall` is available**: also call `grafos_recall("{project} decisions files")` and include any returned graph context in the report. Skip gracefully if unavailable.
 
 ### Step 5 — Report to user
 Emit exactly this schema, then ask what to do next in one sentence:

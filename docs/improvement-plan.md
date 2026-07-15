@@ -10,7 +10,7 @@ completo como Gentle AI.
 
 ## Principios de diseño
 
-- Mantener `projects/casa/` y `projects/workflow/` como fuentes de verdad de authoring.
+- Mantener `skills/` como fuente de verdad de authoring.
 - Mantener destinos locales como copias, nunca como fuente editable.
 - No introducir symlinks ni dependencias de NAS.
 - Preferir manifiestos declarativos sobre lógica dispersa en scripts.
@@ -37,7 +37,7 @@ skill completa cuando corresponda.
 
 1. Añadir comando `registry` a `bin/skills-hub.js`.
 2. Crear script o módulo `scripts/registry-refresh.*` que:
-   - escanee las fuentes declaradas en `config/projects.json`;
+   - escanee `skills/common`, `skills/claude-only`, `skills/copilot-only`;
    - ignore `_shared` y referencias internas;
    - lea frontmatter `name` y `description`;
    - use el nombre de carpeta como fallback controlado;

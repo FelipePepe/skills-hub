@@ -84,12 +84,12 @@ MEDIUM_RULES=(
 collect_files() {
   if command -v rg >/dev/null 2>&1; then
     {
-      rg --files "$ROOT_DIR/projects" -g 'SKILL.md' 2>/dev/null || true
+      rg --files "$ROOT_DIR/skills" -g 'SKILL.md' 2>/dev/null || true
       rg --files "$ROOT_DIR/prompts" -g '*.md' 2>/dev/null || true
     } | sort -u
   else
     {
-      find "$ROOT_DIR/projects" -name SKILL.md -type f 2>/dev/null || true
+      find "$ROOT_DIR/skills" -name SKILL.md -type f 2>/dev/null || true
       find "$ROOT_DIR/prompts" -name '*.md' -type f 2>/dev/null || true
     } | sort -u
   fi
