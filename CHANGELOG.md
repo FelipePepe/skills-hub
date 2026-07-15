@@ -7,6 +7,27 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [3.0.0] - 2026-07-15
+
+### Cambiado (breaking)
+
+- Catálogo reestructurado de `skills/` plano a `projects/casa/skills/` + `projects/workflow/skills/`, con `config/projects.json` declarando proyectos + variantes en lugar de un array estático de fuentes.
+
+### Añadido
+
+- `projects/workflow/skills/claude-only/session-start`: modo onboarding (briefing "First contact" para proyectos sin memoria previa) y heurística de primer contacto. v1.4 → v1.5.
+- `session-start`/`session-end` (`claude-only` y `common`): default "Atlas-first" — Atlas es la fuente primaria, Engram completa detalle temporal/táctico, Atlas gana en conflicto.
+- `session-start`/`session-end`: integración con `codebase-memory-mcp` — chequeo de freshness del grafo de código y prompt de re-indexado (nunca automático).
+
+### Eliminado
+
+- Skill `core-grafos-memory` y `prompts/grafos-memory.prompt.md`.
+- Integración CodeGraph (`codegraph init/sync/status/files/explore`) — reemplazada por `codebase-memory-mcp`.
+
+### Corregido
+
+- Ruta de páginas de proyecto en Atlas: `Projects/` → `Proyectos/` (la carpeta `Projects/` nunca existió en el vault; toda lectura/escritura de Atlas en sesión era un no-op silencioso).
+
 ## [2.6.0] - 2026-06-28
 
 ### Añadido
