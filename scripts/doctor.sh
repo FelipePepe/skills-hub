@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
+PROJECTS_FILE="$ROOT_DIR/config/projects.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 SKILLS_DOCTOR="$ROOT_DIR/scripts/doctor-skills.sh"
 
@@ -20,8 +21,11 @@ skills_hub_require_command rsync
 skills_hub_require_command node
 skills_hub_require_file "$MAP_FILE"
 skills_hub_require_file "$APPS_FILE"
+skills_hub_require_file "$PROJECTS_FILE"
 skills_hub_require_file "$SKILLS_DOCTOR"
 skills_hub_validate_json "$APPS_FILE"
+skills_hub_validate_json "$PROJECTS_FILE"
+node "$ROOT_DIR/scripts/lib/catalog.mjs" check
 skills_hub_source_sync_map "$MAP_FILE"
 
 skills_hub_assert_local "$ROOT_DIR" "clon del repo"
@@ -95,7 +99,7 @@ for pair in "${SYNC_PAIRS[@]}"; do
   dst_abs="${pair##*::}"
   src_abs="$ROOT_DIR/$src_rel"
 
-  if [[ ! -d "$src_abs" ]]; then
+  if [[ ! -e "$src_abs" ]]; then
     echo "ERROR: origen inexistente -> $src_abs"
     errors=1
   fi

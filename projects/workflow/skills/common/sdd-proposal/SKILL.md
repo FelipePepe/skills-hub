@@ -20,7 +20,7 @@ This skill is a legacy alias.
 
 ## What to Do
 
-1. Load and follow `skills/common/sdd-propose/SKILL.md`
+1. Load and follow `projects/workflow/skills/common/sdd-propose/SKILL.md`
 2. Preserve name compatibility in the summary if the legacy context requires it
 3. Return the result using the format and persistence defined by `sdd-propose`
 

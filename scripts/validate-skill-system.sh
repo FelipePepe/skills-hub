@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="${SCRIPT_DIR}"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -67,7 +67,7 @@ validate_skill() {
 for skill in sdd-init sdd-explore sdd-propose sdd-spec sdd-design sdd-tasks sdd-apply sdd-verify sdd-archive sdd-onboard session-start session-end; do
     echo ""
     echo "  Validating: $skill"
-    skill_path="${PROJECT_ROOT}/skills/common/$skill"
+    skill_path="${PROJECT_ROOT}/projects/workflow/skills/common/$skill"
     if [[ -d "$skill_path" ]]; then
         validate_skill "$skill_path" || true
     else
@@ -82,7 +82,7 @@ echo ""
 echo "📋 Phase 2: Manifest Validation"
 echo "========================================"
 
-MANIFEST="${PROJECT_ROOT}/skills/skills-manifest.json"
+MANIFEST="${PROJECT_ROOT}/projects/workflow/skills/skills-manifest.json"
 
 if [[ -f "$MANIFEST" ]]; then
     log_success "Manifest file exists"
@@ -268,7 +268,7 @@ echo "📍 Phase 7: Project Structure Validation"
 echo "========================================"
 
 # Check required directories
-for dir in skills/common config scripts; do
+for dir in projects/casa projects/workflow config scripts; do
     if [[ -d "${PROJECT_ROOT}/$dir" ]]; then
         log_success "$dir/ exists"
     else

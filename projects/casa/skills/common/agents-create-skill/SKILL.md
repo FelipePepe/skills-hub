@@ -31,7 +31,7 @@ This skill must follow the rules from:
 
 ## Workflow
 
-1. Choose `skills/common` unless platform-specific behavior is required.
+1. Choose `projects/casa/skills/common` for `.casa` infrastructure; otherwise use `projects/workflow/skills/common`.
 2. Create a flat folder whose name matches frontmatter `name`.
 3. Include all required governance sections.
 4. Keep `SKILL.md` under 300 lines.

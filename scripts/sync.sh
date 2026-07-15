@@ -12,6 +12,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MAP_FILE="$ROOT_DIR/config/sync-map.sh"
 APPS_FILE="$ROOT_DIR/config/apps.json"
+PROJECTS_FILE="$ROOT_DIR/config/projects.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 OPENCODE_CONFIG="$ROOT_DIR/scripts/install-opencode-config.mjs"
 
@@ -46,10 +47,12 @@ done
 
 skills_hub_require_file "$MAP_FILE"
 skills_hub_require_file "$APPS_FILE"
+skills_hub_require_file "$PROJECTS_FILE"
 skills_hub_require_file "$OPENCODE_CONFIG"
 skills_hub_require_command rsync
 skills_hub_require_command node
 skills_hub_validate_json "$APPS_FILE"
+skills_hub_validate_json "$PROJECTS_FILE"
 skills_hub_source_sync_map "$MAP_FILE"
 
 # Invariante: el clon debe estar en disco local.
@@ -64,7 +67,7 @@ $VERBOSE && rsync_file+=( -v )
 
 skills_hub_info "Copiando skills a las apps detectadas...$([[ "$DRY_RUN" == true ]] && echo ' [dry-run]')"
 
-# Extrae de apps.json: id<TAB>installPath<TAB>detectPaths(,)<TAB>sources(,)
+# Resuelve de apps.json + projects.json: id<TAB>installPath<TAB>detectPaths(,)<TAB>sources(,)
 # Solo apps con al menos una source de skills.
 while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
   [[ -n "$app_id" ]] || continue
@@ -108,20 +111,7 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
       rsync "${rsync_base[@]}" "$skill_dir/" "$install_path/$skill_name/"
     done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
   done
-done < <(
-  node -e '
-    const fs = require("node:fs");
-    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-    const P = "linux";
-    for (const app of data.apps) {
-      const sources = Array.isArray(app.sources) ? app.sources.join(",") : "";
-      if (!sources) continue;
-      const install = app.installPath?.[P] ?? "";
-      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
-      console.log([app.id, install, detect, sources].join("\t"));
-    }
-  ' "$APPS_FILE"
-)
+done < <(node "$ROOT_DIR/scripts/lib/catalog.mjs" app-sources)
 
 skills_hub_info "Copiando agentes a las apps detectadas...$([[ "$DRY_RUN" == true ]] && echo ' [dry-run]')"
 
@@ -167,20 +157,7 @@ while IFS=$'\t' read -r app_id agent_install_path detect_csv agent_sources_csv; 
       rsync "${rsync_file[@]}" "$agent_file" "$agent_install_path/$agent_basename"
     done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -name "*.md" -type f -print0 | sort -z)
   done
-done < <(
-  node -e '
-    const fs = require("node:fs");
-    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-    const P = "linux";
-    for (const app of data.apps) {
-      const agentSources = Array.isArray(app.agentSources) ? app.agentSources.join(",") : "";
-      if (!agentSources) continue;
-      const install = app.agentInstallPath?.[P] ?? "";
-      const detect = Array.isArray(app.detectPaths?.[P]) ? app.detectPaths[P].join(",") : "";
-      console.log([app.id, install, detect, agentSources].join("\t"));
-    }
-  ' "$APPS_FILE"
-)
+done < <(node "$ROOT_DIR/scripts/lib/catalog.mjs" agent-sources)
 
 skills_hub_info "Sincronizando contenido copiable legacy (prompts, etc.)..."
 for pair in "${SYNC_PAIRS[@]}"; do
@@ -188,7 +165,7 @@ for pair in "${SYNC_PAIRS[@]}"; do
   dst_abs="${pair##*::}"
   src_abs="$ROOT_DIR/$src_rel"
 
-  [[ -d "$src_abs" ]] || { skills_hub_warn "origen inexistente, se omite -> $src_abs"; continue; }
+  [[ -e "$src_abs" ]] || { skills_hub_warn "origen inexistente, se omite -> $src_abs"; continue; }
   skills_hub_assert_local "$dst_abs" "destino legacy"
 
   if [[ ! -d "$dst_abs" ]]; then
@@ -199,8 +176,13 @@ for pair in "${SYNC_PAIRS[@]}"; do
     fi
   fi
 
-  echo "SYNC: $src_abs/ -> $dst_abs/"
-  rsync "${rsync_base[@]}" "$src_abs/" "$dst_abs/"
+  if [[ -d "$src_abs" ]]; then
+    echo "SYNC: $src_abs/ -> $dst_abs/"
+    rsync "${rsync_base[@]}" "$src_abs/" "$dst_abs/"
+  else
+    echo "SYNC: $src_abs -> $dst_abs"
+    rsync "${rsync_file[@]}" "$src_abs" "$dst_abs"
+  fi
 done
 
 skills_hub_info "Instalando configuracion gestionada (OpenCode)..."

@@ -4,9 +4,9 @@ Implement or update token-efficient skills inside `skills-hub`.
 
 ## Rules
 
-- Use `skills/common` by default.
-- Use `skills/copilot-only` only for Copilot/OpenCode-specific behavior.
-- Use `skills/claude-only` only for Claude-specific behavior.
+- Use `projects/workflow/skills/common` by default.
+- Use `projects/workflow/skills/copilot-only` only for Copilot/OpenCode-specific behavior.
+- Use `projects/workflow/skills/claude-only` only for Claude-specific behavior.
 - Keep every skill as a direct child directory; do not create nested category folders.
 - Folder name must match frontmatter `name` exactly.
 - Keep each `SKILL.md` under 300 lines; move support material to `references/` when needed.

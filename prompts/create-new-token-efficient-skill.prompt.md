@@ -4,8 +4,8 @@ Create a new repo-compatible skill in `skills-hub`.
 
 ## Defaults
 
-- Put shared skills in `skills/common/<skill-name>/SKILL.md`.
-- Use `skills/copilot-only` or `skills/claude-only` only for platform-specific exceptions.
+- Put shared skills in `projects/workflow/skills/common/<skill-name>/SKILL.md`.
+- Use `projects/workflow/skills/copilot-only` or `projects/workflow/skills/claude-only` only for platform-specific exceptions.
 - Do not create nested category folders.
 - Use a flat prefixed name when a category helps, such as `analysis-code-review`.
 
