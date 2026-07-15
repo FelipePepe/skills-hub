@@ -53,13 +53,13 @@ Each candidate goes to ONE destination (not both unless there is an explicit rea
 
 **Atlas — persistent and architectural knowledge** (useful life >6 months, cross-session):
 - Lives in `/mnt/nas/Obsidian/` (Obsidian vault). Primary access via filesystem (Read/Write/Edit) — the `atlas_*` MCP may not be available in every session.
-- Structure: `Projects/<project>.md` (entity page per project), `Stack/<category>/<tech>.md` (tech reference with `_INDEX.md` master), `Setup/` (infra/operational), `AI/`, `Temp/`.
+- Structure: `Proyectos/<project>.md` (entity page per project), `Stack/<category>/<tech>.md` (tech reference with `_INDEX.md` master), `Setup/` (infra/operational), `AI/`, `Temp/`.
 - "Load-bearing" architecture decisions: stack choice, data model, stable API contracts.
 - Organizational conventions that apply across multiple projects.
 - Canonical mappings (e.g. "MDASH↔vi-sdd", OWASP taxonomies).
 - Established personal/team working patterns.
 
-**Most typical at session close**: if there was a spec/phase close with architectural substance, **update `Projects/<project>.md`** with the delta (current state, metrics, new Stack links). This is usually not a new page — it is an upsert on the existing entity page. Mandatory convention: refresh the `**Last updated:** YYYY-MM-DD` field at the top.
+**Most typical at session close**: if there was a spec/phase close with architectural substance, **update `Proyectos/<project>.md`** with the delta (current state, metrics, new Stack links). This is usually not a new page — it is an upsert on the existing entity page. Mandatory convention: refresh the `**Last updated:** YYYY-MM-DD` field at the top.
 
 **Engram — operational memory** (useful life weeks-months, day-to-day):
 - Resolved bugs (symptom+cause+fix)
@@ -86,7 +86,7 @@ Only if the `codebase-memory` MCP tools are available this session AND source fi
 For each candidate:
 
 - Engram: `mem_search("<title or keywords>", project=<X>)`. If something similar exists: use `topic_key` to upsert with `mem_save` or `mem_update`.
-- Atlas: check if `Projects/<project>.md` exists in `/mnt/nas/Obsidian/`. If yes → edit the relevant section (do not create a new page). If the observation spans several projects or concerns a technology, consider `Stack/<category>/<tech>.md`. Last resort: create a new page — only if the topic genuinely does not fit any existing one.
+- Atlas: check if `Proyectos/<project>.md` exists in `/mnt/nas/Obsidian/`. If yes → edit the relevant section (do not create a new page). If the observation spans several projects or concerns a technology, consider `Stack/<category>/<tech>.md`. Last resort: create a new page — only if the topic genuinely does not fit any existing one.
 
 `topic_key` values (Engram) must be stable and compound: `vi-sdd/spec-006-owasp`, `homelab/nginx-config`, `personal/git-workflow`.
 
@@ -133,7 +133,7 @@ Display a table of what was saved:
 |-------------|-------------|------|--------|
 | Engram | ... | bugfix | save |
 | Engram | ... | decision | update (#1234) |
-| Atlas | `Projects/vi-sdd.md` | architecture | edit (section X) |
+| Atlas | `Proyectos/vi-sdd.md` | architecture | edit (section X) |
 | Atlas | `Stack/Languages/Rust.md` | pattern | edit (section Y) |
 
 And briefly mention what was decided NOT to save and why (e.g. "trivial", "already in X").
