@@ -2,17 +2,15 @@
 name: session-start
 description: >
   Activates the session workflow: detects the active project, checks git state,
-  reads the last journal and state docs, detects the active spec with pending
-  tasks, queries context in Engram and Atlas, and optionally runs quick
-  tests/benchmarks. Returns a
-  resumption briefing — or an onboarding briefing on first contact with a
-  project — with next-step suggestions. Trigger: user says
+  reads the last journal and state docs, detects the active spec with pending tasks,
+  queries context in Engram and Atlas, and optionally runs quick tests/benchmarks.
+  Returns a resumption briefing with next-step suggestions. Trigger: user says
   "start session", "session start", "resuming", "where did we leave off",
   "project state", "bring me up to speed", "session start".
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.4"
+  version: "1.1"
 ---
 
 ## When to Use This Skill
@@ -74,6 +72,7 @@ Run in parallel:
 - Direct read of the **Atlas (Obsidian)** vault at `/mnt/nas/Obsidian/`:
   - `Projects/<name>.md` — project entity page, if it exists (architectural state).
   - If the `atlas_search` MCP is available, also use it. If not, use `grep`/`find` in the vault.
+- **If `grafos_recall` is available**: call `grafos_recall("<project> session decisions files")` — returns graph entities and relations relevant to the current project. Add any returned context to the briefing. Grafos unavailability is not a blocker — skip gracefully.
 
 Cross-check dates:
 - If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift".
@@ -112,33 +111,6 @@ Return a structured summary:
 <1-2 concrete sentences based on the last journal and pending tasks>
 ```
 
-**Onboarding variant — first contact.** When the first-contact heuristic fires (see
-Heuristics), the resumption template above makes no sense ("last session: none").
-Replace it with an onboarding briefing that teaches the project instead:
-
-```
-## First contact — <project>
-
-### What it is
-<README/CLAUDE.md: purpose in 2-3 lines>
-
-### Stack & conventions
-<manifests: language, framework, package manager, test runner>
-<CLAUDE.md rules that constrain how work is done here>
-
-### Structure
-<directory tree / README description: layers and where symbols concentrate>
-
-### Entry points & hotspots
-<main/server/app + top fan-in symbols — where to start reading>
-
-### How to run / test
-<build, test, dev commands — from CLAUDE.md or package scripts>
-
-### Health signals
-<tests present?, CI?, uncommitted work?>
-```
-
 If conflicts are detected (outdated engram, checkboxes vs IMPLEMENTATION_SUMMARY, red tests), add an **⚠ Attention** section with the detail.
 
 After the briefing, always end with a **session intake** — ask these questions to collect everything needed before starting work. Present them as a compact block, not a wall of text:
@@ -154,11 +126,6 @@ After the briefing, always end with a **session intake** — ask these questions
    - Something else I should load before starting?
 4. **Blockers** — Anything waiting on a PR, external dependency, or another person?
 ```
-
-**Onboarding intake**: on first contact, prepend one extra question — "Is this your
-first time in this repo, or are you resuming work started elsewhere (no memory
-recorded on this machine)?" Engram-first-contact is not always user-first-contact;
-if they are resuming, keep the onboarding structure but skip the teaching tone.
 
 STOP after showing the intake. Do not assume answers, propose code, or begin any task until the user replies. Questions 2–4 are optional — if the user only answers question 1, that is enough to proceed.
 
@@ -176,13 +143,6 @@ STOP after showing the intake. Do not assume answers, propose code, or begin any
 ---
 
 ## Heuristics
-
-**Is this first contact? (onboarding mode)**
-- ALL of these → first contact: mem_context has no observations for the project,
-  no journal/STATE/IMPLEMENTATION_SUMMARY, no Atlas entity page. Use the onboarding
-  briefing variant (Step 8) and prepend the first-time intake question.
-- Only SOME signals missing (e.g. journal exists but Engram is empty) → resumption
-  briefing; flag the missing store as drift instead of switching template.
 
 **Is there an active spec?**
 - `specs/NNN-*/tasks.md` exists with `- [ ]` pending AND the journal/STATE does not explicitly say "closed" → yes

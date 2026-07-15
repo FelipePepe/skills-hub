@@ -1,6 +1,6 @@
 # Skills Security Gate
 
-The skills security gate adds a static scan for unsafe assistant instructions in `projects/*/skills/` and `prompts/`.
+The skills security gate adds a static scan for unsafe assistant instructions in `skills/` and `prompts/`.
 
 ## What It Checks
 

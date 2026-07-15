@@ -7,9 +7,9 @@ Audit new or modified `skills-hub` skills and prompts for unsafe assistant behav
 Inspect all new or modified files under:
 
 ```text
-projects/workflow/skills/common
-projects/workflow/skills/copilot-only
-projects/workflow/skills/claude-only
+skills/common
+skills/copilot-only
+skills/claude-only
 prompts
 ```
 

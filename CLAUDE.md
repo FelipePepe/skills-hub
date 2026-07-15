@@ -8,13 +8,12 @@ Single source of truth (a GitHub repo) for managing AI assistant skills and dist
 
 ## Architecture
 
-- `projects/casa/` - skills bound to the `.casa` intranet and home infrastructure
-- `projects/workflow/` - portable development, agent, SDD, analysis, and documentation skills
-- Each project keeps `skills/common`, `skills/copilot-only`, and `skills/claude-only`
+- `skills/common` - cross-platform skills shared across all apps
+- `skills/copilot-only` - skills exclusive to GitHub Copilot / OpenCode
+- `skills/claude-only` - skills exclusive to Claude
 - `agents/common` - cross-platform sub-agent definitions (installed to `~/.claude/agents/`)
 - `agents/claude-only` - Claude-specific sub-agent definitions
-- `config/projects.json` - canonical project boundaries and skill sources
-- `config/apps.json` - manifest defining target apps, their detect paths, install paths, project variants, and agent sources
+- `config/apps.json` - manifest defining target apps, their detect paths, install paths, skill sources, and agent sources
 - `config/sync-map.sh` - legacy copy sync pairs in format `<rel_path>::<abs_path>` for copyable content (e.g., VS Code prompts)
 - `scripts/sync.sh` - copy-based installer (rsync) that copies skills from sources to each detected app's installPath; enforces the local-only invariant via `skills_hub_assert_local`
 - `scripts/install-opencode-config.mjs` - installs OpenCode managed config (json-merge + markdown managed block); the only piece that needs Node merge logic
@@ -61,7 +60,7 @@ Direct script invocation:
 
 - Every `SKILL.md` must be under 300 lines; if larger, modularize into `references/`
 - SKILL.md frontmatter `name` must match the containing directory name exactly
-- Agent files (`agents/**/*.md`) must include the Prompt Defense Baseline block (see `projects/workflow/skills/common/_shared/prompt-defense-baseline.md`)
+- Agent files (`agents/**/*.md`) must include the Prompt Defense Baseline block (see `skills/common/_shared/prompt-defense-baseline.md`)
 - Agent `name` frontmatter must match the filename (without `.md`)
 - Default placement for an agent is `agents/common`; use `agents/claude-only` only when it depends on Claude-specific tooling
 - Never hardcode paths outside `config/sync-map.sh`
@@ -71,7 +70,7 @@ Direct script invocation:
 - Naming: use `sdd-propose` as canonical, `sdd-proposal` is legacy alias only
 - ONLY use `pnpm` — `npm` and `npx` are FORBIDDEN. Use `pnpm` and `pnpm dlx` instead. This applies to skill examples, scripts, and all commands in this repo.
 - Use `pnpm` in JS/TS skill examples; document `minimumReleaseAge: 10080` for bootstrap/setup skills
-- Place `.casa` skills in `projects/casa/skills/common` and portable skills in `projects/workflow/skills/common`; use the selected project's `copilot-only`/`claude-only` only when it truly depends on that platform
+- Default placement for a skill is `skills/common` (consumed by all apps); use `copilot-only`/`claude-only` only when it truly depends on that platform
 - Skills are installed by COPY (rsync), never symlinks; after editing a skill, re-run `pnpm skills-hub sync` to propagate
 - Never let the clone or any install target live on a network filesystem (NAS); `skills_hub_assert_local` enforces this
 - If changing installer logic, keep `bin/skills-hub.js` and `scripts/sync.sh` aligned

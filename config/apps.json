@@ -17,8 +17,10 @@
           "%USERPROFILE%/.copilot/skills"
         ]
       },
-      "projects": ["casa", "workflow"],
-      "skillVariants": ["copilot-only"],
+      "sources": [
+        "skills/common",
+        "skills/copilot-only"
+      ],
       "configFiles": [
         {
           "source": "behavior/copilot/copilot-instructions.md",
@@ -51,8 +53,10 @@
           "%USERPROFILE%/.claude/skills"
         ]
       },
-      "projects": ["casa", "workflow"],
-      "skillVariants": ["common", "claude-only"],
+      "sources": [
+        "skills/common",
+        "skills/claude-only"
+      ],
       "agentSources": [
         "agents/common",
         "agents/claude-only"
@@ -85,8 +89,9 @@
           "%USERPROFILE%/.agents/skills"
         ]
       },
-      "projects": ["casa", "workflow"],
-      "skillVariants": ["common"]
+      "sources": [
+        "skills/common"
+      ]
     },
     {
       "id": "opencode",

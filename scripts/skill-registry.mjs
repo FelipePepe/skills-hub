@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { loadCatalog, resolveSkillSources } from "./lib/catalog.mjs";
 
 const DEFAULT_OUTPUT = ".skills-hub/skill-registry.md";
 const SKILL_FILE = "SKILL.md";
@@ -46,6 +45,10 @@ function parseArgs(argv) {
   return args;
 }
 
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
 function normalizeRel(filePath) {
   return filePath.split(path.sep).join("/");
 }
@@ -54,8 +57,13 @@ function unique(values) {
   return [...new Set(values)].filter(Boolean);
 }
 
+function appSources(app) {
+  return unique([...(app.sources || []), ...(app.agentSources || [])]);
+}
+
 function sourceScope(source) {
-  return source.replace(/^projects\//, "").replace(/\/skills\//, "/");
+  const parts = source.split("/");
+  return parts[parts.length - 1] || source;
 }
 
 function parseScalar(raw) {
@@ -162,12 +170,15 @@ function walkSkillFiles(rootDir, source) {
 }
 
 function loadRegistry(rootDir) {
-  const { apps, projectsById } = loadCatalog(rootDir);
+  const appsPath = path.join(rootDir, "config", "apps.json");
+  const apps = readJson(appsPath).apps || [];
 
   // Ordered skill sources per app; install copies in this order, last wins.
   const appSkillSources = new Map();
   for (const app of apps) {
-    const skillSources = resolveSkillSources(app, projectsById);
+    const skillSources = appSources(app).filter((source) =>
+      source.startsWith("skills/"),
+    );
     if (skillSources.length > 0) {
       appSkillSources.set(app.id, skillSources);
     }
@@ -290,7 +301,7 @@ function renderMarkdown(registry) {
       "",
       "## Overrides",
       "",
-      "Platform-specific sources override each project's `common` source at install time (last source wins). For these apps, agents must read the winning `SKILL.md`:",
+      "Platform-specific sources override `skills/common` at install time (last source wins). For these apps, agents must read the winning `SKILL.md`:",
       "",
     );
     for (const collision of registry.collisions) {

@@ -39,7 +39,7 @@ Persistence targets:
 Follow **Section A** from `skills/_shared/sdd-phase-common.md`.
 
 If the project is React (for example `react`, `next`, `vite` + React, or React Native is clearly present):
-- load `projects/workflow/skills/common/react-doctor/SKILL.md`
+- load `skills/common/react-doctor/SKILL.md`
 - apply its diagnostic checklist during verification
 - include its findings in the verification report
 
