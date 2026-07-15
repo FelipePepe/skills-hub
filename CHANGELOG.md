@@ -28,6 +28,36 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 - Ruta de páginas de proyecto en Atlas: `Projects/` → `Proyectos/` (la carpeta `Projects/` nunca existió en el vault; toda lectura/escritura de Atlas en sesión era un no-op silencioso).
 
+## [2.8.0] - 2026-07-05
+
+### Añadido
+
+- `projects/workflow/skills/common/compliance-ops`: guardrail de cumplimiento normativo con entrevista guiada para HIPAA, SOC 2, GDPR y PCI-DSS; 13 archivos de referencia bajo `references/`.
+- `agents/common/sdd-{explore,propose,spec,design,tasks,apply,verify,archive}`: 8 agentes de fase SDD versionados por primera vez con asignación de modelo (`opus`=design, `sonnet`=explore/propose/spec/apply/verify, `haiku`=tasks/archive) y Prompt Defense Baseline obligatorio.
+- `behavior/claude/CLAUDE.md`: sección `### Compliance` en la tabla de auto-carga de skills (`compliance-ops`, `eu-gdpr`, `eu-ai-act`); reglas de solo inglés, ejecución silenciosa con resumen al final, y preguntas una a una antes de empezar.
+- `behavior/copilot/copilot-instructions.md`: mismas reglas de comportamiento aplicadas (`## Language`, `## Pre-Task Protocol`, contrato de output actualizado).
+- `config/sync-map.sh`: entradas para `behavior/claude/CLAUDE.md` y `behavior/copilot/copilot-instructions.md` como fuentes versionadas.
+- `dependabot.yml`: `target-branch: develop` para respetar GitFlow.
+- `actions/checkout`: bump v6 → v7 en `quality.yml` y `release.yml`.
+
+### Cambiado
+
+- `sdd-propose`: modelo opus → sonnet (tarea de escritura estructurada, no arquitectura).
+- `sdd-tasks`: modelo sonnet → haiku (descomposición mecánica desde artefactos spec+design completos).
+
+## [2.7.0] - 2026-07-04
+
+### Añadido
+
+- `skills-hub registry list|refresh|check [--json]`: registro index-first de skills inspirado en el modelo de carga progresiva de DeerFlow. `refresh` genera `.skills-hub/skill-registry.md` con nombre, descripción, scope, apps efectivas, coste aproximado en tokens y ruta exacta de cada `SKILL.md` (índice, no resumen de reglas).
+- Exposición efectiva por app: cuando una fuente de plataforma (`claude-only`/`copilot-only`) contiene una skill homónima de `common`, gana la última fuente declarada en `config/apps.json` (semántica rsync). Los overrides se listan en la sección `Overrides` del índice.
+- `registry check`: warnings de gobernanza y de límites de Copilot Agent Skills (name ≤64 en minúsculas/dígitos/guiones; description obligatoria ≤1024; description ≥40; cuerpo ≤300 líneas). Integrado en `doctor-skills.sh`.
+- Contrato de tokens de salida en `behavior/copilot/copilot-instructions.md` y `behavior/claude/CLAUDE.md` (answer-first, sin eco de código, diffs en lugar de archivos completos).
+
+### Arreglado
+
+- `skills/common/remotion-to-hyperframes`: description reducida de 1240 a <1024 caracteres — superaba el límite de VS Code Copilot Agent Skills y la skill se ignoraba en silencio.
+
 ## [2.6.0] - 2026-06-28
 
 ### Añadido
@@ -57,8 +87,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - `projects/workflow/skills/common/critical-advisor`: skill de persona consejera con 7 reglas — cuestiona primero, etiqueta confianza, elimina frases de validación, mantiene posición bajo presión.
 - `scripts/bootstrap.sh` + `scripts/patch-mcp.mjs`: instalación unificada para nueva máquina. Un solo comando (`pnpm bootstrap`) construye el MCP de grafos, sincroniza skills y parchea `~/.claude.json` y `~/.vscode/mcp/config.json` de forma idempotente.
 - `pnpm bootstrap` registrado en `package.json`.
-- Integración de grafos en `session-start` y `session-end` (claude-only + common): `grafos_recall` al inicio de sesión, `grafos_remember` al cierre. Ambos condicionales — no bloquean si grafos no está disponible.
+- Integración de grafos en `session-start` y `session-end` (claude-only + common): `grafos_recall` al inicio de sesión, `grafos_remember` al cierre. Ambos condicionales — no bloquean si grafos no está disponible. (Nota: esta integración fue eliminada en v3.0.0.)
 - Pack DDIA en `projects/workflow/skills/common/ddia-*`: 15 skills compartidas para diseño y revisión de sistemas data-intensive, incluyendo router, modelos de datos, almacenamiento, replicación, sharding, transacciones, sistemas distribuidos, consenso, batch, streaming y ética de datos.
+
 ## [2.2.0] - 2026-06-07
 
 ### Añadido
@@ -144,7 +175,14 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.2.0...HEAD
+[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/FelipePepe/skills-hub/compare/v2.8.0...v3.0.0
+[2.8.0]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...v2.8.0
+[2.7.0]: https://github.com/FelipePepe/skills-hub/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/FelipePepe/skills-hub/compare/v2.5.0...v2.6.0
+[2.5.0]: https://github.com/FelipePepe/skills-hub/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/FelipePepe/skills-hub/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.com/FelipePepe/skills-hub/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/FelipePepe/skills-hub/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/FelipePepe/skills-hub/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/FelipePepe/skills-hub/compare/v1.1.0...v2.0.0
