@@ -56,7 +56,7 @@ Use the hook output to call `engram-mem_session_summary` with the following form
 
 Atlas-first default: if the session included an architecture/stack decision or anything
 still true in 6 months, prefer Atlas over Engram. Edit
-`/mnt/nas/Obsidian/Projects/{current-project}.md` with the delta (refresh
+`/mnt/nas/Obsidian/Proyectos/{current-project}.md` with the delta (refresh
 `**Last updated:**`). This is usually an upsert on the existing page, not a new one.
 If nothing load-bearing happened, skip — the Step 2 engram summary already covers it.
 

@@ -52,7 +52,7 @@ ls openspec/config.yaml 2>/dev/null && cat openspec/config.yaml || echo "No SDD 
 
 ### Step 4 — Read Atlas + engram context (Atlas-first)
 **Only run if** Step 1 returned a valid project id OR Step 3 found an active change. Otherwise skip.
-- Read `/mnt/nas/Obsidian/Projects/{current-project}.md` if it exists (Atlas entity page) — this is the primary source of truth.
+- Read `/mnt/nas/Obsidian/Proyectos/{current-project}.md` if it exists (Atlas entity page) — this is the primary source of truth.
 - Call `engram-mem_context project="{current-project}"` for temporal/tactical detail Atlas doesn't carry.
 - If Atlas and Engram disagree, Atlas wins.
 - `ATLAS` status for Step 6: `synced` (page exists, read OK), `none` (no entity page).

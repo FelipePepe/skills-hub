@@ -71,14 +71,14 @@ CAUTION: unchecked checkboxes may be stale. Cross-reference with `IMPLEMENTATION
 Fetch in parallel, but treat **Atlas as the primary source of truth** — it's where `session-end` now saves by default:
 
 - Direct read of the **Atlas (Obsidian)** vault at `/mnt/nas/Obsidian/`:
-  - `Projects/<name>.md` — project entity page, if it exists (architectural state).
+  - `Proyectos/<name>.md` — project entity page, if it exists (architectural state).
   - If the `atlas_search` MCP is available, also use it. If not, use `grep`/`find` in the vault.
 - `mem_context(project=<name>, limit=20)` — recent observations in Engram, for temporal/tactical detail Atlas doesn't carry (bugfixes, spec snapshots, in-progress state).
 
 If Atlas and Engram disagree on the same fact, **Atlas wins** — it's the later, more deliberate write. Use Engram to fill gaps (what happened recently) rather than to override Atlas's architectural state.
 
 Cross-check dates:
-- If `Projects/<name>.md` has `Last updated:` earlier than the project's last journal → flag Atlas drift in the briefing (reconciliation is `session-end` work).
+- If `Proyectos/<name>.md` has `Last updated:` earlier than the project's last journal → flag Atlas drift in the briefing (reconciliation is `session-end` work).
 - If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift" (lower priority than Atlas drift).
 
 ### Step 6 — Codebase Graph (codebase-memory-mcp)
@@ -208,8 +208,8 @@ STOP after showing the intake. Do not assume answers, propose code, or begin any
 - Suggest at the end of the briefing: "Consider running `/session-end` at the end of today to sync Engram"
 
 **Is Atlas relevant?**
-- The Atlas vault lives in `/mnt/nas/Obsidian/`. Structure: `Projects/<project>.md` (entity page), `Stack/<category>/<tech>.md` (tech catalog with `_INDEX.md`), `Setup/` (infra), `AI/`, `Temp/`.
-- If `Projects/<project>.md` exists → always read it: it has stable architectural state + backlinks to relevant Stack technologies.
+- The Atlas vault lives in `/mnt/nas/Obsidian/`. Structure: `Proyectos/<project>.md` (entity page), `Stack/<category>/<tech>.md` (tech catalog with `_INDEX.md`), `Setup/` (infra), `AI/`, `Temp/`.
+- If `Proyectos/<project>.md` exists → always read it: it has stable architectural state + backlinks to relevant Stack technologies.
 - For small personal projects without an entity page, skip.
 
 **Is the codebase graph stale?**
