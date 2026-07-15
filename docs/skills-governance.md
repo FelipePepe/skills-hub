@@ -1,18 +1,19 @@
 # Skills Governance
 
-`skills-hub` is the canonical catalog for assistant skills. The repository uses flat skill directories so every installer can expose the same predictable source folders without category traversal or custom routing.
+`skills-hub` is the canonical catalog for assistant skills. The repository is split into two project catalogs and keeps flat skill directories inside each platform variant so every installer can expose predictable sources without category traversal or custom routing.
 
 ## Layout
 
-- Shared skills go in `skills/common/<skill>/SKILL.md`.
-- Copilot/OpenCode-specific skills go in `skills/copilot-only/<skill>/SKILL.md` only when they depend on that platform.
-- Claude-specific skills go in `skills/claude-only/<skill>/SKILL.md` only when they depend on Claude behavior.
+- Casa/intranet skills go in `projects/casa/skills/common/<skill>/SKILL.md`.
+- Portable workflow skills go in `projects/workflow/skills/common/<skill>/SKILL.md`.
+- Copilot/OpenCode-specific skills go in the selected project's `skills/copilot-only/<skill>/SKILL.md`.
+- Claude-specific skills go in the selected project's `skills/claude-only/<skill>/SKILL.md`.
 - Categories are represented by name prefixes such as `core-`, `analysis-`, `dev-`, `docs-`, `agents-`, `quality-`, and `ddia-`.
-- Do not create nested folders like `skills/common/analysis/<skill>/SKILL.md`.
+- Do not create nested folders like `projects/workflow/skills/common/analysis/<skill>/SKILL.md`.
 
 ## DDIA Skills
 
-- DDIA-derived skills are shared, platform-agnostic skills and live in `skills/common/ddia-*`.
+- DDIA-derived skills are shared, platform-agnostic skills and live in `projects/workflow/skills/common/ddia-*`.
 - Keep them derivative and operational: trade-offs, workflows, review questions, and source traces only.
 - Do not store or synchronize source PDFs, long excerpts, or verbatim book passages in the canonical catalog.
 
@@ -25,17 +26,18 @@ The baseline governance layer is:
 - `core-repository-safety-rules` — local-only repository safety.
 - `quality-skill-quality-gate` — PASS/WARN/FAIL validation checklist.
 
-Existing `skills/common/skills-catalog-maintainer` remains the catalog maintenance reference for naming, modularity, exposure rules, and legacy cleanup. The new governance skills complement it by adding token-efficiency and bounded-output requirements.
+Existing `projects/casa/skills/common/skills-catalog-maintainer` remains the catalog maintenance reference for naming, modularity, exposure rules, and legacy cleanup. The new governance skills complement it by adding token-efficiency and bounded-output requirements.
 
 ## Creating a New Token-Efficient Skill
 
-1. Default to `skills/common`.
-2. Use a flat prefixed folder name when helpful.
-3. Match folder name and frontmatter `name` exactly.
-4. Keep `description` under 160 characters.
-5. Include language, dependency, workflow, tool, safety, output, explanation, token-efficiency, and success criteria sections.
-6. Keep `SKILL.md` under 300 lines; move long examples into `references/`.
-7. Run cheap validation before finishing.
+1. Choose `projects/casa` for `.casa` infrastructure; otherwise use `projects/workflow`.
+2. Default to the selected project's `skills/common`.
+3. Use a flat prefixed folder name when helpful.
+4. Match folder name and frontmatter `name` exactly.
+5. Keep `description` under 160 characters.
+6. Include language, dependency, workflow, tool, safety, output, explanation, token-efficiency, and success criteria sections.
+7. Keep `SKILL.md` under 300 lines; move long examples into `references/`.
+8. Run cheap validation before finishing.
 
 ## Auditing Existing Skills
 
@@ -47,7 +49,7 @@ Use `agents-audit-skills`, `quality-skill-quality-gate`, and `skills-catalog-mai
 
 ### Current Audit Snapshot
 
-- `PASS`: existing catalog structure validated by `doctor-skills` rules; `skills/common`, `skills/copilot-only`, and `skills/claude-only` are exposed through `config/apps.json`.
+- `PASS`: both project catalogs are validated by `doctor-skills` and exposed through `config/apps.json`, resolved by `config/projects.json`.
 - `WARN`: some existing skills predate the new governance section template; platform-specific overrides are preserved intentionally.
 - `FAIL`: none identified in the canonical skill tree during this governance-layer addition.
 

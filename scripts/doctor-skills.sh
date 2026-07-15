@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 APPS_FILE="$ROOT_DIR/config/apps.json"
+PROJECTS_FILE="$ROOT_DIR/config/projects.json"
 COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 
 # shellcheck disable=SC1091 source=lib/common.sh
@@ -11,11 +12,14 @@ source "$COMMON_LIB"
 
 skills_hub_require_command node
 skills_hub_require_file "$APPS_FILE"
+skills_hub_require_file "$PROJECTS_FILE"
 skills_hub_validate_json "$APPS_FILE"
+skills_hub_validate_json "$PROJECTS_FILE"
+node "$ROOT_DIR/scripts/lib/catalog.mjs" check >/dev/null
 
-mapfile -t skill_files < <(find "$ROOT_DIR/skills" -name SKILL.md | sort)
+mapfile -t skill_files < <(find "$ROOT_DIR/projects" -name SKILL.md | sort)
 if [[ "${#skill_files[@]}" -eq 0 ]]; then
-  skills_hub_die "No se encontraron skills en $ROOT_DIR/skills"
+  skills_hub_die "No se encontraron skills en $ROOT_DIR/projects"
 fi
 
 for file in "${skill_files[@]}"; do
@@ -63,15 +67,7 @@ while IFS=$'\t' read -r app_id sources; do
 
   skills_hub_info "Skills doctor: app '$app_id' expone $skill_count skills canonicas."
 done < <(
-  # shellcheck disable=SC2016
-  node -e '
-    const fs = require("node:fs");
-    const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-    for (const app of data.apps) {
-      const sources = Array.isArray(app.sources) ? app.sources.join(",") : "";
-      console.log(`${app.id}\t${sources}`);
-    }
-  ' "$APPS_FILE"
+  node "$ROOT_DIR/scripts/lib/catalog.mjs" app-sources | cut -f1,4
 )
 
 skills_hub_info "Skills doctor: validando skill registry..."

@@ -2,12 +2,13 @@
 name: session-end
 description: >
   Session cleanup and memory consolidation protocol. Runs at the end of every task
-  to summarize work, persist findings, and close the session cleanly.
+  to summarize work, persist findings (Atlas-first, Engram for temporal detail),
+  check codebase graph freshness, and close the session cleanly.
   Trigger: Always active — execute when a task or request is fully completed.
 license: Apache-2.0
 metadata:
   author: gentleman-programming
-  version: "1.0"
+  version: "1.1"
 ---
 
 ## When to Use
@@ -51,13 +52,20 @@ Use the hook output to call `engram-mem_session_summary` with the following form
 - path/to/file.md — [role in the work]
 ```
 
-### Step 2b — Grafos memory (if available)
+### Step 2b — Atlas update (if load-bearing, Atlas-first)
 
-**If `grafos_remember` is available**: call it with a one-line session summary before closing:
-```
-grafos_remember("Session <date> · <project>: <what was done>. Files: <list>. Next: <pending>.")
-```
-Skip gracefully if unavailable.
+Atlas-first default: if the session included an architecture/stack decision or anything
+still true in 6 months, prefer Atlas over Engram. Edit
+`/mnt/nas/Obsidian/Proyectos/{current-project}.md` with the delta (refresh
+`**Last updated:**`). This is usually an upsert on the existing page, not a new one.
+If nothing load-bearing happened, skip — the Step 2 engram summary already covers it.
+
+### Step 2c — Codebase graph freshness (codebase-memory-mcp)
+
+**Only if** the `codebase-memory` MCP tools are available AND source files changed this session.
+- `list_projects` — skip entirely if this repo was never indexed.
+- If indexed: `index_status` vs current HEAD. If behind, ask the user before running
+  `index_repository` — never re-index without confirmation.
 
 ### Step 3 — Close the session
 ```
@@ -70,12 +78,13 @@ This marks the session as completed and releases any tracked resources.
 
 - Always include `🔲` items for work carried over to the next session
 - Even if there is nothing to summarize, still run Steps 1 and 3
+- Never run `index_repository` (Step 2c) without explicit user confirmation
 
 ## Output contract
 
 After Step 3 emit exactly one line to the user:
 ```
-SESSION:closed BRANCH:{name} COMMITTED:{yes|no}
+SESSION:closed BRANCH:{name} COMMITTED:{yes|no} ATLAS:{updated|skip} GRAPH:{reindexed|stale-pending|skip}
 ```
 No summary of what was done, no bullets, no headers. One line only.
 

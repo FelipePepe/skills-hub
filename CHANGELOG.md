@@ -7,11 +7,32 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [3.0.0] - 2026-07-15
+
+### Cambiado (breaking)
+
+- Catálogo reestructurado de `skills/` plano a `projects/casa/skills/` + `projects/workflow/skills/`, con `config/projects.json` declarando proyectos + variantes en lugar de un array estático de fuentes.
+
+### Añadido
+
+- `projects/workflow/skills/claude-only/session-start`: modo onboarding (briefing "First contact" para proyectos sin memoria previa) y heurística de primer contacto. v1.4 → v1.5.
+- `session-start`/`session-end` (`claude-only` y `common`): default "Atlas-first" — Atlas es la fuente primaria, Engram completa detalle temporal/táctico, Atlas gana en conflicto.
+- `session-start`/`session-end`: integración con `codebase-memory-mcp` — chequeo de freshness del grafo de código y prompt de re-indexado (nunca automático).
+
+### Eliminado
+
+- Skill `core-grafos-memory` y `prompts/grafos-memory.prompt.md`.
+- Integración CodeGraph (`codegraph init/sync/status/files/explore`) — reemplazada por `codebase-memory-mcp`.
+
+### Corregido
+
+- Ruta de páginas de proyecto en Atlas: `Projects/` → `Proyectos/` (la carpeta `Projects/` nunca existió en el vault; toda lectura/escritura de Atlas en sesión era un no-op silencioso).
+
 ## [2.8.0] - 2026-07-05
 
 ### Añadido
 
-- `skills/common/compliance-ops`: guardrail de cumplimiento normativo con entrevista guiada para HIPAA, SOC 2, GDPR y PCI-DSS; 13 archivos de referencia bajo `references/`.
+- `projects/workflow/skills/common/compliance-ops`: guardrail de cumplimiento normativo con entrevista guiada para HIPAA, SOC 2, GDPR y PCI-DSS; 13 archivos de referencia bajo `references/`.
 - `agents/common/sdd-{explore,propose,spec,design,tasks,apply,verify,archive}`: 8 agentes de fase SDD versionados por primera vez con asignación de modelo (`opus`=design, `sonnet`=explore/propose/spec/apply/verify, `haiku`=tasks/archive) y Prompt Defense Baseline obligatorio.
 - `behavior/claude/CLAUDE.md`: sección `### Compliance` en la tabla de auto-carga de skills (`compliance-ops`, `eu-gdpr`, `eu-ai-act`); reglas de solo inglés, ejecución silenciosa con resumen al final, y preguntas una a una antes de empezar.
 - `behavior/copilot/copilot-instructions.md`: mismas reglas de comportamiento aplicadas (`## Language`, `## Pre-Task Protocol`, contrato de output actualizado).
@@ -41,17 +62,17 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
-- `skills/claude-only/session-start`: bloque de intake al final del briefing — 4 preguntas (goal, constraints, approach, blockers). Claude se detiene y espera respuesta antes de comenzar cualquier tarea. v1.1.
+- `projects/workflow/skills/claude-only/session-start`: bloque de intake al final del briefing — 4 preguntas (goal, constraints, approach, blockers). Claude se detiene y espera respuesta antes de comenzar cualquier tarea. v1.1.
 
 ### Arreglado
 
-- `skills/common/session-start`: reemplaza llamadas a `bash ~/.copilot/hooks/copilot/*.sh` con comandos git nativos — la skill ahora funciona en Claude, agents y Copilot sin dependencias de plataforma. Corrige campo `author` (era `gentleman-programming`). v1.3.
+- `projects/workflow/skills/common/session-start`: reemplaza llamadas a `bash ~/.copilot/hooks/copilot/*.sh` con comandos git nativos — la skill ahora funciona en Claude, agents y Copilot sin dependencias de plataforma. Corrige campo `author` (era `gentleman-programming`). v1.3.
 
 ## [2.5.0] - 2026-06-26
 
 ### Añadido
 
-- `skills/common/redis-cache`: nueva skill portable para caching con Redis en Node.js/TypeScript. Cubre selección de estrategia (cache-aside/write-through/write-behind), diseño de claves, política de TTL, patrones de cliente node-redis v5 (RESP3, client-side caching), manejo de fallos y pitfalls comunes.
+- `projects/workflow/skills/common/redis-cache`: nueva skill portable para caching con Redis en Node.js/TypeScript. Cubre selección de estrategia (cache-aside/write-through/write-behind), diseño de claves, política de TTL, patrones de cliente node-redis v5 (RESP3, client-side caching), manejo de fallos y pitfalls comunes.
 
 ## [2.4.0] - 2026-06-14
 
@@ -63,11 +84,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Añadido
 
-- `skills/common/critical-advisor`: skill de persona consejera con 7 reglas — cuestiona primero, etiqueta confianza, elimina frases de validación, mantiene posición bajo presión.
+- `projects/workflow/skills/common/critical-advisor`: skill de persona consejera con 7 reglas — cuestiona primero, etiqueta confianza, elimina frases de validación, mantiene posición bajo presión.
 - `scripts/bootstrap.sh` + `scripts/patch-mcp.mjs`: instalación unificada para nueva máquina. Un solo comando (`pnpm bootstrap`) construye el MCP de grafos, sincroniza skills y parchea `~/.claude.json` y `~/.vscode/mcp/config.json` de forma idempotente.
 - `pnpm bootstrap` registrado en `package.json`.
-- Integración de grafos en `session-start` y `session-end` (claude-only + common): `grafos_recall` al inicio de sesión, `grafos_remember` al cierre. Ambos condicionales — no bloquean si grafos no está disponible.
-- Pack DDIA en `skills/common/ddia-*`: 15 skills compartidas para diseño y revisión de sistemas data-intensive, incluyendo router, modelos de datos, almacenamiento, replicación, sharding, transacciones, sistemas distribuidos, consenso, batch, streaming y ética de datos.
+- Integración de grafos en `session-start` y `session-end` (claude-only + common): `grafos_recall` al inicio de sesión, `grafos_remember` al cierre. Ambos condicionales — no bloquean si grafos no está disponible. (Nota: esta integración fue eliminada en v3.0.0.)
+- Pack DDIA en `projects/workflow/skills/common/ddia-*`: 15 skills compartidas para diseño y revisión de sistemas data-intensive, incluyendo router, modelos de datos, almacenamiento, replicación, sharding, transacciones, sistemas distribuidos, consenso, batch, streaming y ética de datos.
+
 ## [2.2.0] - 2026-06-07
 
 ### Añadido
@@ -81,9 +103,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Añadido
 
 - Sub-capa de sub-agentes en `agents/` (`common` y `claude-only`): 4 agentes instalados en `~/.claude/agents/` — `planner`, `silent-failure-hunter`, `security-reviewer`, `build-error-resolver` (#21).
-- `skills/common/_shared/prompt-defense-baseline.md`: bloque canónico de defensa contra prompt injection, requerido en todas las definiciones de agente (#21).
+- `projects/workflow/skills/common/_shared/prompt-defense-baseline.md`: bloque canónico de defensa contra prompt injection, requerido en todas las definiciones de agente (#21).
 - Soporte de `agentSources` y `agentInstallPath` en `config/apps.json` para la app `claude` (#21).
-- Skills de cumplimiento normativo europeo: `eu-ai-act` y `eu-gdpr` en `skills/common` (#19).
+- Skills de cumplimiento normativo europeo: `eu-ai-act` y `eu-gdpr` en `projects/workflow/skills/common` (#19).
 - Archivos de comportamiento versionados (`behavior/claude/CLAUDE.md`, `behavior/copilot/copilot-instructions.md`) con tabla de auto-carga de skills completa (#20).
 - `scripts/install-behavior.sh`: instalador de archivos de comportamiento (copia segura sin `--delete`) integrado en el pipeline de sync (#20).
 - `config/model-map.json`: configuración de scheduling de modelos según VRAM disponible.
@@ -153,7 +175,8 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v2.8.0...HEAD
+[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/FelipePepe/skills-hub/compare/v2.8.0...v3.0.0
 [2.8.0]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/FelipePepe/skills-hub/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/FelipePepe/skills-hub/compare/v2.5.0...v2.6.0

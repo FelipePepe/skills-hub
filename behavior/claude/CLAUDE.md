@@ -96,7 +96,6 @@ Load skills BEFORE writing code. Apply ALL patterns. Multiple skills can apply s
 | GDPR, EU users, personal data, DPA, data-subject rights, erasure, portability | `eu-gdpr` |
 | EU AI Act, AI system classification, high-risk AI, conformity assessment | `eu-ai-act` |
 
-
 ### Workflow
 
 | Context | Skill |
