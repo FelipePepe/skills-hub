@@ -8,7 +8,7 @@ COMMON_LIB="$ROOT_DIR/scripts/lib/common.sh"
 source "$COMMON_LIB"
 
 SRC_DIR="${SRC_DIR:-${HOME}/.copilot/skills}"
-DST_DIR="$ROOT_DIR/skills/copilot-only"
+DST_DIR="$ROOT_DIR/projects/workflow/skills/copilot-only"
 
 DRY_RUN=false
 DELETE=true

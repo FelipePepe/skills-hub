@@ -19,8 +19,9 @@ metadata:
 
 | Situation | Action |
 |---|---|
-| New reusable skill | Place it in `skills/common` if platform-agnostic |
-| Platform-specific behavior | Keep it in `skills/copilot-only` or equivalent |
+| New intranet skill | Place it in `projects/casa/skills/common` |
+| New portable skill | Place it in `projects/workflow/skills/common` |
+| Platform-specific behavior | Keep it in the selected project's `skills/copilot-only` or `skills/claude-only` |
 | SKILL grows too much | Split support material into `references/` or `assets/` |
 | Renaming a skill | Update folder, frontmatter, docs, and routing references together |
 | Catalog uncertainty | Run the doctor and fix findings before continuing |
@@ -38,8 +39,9 @@ metadata:
 
 ### 1. Classify correctly
 
-- `skills/common` for portable skills
-- `skills/copilot-only` for Copilot/OpenCode specific workflows
+- `projects/casa/skills/common` for `.casa` infrastructure skills
+- `projects/workflow/skills/common` for portable skills
+- the selected project's `skills/copilot-only` or `skills/claude-only` for platform-specific behavior
 - keep support content near the skill in `references/` or `assets/`
 
 ### 2. Preserve canonical exposure
