@@ -72,7 +72,6 @@ Fetch in parallel, but treat **Atlas as the primary source of truth** — it's w
   - `Projects/<name>.md` — project entity page, if it exists (architectural state).
   - If the `atlas_search` MCP is available, also use it. If not, use `grep`/`find` in the vault.
 - `mem_context(project=<name>, limit=20)` — recent observations in Engram, for temporal/tactical detail Atlas doesn't carry (bugfixes, spec snapshots, in-progress state).
-- **If `grafos_recall` is available**: call `grafos_recall("<project> session decisions files")` — returns graph entities and relations relevant to the current project. Add any returned context to the briefing. Grafos unavailability is not a blocker — skip gracefully.
 
 If Atlas and Engram disagree on the same fact, **Atlas wins** — it's the later, more deliberate write. Use Engram to fill gaps (what happened recently) rather than to override Atlas's architectural state.
 
