@@ -3,7 +3,7 @@ name: compliance-ops
 type: standalone
 version: 0.1.0
 category: operations
-description: Interview-driven compliance guardrail framework for Claude Code. Makes the AI aware of compliance rules (HIPAA, SOC 2, GDPR, PCI-DSS) BEFORE it builds, so every website, workflow, automation, and system is designed with those principles baked in — protected data never routed through uncovered servers or non-compliant flows. Use when the user says "compliance ops", "/compliance-ops", "is this HIPAA compliant", "build this HIPAA safe", "SOC 2", "GDPR", "PCI", "is this PCI compliant", "compliance", "BAA", "DPA", "PHI", "personal data", "cardholder data", "is it safe to put patient/customer/card data through this", or is building anything in a regulated industry (healthcare, behavioral health, finance, legal, SaaS handling customer data, EU users, payments). NOT legal advice. Does NOT make a Claude consumer subscription able to process protected data.
+description: "Compliance guardrails (HIPAA, SOC 2, GDPR, PCI-DSS) applied before building. Trigger: 'is this HIPAA/PCI compliant', SOC 2, BAA, DPA, PHI, cardholder data, compliance, or building in regulated industries (healthcare, finance, legal, SaaS, payments). NOT legal advice."
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, WebSearch, AskUserQuestion]
 ---
 

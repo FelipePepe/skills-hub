@@ -98,6 +98,7 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
 
   skills_hub_info "  $app_id -> $install_path"
 
+  declare -A expected_skills=()
   IFS=',' read -r -a source_list <<< "$sources_csv"
   for source_dir in "${source_list[@]}"; do
     [[ -n "$source_dir" ]] || continue
@@ -108,9 +109,27 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
       skill_name="$(basename "$skill_dir")"
       # Excluir privados/compartidos (mismo criterio que el catalogo).
       [[ "$skill_name" == _* || "$skill_name" == .* ]] && continue
+      expected_skills["$skill_name"]=1
       rsync "${rsync_base[@]}" "$skill_dir/" "$install_path/$skill_name/"
     done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
   done
+
+  # Poda de huerfanas: skills del destino que ya no existen en ninguna fuente.
+  # Se preservan directorios privados/compartidos (_*, .*), igual que en la copia.
+  if [[ -d "$install_path" ]]; then
+    while IFS= read -r -d '' installed_dir; do
+      installed_name="$(basename "$installed_dir")"
+      [[ "$installed_name" == _* || "$installed_name" == .* ]] && continue
+      [[ -n "${expected_skills[$installed_name]:-}" ]] && continue
+      if [[ "$DRY_RUN" == true ]]; then
+        echo "PLAN: rm -rf $installed_dir (huerfana)"
+      else
+        rm -rf "$installed_dir"
+        skills_hub_info "  $app_id: huerfana eliminada -> $installed_name"
+      fi
+    done < <(find "$install_path" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+  fi
+  unset expected_skills
 done < <(node "$ROOT_DIR/scripts/lib/catalog.mjs" app-sources)
 
 skills_hub_info "Copiando agentes a las apps detectadas...$([[ "$DRY_RUN" == true ]] && echo ' [dry-run]')"
@@ -168,11 +187,16 @@ for pair in "${SYNC_PAIRS[@]}"; do
   [[ -e "$src_abs" ]] || { skills_hub_warn "origen inexistente, se omite -> $src_abs"; continue; }
   skills_hub_assert_local "$dst_abs" "destino legacy"
 
-  if [[ ! -d "$dst_abs" ]]; then
+  if [[ -d "$src_abs" ]]; then
+    dst_dir="$dst_abs"
+  else
+    dst_dir="$(dirname "$dst_abs")"
+  fi
+  if [[ ! -d "$dst_dir" ]]; then
     if [[ "$DRY_RUN" == true ]]; then
-      echo "PLAN: mkdir -p $dst_abs"
+      echo "PLAN: mkdir -p $dst_dir"
     else
-      mkdir -p "$dst_abs"
+      mkdir -p "$dst_dir"
     fi
   fi
 

@@ -1,10 +1,6 @@
 ---
 name: eu-gdpr
-description: >
-  Detects and applies the EU General Data Protection Regulation (GDPR) in projects
-  that handle personal data from European citizens. Proactively when detecting
-  personal data, user fields, cookies, tracking, profiles, or when the user mentions
-  privacy, personal data, consent, or data regulations.
+description: "Apply GDPR when handling EU personal data. Trigger: personal data, user fields, cookies, tracking, profiles, consent, privacy, DPA, data-subject rights, erasure, portability."
 license: Apache-2.0
 metadata:
   author: gentleman-programming

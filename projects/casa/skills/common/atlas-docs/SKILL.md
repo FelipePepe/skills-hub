@@ -1,11 +1,6 @@
 ---
 name: atlas-docs
-description: >
-  Creates and updates documents in the Atlas (Obsidian) vault on the .casa intranet.
-  Ensures all documents have bidirectional wikilinks for the knowledge graph.
-  Trigger: when the user asks to create or update documents in atlas.casa, the
-  Obsidian vault, or when something new is implemented on the intranet that needs
-  to be documented.
+description: "Create or update documents in the Atlas (Obsidian) vault with bidirectional wikilinks. Trigger: document something in atlas.casa, the vault, or new intranet work."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
@@ -48,7 +43,7 @@ metadata:
 │   ├── ORM/               ← DrizzleORM, SpringDataJPA
 │   ├── Testing/           ← Vitest, Playwright, Pytest, JUnit
 │   └── Tools/             ← ESLint, Prettier, Zod, Swagger, Drizzle-Kit
-├── Projects/              ← Notes for concrete projects
+├── Proyectos/              ← Notes for concrete projects
 └── Setup/                 ← Infrastructure, devices, services
     ├── _INDEX.md (or network in Red-Local-Servicios.md)
     ├── Dispositivos.md
@@ -120,7 +115,7 @@ echo "OK"'
 ```
 
 ### Step 4 — Update Notes That Should Link to the New One
-If you create `Projects/new-tool.md` that uses React and TypeScript:
+If you create `Proyectos/new-tool.md` that uses React and TypeScript:
 - Update `Stack/Frontend/React.md` → add to "## Projects Using It"
 - Update `Stack/Languages/TypeScript.md` → same
 - Update `Stack/_INDEX.md` → add in the Projects section
@@ -156,7 +151,7 @@ curl -s http://atlas.casa/api/notes | python3 -c "import json,sys; notes=json.lo
 ```
 
 ## Projects Using It
-- [[Projects/project-name|Project Name]] — {how it is used}
+- [[Proyectos/project-name|Project Name]] — {how it is used}
 
 ## See Also
 - [[RelatedTechnology1]] — {relationship}
@@ -231,7 +226,7 @@ curl -s http://atlas.casa/api/notes | python3 -c "import json,sys; notes=json.lo
 ## See Also
 - [[Dispositivos]] — network inventory
 - [[Red-Local-Servicios]] — nginx configuration
-- [[Projects/related-project]] — {if applicable}
+- [[Proyectos/related-project]] — {if applicable}
 ```
 
 ## Date and Format Conventions

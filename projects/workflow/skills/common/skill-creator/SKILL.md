@@ -1,10 +1,6 @@
 ---
 name: skill-creator
-description: >
-  Create or update reusable AI agent skills with clear trigger metadata, lean
-  instructions, and progressive disclosure. Trigger: When the user asks to
-  create a new skill, improve an existing one, add agent instructions, or
-  codify a recurring workflow for AI.
+description: "Create or update reusable AI agent skills: trigger metadata, lean instructions, progressive disclosure. Trigger: create a new skill, improve one, or codify a recurring workflow."
 license: Apache-2.0
 metadata:
   author: gentleman-programming

@@ -7,6 +7,32 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [4.0.0] - 2026-07-19
+
+### Añadido
+
+- `scripts/sync.sh`: poda de skills huérfanas — al sincronizar cada app, elimina del destino los directorios de skills que ya no existen en ninguna fuente (se preservan `_*`/`.*` como `_shared`). Antes, las skills borradas de la fuente persistían para siempre en los targets (~100 huérfanas acumuladas en `~/.copilot/skills`).
+- 8 skills autoradas localmente portadas a `projects/workflow/skills/claude-only` para cumplir el invariante "los targets no son lugares de autoría": `chained-pr`, `codebase-memory`, `cognitive-doc-design`, `comment-writer`, `headroom`, `issue-creation`, `skill-registry`, `work-unit-commits`.
+
+### Corregido
+
+- `scripts/check.sh` comparaba cada variante fuente contra el destino sin aplicar la precedencia de overrides de `sync.sh` (claude-only pisa a common), marcando falso drift en `session-start`/`session-end`; ahora compara solo la fuente efectiva por skill.
+- `atlas-docs` (variantes `common` y `copilot-only`) referenciaba la carpeta inexistente `Projects/` del vault Atlas; corregido a `Proyectos/` (convención real del vault y de `session-start`/`session-end` v1.5).
+- `scripts/sync.sh` fallaba con `mkdir: cannot create directory ... CLAUDE.md` al procesar pares de `sync-map.sh` cuyo destino es un archivo: ahora crea el directorio padre (`dirname`) para orígenes de tipo archivo.
+- Eliminados de `config/sync-map.sh` los pares de `CLAUDE.md` y `copilot-instructions.md`, duplicados de los `configFiles` de `apps.json` que ya instala `install-behavior.sh`.
+
+### Eliminado
+
+- Pack DDIA completo (15 skills `ddia-*`), pack genérico (`agents-*`, `analysis-*`, `core-*`, `dev-*`, `docs-*`, `quality-skill-quality-gate`, `security-skill-security-gate`), suite HyperFrames/animación, y skills muertas o redundantes (`casa-atlas`, `casa-vault`, `skill-installer`, `infisical-admin-mcp`, `sdd-proposal`, `branch-pr`, `nueva-casa`) de `common`/`claude-only`; las variantes `copilot-only` no se tocan.
+
+### Cambiado
+
+- Runbooks casa consolidados en una única skill router `casa-ops` (dominios, deploys docker/web, secretos Infisical, Trello, workflow) con carga bajo demanda desde `references/`.
+- `gitflow-casa` absorbe el flujo de creación de PRs (`references/pr-workflow.md`).
+- Descripciones de frontmatter recortadas a una línea (~250 caracteres máx.) manteniendo los triggers; ahorra ~7k tokens de contexto por sesión en Claude.
+- Catálogo `copilot-only` alineado con la limpieza: 8 skills redundantes o muertas sustituidas por `casa-ops` + `atlas-docs`.
+- `behavior/claude/CLAUDE.md` reconciliado con la versión compactada instalada (tablas de skills sustituidas por regla de triggers); añadido `output-styles/neutral.md` para que sync no lo borre.
+
 ## [3.0.0] - 2026-07-15
 
 ### Cambiado (breaking)
@@ -175,7 +201,8 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v3.0.0...HEAD
+[Sin publicar]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v3.0.0...v4.0.0
 [3.0.0]: https://github.com/FelipePepe/skills-hub/compare/v2.8.0...v3.0.0
 [2.8.0]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/FelipePepe/skills-hub/compare/v2.6.0...v2.7.0
