@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Corregido
+
+- `scripts/sync.sh` fallaba con `mkdir: cannot create directory ... CLAUDE.md` al procesar pares de `sync-map.sh` cuyo destino es un archivo: ahora crea el directorio padre (`dirname`) para orígenes de tipo archivo.
+- Eliminados de `config/sync-map.sh` los pares de `CLAUDE.md` y `copilot-instructions.md`, duplicados de los `configFiles` de `apps.json` que ya instala `install-behavior.sh`.
+
 ### Eliminado
 
 - Pack DDIA completo (15 skills `ddia-*`), pack genérico (`agents-*`, `analysis-*`, `core-*`, `dev-*`, `docs-*`, `quality-skill-quality-gate`, `security-skill-security-gate`), suite HyperFrames/animación, y skills muertas o redundantes (`casa-atlas`, `casa-vault`, `skill-installer`, `infisical-admin-mcp`, `sdd-proposal`, `branch-pr`, `nueva-casa`) de `common`/`claude-only`; las variantes `copilot-only` no se tocan.
