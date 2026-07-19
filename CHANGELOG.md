@@ -14,6 +14,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Corregido
 
+- `scripts/check.sh` comparaba cada variante fuente contra el destino sin aplicar la precedencia de overrides de `sync.sh` (claude-only pisa a common), marcando falso drift en `session-start`/`session-end`; ahora compara solo la fuente efectiva por skill.
 - `atlas-docs` (variantes `common` y `copilot-only`) referenciaba la carpeta inexistente `Projects/` del vault Atlas; corregido a `Proyectos/` (convención real del vault y de `session-start`/`session-end` v1.5).
 - `scripts/sync.sh` fallaba con `mkdir: cannot create directory ... CLAUDE.md` al procesar pares de `sync-map.sh` cuyo destino es un archivo: ahora crea el directorio padre (`dirname`) para orígenes de tipo archivo.
 - Eliminados de `config/sync-map.sh` los pares de `CLAUDE.md` y `copilot-instructions.md`, duplicados de los `configFiles` de `apps.json` que ya instala `install-behavior.sh`.
