@@ -1,10 +1,6 @@
 ---
 name: session-end
-description: >
-  Session cleanup and memory consolidation protocol. Runs at the end of every task
-  to summarize work, persist findings (Atlas-first, Engram for temporal detail),
-  check codebase graph freshness, and close the session cleanly.
-  Trigger: Always active — execute when a task or request is fully completed.
+description: "Structured session close: separates Engram operational memory from Atlas knowledge, refreshes the codebase graph, compresses via Headroom, saves observations and optional journal entry. Trigger: 'close/end session', 'save to engram', 'save context', 'summarize what we did', or end of a long session."
 license: Apache-2.0
 metadata:
   author: gentleman-programming

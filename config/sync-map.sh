@@ -17,6 +17,4 @@ esac
 SYNC_PAIRS=(
   "prompts::${_VSCODE_USER_DIR}/prompts"
   "output-styles::${HOME}/.claude/output-styles"
-  "behavior/claude/CLAUDE.md::${HOME}/.claude/CLAUDE.md"
-  "behavior/copilot/copilot-instructions.md::${HOME}/.copilot/copilot-instructions.md"
 )

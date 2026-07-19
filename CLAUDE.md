@@ -16,7 +16,7 @@ Single source of truth (a GitHub repo) for managing AI assistant skills and dist
 - `config/projects.json` - canonical project boundaries and skill sources
 - `config/apps.json` - manifest defining target apps, their detect paths, install paths, project variants, and agent sources
 - `config/sync-map.sh` - legacy copy sync pairs in format `<rel_path>::<abs_path>` for copyable content (e.g., VS Code prompts)
-- `scripts/sync.sh` - copy-based installer (rsync) that copies skills from sources to each detected app's installPath; enforces the local-only invariant via `skills_hub_assert_local`
+- `scripts/sync.sh` - copy-based installer (rsync) that copies skills from sources to each detected app's installPath and prunes orphan skills no longer present in any source (preserving `_*`/`.*` dirs); enforces the local-only invariant via `skills_hub_assert_local`
 - `scripts/install-opencode-config.mjs` - installs OpenCode managed config (json-merge + markdown managed block); the only piece that needs Node merge logic
 - `scripts/lib/common.sh` - shared bash helpers, including `skills_hub_assert_local` (NAS guard)
 - `bin/skills-hub.js` - official CLI wrapping the installer and all validation scripts
@@ -68,7 +68,7 @@ Direct script invocation:
 - All Bash scripts must use `set -euo pipefail`
 - `SYNC_PAIRS` format: `"<rel_path>::<abs_path>"` — destination must be absolute
 - Naming: use `atlas`/`atlas.casa`, never `mente`/`mente.casa`
-- Naming: use `sdd-propose` as canonical, `sdd-proposal` is legacy alias only
+- Naming: use `sdd-propose` as canonical; the legacy `sdd-proposal` alias was removed
 - ONLY use `pnpm` — `npm` and `npx` are FORBIDDEN. Use `pnpm` and `pnpm dlx` instead. This applies to skill examples, scripts, and all commands in this repo.
 - Use `pnpm` in JS/TS skill examples; document `minimumReleaseAge: 10080` for bootstrap/setup skills
 - Place `.casa` skills in `projects/casa/skills/common` and portable skills in `projects/workflow/skills/common`; use the selected project's `copilot-only`/`claude-only` only when it truly depends on that platform

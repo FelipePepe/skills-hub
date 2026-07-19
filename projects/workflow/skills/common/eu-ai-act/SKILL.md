@@ -1,10 +1,6 @@
 ---
 name: eu-ai-act
-description: >
-  Detects and applies the EU Artificial Intelligence Act (AI Act) in projects with
-  artificial intelligence systems. Proactively when starting a project with AI
-  dependencies, detecting ML library imports, or when the user mentions AI, models,
-  data, compliance, or regulation.
+description: "Apply the EU AI Act in projects with AI systems. Trigger: AI/ML dependencies or imports detected, or mentions of AI models, classification, high-risk AI, conformity assessment."
 license: Apache-2.0
 metadata:
   author: gentleman-programming

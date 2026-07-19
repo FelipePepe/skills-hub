@@ -5,7 +5,7 @@ name: poc-init
 description: >
   Inicializa un nuevo proyecto PoC con el stack estándar: Angular 21 +
   Express/TypeScript + Drizzle ORM + OpenAPI + gitflow + CLAUDE.md +
-  estructura lista para deploy-casa. Trigger: "crea un nuevo poc", "nuevo
+  estructura lista para casa-ops. Trigger: "crea un nuevo poc", "nuevo
   proyecto", "inicializa el proyecto X", "scaffolding para X".
 license: Apache-2.0
 metadata:

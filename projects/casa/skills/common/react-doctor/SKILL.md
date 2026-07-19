@@ -1,11 +1,6 @@
 ---
 name: react-doctor
-description: >
-  Diagnoses problems and bad patterns in React applications: render loops,
-  poorly defined effects, unnecessary derived state, incorrect memoization,
-  oversized components, hydration issues, performance, and basic accessibility.
-  Trigger: when the user asks to review a React app, debug strange behavior,
-  audit performance/rendering, or improve React component health.
+description: "Diagnose React problems: render loops, bad effects, derived state, memoization, oversized components, hydration, performance, accessibility. Trigger: review, debug, or audit a React app."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez

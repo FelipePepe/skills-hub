@@ -1,9 +1,6 @@
 ---
 name: gitflow-casa
-description: >
-  Applies GitFlow correctly in any repository: feature/* → develop → release → main.
-  Checks branch/state, detects violations, guides commits, merges, tags, and lefthook.
-  Trigger: commit, merge, release, hooks, "which branch", "how do I push", "am I following gitflow?".
+description: "Apply GitFlow (feature/* -> develop -> release -> main): branch checks, commits, merges, tags, lefthook, PR creation. Trigger: commit, merge, release, hooks, creating a pull request, 'which branch', 'am I following gitflow?'."
 license: Apache-2.0
 metadata:
   author: Felipe Perez
@@ -13,6 +10,7 @@ metadata:
 ## When to Use
 
 - The user wants to commit, merge, publish, or tag a version.
+- Creating a pull request or preparing a branch for review.
 - Asks which branch to use or whether the repo follows GitFlow.
 - There are changes or commits on the wrong branch.
 - Wants to configure or verify lefthook.
@@ -61,6 +59,10 @@ Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `chore`, `ci`
 For complete release/hotfix commands, commit rules, `lefthook.yml`, hooks, and troubleshooting, load:
 
 - `references/full-protocol.md`
+
+For PR creation (branch naming patterns, conventional commit regex, PR body structure, `gh pr create`), load:
+
+- `references/pr-workflow.md`
 
 ## Rules
 

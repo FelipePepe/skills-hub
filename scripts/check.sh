@@ -68,6 +68,9 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
     continue
   fi
 
+  # Mapa efectivo skill -> fuente: mismas semanticas que sync.sh, donde las
+  # fuentes posteriores (p. ej. claude-only) sobreescriben a las anteriores.
+  declare -A effective_src=()
   IFS=',' read -r -a source_list <<< "$sources_csv"
   for source_dir in "${source_list[@]}"; do
     [[ -n "$source_dir" ]] || continue
@@ -77,6 +80,13 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
     while IFS= read -r -d '' skill_dir; do
       skill_name="$(basename "$skill_dir")"
       [[ "$skill_name" == _* || "$skill_name" == .* ]] && continue
+      effective_src["$skill_name"]="$skill_dir"
+    done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+  done
+
+  if [[ ${#effective_src[@]} -gt 0 ]]; then
+    while IFS= read -r skill_name; do
+      skill_dir="${effective_src[$skill_name]}"
       dst="$install_path/$skill_name"
 
       if [[ -L "$dst" ]]; then
@@ -100,8 +110,9 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
         errors=1
       fi
       rm -f "$tmp_out"
-    done < <(find "$abs_source" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
-  done
+    done < <(printf '%s\n' "${!effective_src[@]}" | sort)
+  fi
+  unset effective_src
 done < <(node "$ROOT_DIR/scripts/lib/catalog.mjs" app-sources)
 
 skills_hub_info "Verificando drift de agentes (repo -> copias instaladas)..."

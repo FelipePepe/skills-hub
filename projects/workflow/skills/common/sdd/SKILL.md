@@ -1,11 +1,6 @@
 ---
 name: sdd
-description: >
-  Orchestrator for the full SDD cycle (Spec-Driven Development). Manages phases,
-  gates, and persistence modes. Invokes the correct sub-agents at each step.
-  Trigger: "sdd init", "sdd new <feature>", "sdd explore", "sdd status",
-  "sdd continue", "sdd apply", "sdd verify", "sdd archive", "sdd onboard" —
-  or any SDD cycle command.
+description: "Orchestrator for the full SDD cycle: phases, gates, persistence, sub-agent routing. Trigger: any SDD command - 'sdd init/new/explore/status/continue/apply/verify/archive/onboard'."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez + gentleman-programming

@@ -1,12 +1,6 @@
 ---
 name: session-end
-description: >
-  Structured session close: reviews work done, separates operational memory (Engram)
-  from stable architectural knowledge (Atlas), checks for duplicates before saving,
-  persists each observation in canonical format, and optionally adds an entry to the
-  project journal. Trigger: user says "close the session", "end of session", "save to
-  engram", "save context", "summarize what we did", "what do we save from this session",
-  or at the end of a long working session. Replaces the old `engram-fin-sesion`.
+description: "Structured session close: separates Engram operational memory from Atlas knowledge, refreshes the codebase graph, compresses via Headroom, saves observations and optional journal entry. Trigger: 'close/end session', 'save to engram', 'save context', 'summarize what we did', or end of a long session."
 license: Apache-2.0
 metadata:
   author: Felipe Perez
