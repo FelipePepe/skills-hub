@@ -7,6 +7,8 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [4.0.0] - 2026-07-19
+
 ### Añadido
 
 - `scripts/sync.sh`: poda de skills huérfanas — al sincronizar cada app, elimina del destino los directorios de skills que ya no existen en ninguna fuente (se preservan `_*`/`.*` como `_shared`). Antes, las skills borradas de la fuente persistían para siempre en los targets (~100 huérfanas acumuladas en `~/.copilot/skills`).
@@ -199,7 +201,8 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v3.0.0...HEAD
+[Sin publicar]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v3.0.0...v4.0.0
 [3.0.0]: https://github.com/FelipePepe/skills-hub/compare/v2.8.0...v3.0.0
 [2.8.0]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/FelipePepe/skills-hub/compare/v2.6.0...v2.7.0
