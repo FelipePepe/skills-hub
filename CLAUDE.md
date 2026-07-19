@@ -16,7 +16,7 @@ Single source of truth (a GitHub repo) for managing AI assistant skills and dist
 - `config/projects.json` - canonical project boundaries and skill sources
 - `config/apps.json` - manifest defining target apps, their detect paths, install paths, project variants, and agent sources
 - `config/sync-map.sh` - legacy copy sync pairs in format `<rel_path>::<abs_path>` for copyable content (e.g., VS Code prompts)
-- `scripts/sync.sh` - copy-based installer (rsync) that copies skills from sources to each detected app's installPath; enforces the local-only invariant via `skills_hub_assert_local`
+- `scripts/sync.sh` - copy-based installer (rsync) that copies skills from sources to each detected app's installPath and prunes orphan skills no longer present in any source (preserving `_*`/`.*` dirs); enforces the local-only invariant via `skills_hub_assert_local`
 - `scripts/install-opencode-config.mjs` - installs OpenCode managed config (json-merge + markdown managed block); the only piece that needs Node merge logic
 - `scripts/lib/common.sh` - shared bash helpers, including `skills_hub_assert_local` (NAS guard)
 - `bin/skills-hub.js` - official CLI wrapping the installer and all validation scripts
