@@ -16,6 +16,8 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Runbooks casa consolidados en una única skill router `casa-ops` (dominios, deploys docker/web, secretos Infisical, Trello, workflow) con carga bajo demanda desde `references/`.
 - `gitflow-casa` absorbe el flujo de creación de PRs (`references/pr-workflow.md`).
 - Descripciones de frontmatter recortadas a una línea (~250 caracteres máx.) manteniendo los triggers; ahorra ~7k tokens de contexto por sesión en Claude.
+- Catálogo `copilot-only` alineado con la limpieza: 8 skills redundantes o muertas sustituidas por `casa-ops` + `atlas-docs`.
+- `behavior/claude/CLAUDE.md` reconciliado con la versión compactada instalada (tablas de skills sustituidas por regla de triggers); añadido `output-styles/neutral.md` para que sync no lo borre.
 
 ## [3.0.0] - 2026-07-15
 

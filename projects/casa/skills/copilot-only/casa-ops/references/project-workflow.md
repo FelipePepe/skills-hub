@@ -1,14 +1,4 @@
----
-name: project-workflow
-description: >
-  Complete workflow for creating and deploying projects on the intranet.
-  From zero to production: SDD + GitFlow + Infisical + Deploy + DNS + Atlas.
-  Trigger: when the user wants to start a new project or asks how we work.
-license: Apache-2.0
-metadata:
-  author: Felipe Pérez
-  version: "1.0"
----
+# project-workflow runbook
 
 ## Complete Flow
 
@@ -116,7 +106,7 @@ INFISICAL_SITE_URL=http://infisical.casa
 # No more variables in .env
 ```
 
-See skill `infisical-vault` for the code pattern.
+See `secrets.md` (same folder) for the code pattern.
 
 ## Phase 5 — Release Checklist
 
@@ -181,13 +171,13 @@ content: What/Why/Where/Learned
 
 | Tool | Skill |
 |------|-------|
-| Full project | `project-workflow` (this) |
-| .casa domains | `casa-domain` |
-| Infisical vault | `casa-vault` + `infisical-vault` |
-| Production deploy | `casa-deploy` |
-| Atlas documentation | `casa-atlas` + `atlas-docs` |
-| Full SDD | `sdd-*` skills |
-| GitFlow | `gitflow` skill |
+| Full project | this file |
+| .casa domains | `domains.md` |
+| Infisical vault | `secrets.md` |
+| Production deploy | `docker-deploy.md` |
+| Atlas documentation | `atlas-docs` |
+| Full SDD | `sdd` skill |
+| GitFlow | `gitflow-casa` skill |
 
 ## Model routing hints
 

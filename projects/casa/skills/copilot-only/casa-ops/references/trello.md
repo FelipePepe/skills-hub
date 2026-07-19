@@ -1,15 +1,4 @@
----
-name: trello-api-client
-description: >
-  CLI to manage the .CASA intranet Trello clone (boards, lists, cards, custom fields)
-  and its integration with SDD, Atlas, and Portal.
-  Trigger: "trello board", "trello card", "trello list", "create trello board",
-  "move card", "add card", "trello new", "move card".
-license: Apache-2.0
-metadata:
-  author: Felipe Pérez
-  version: "1.1"
----
+# trello-api-client runbook
 
 ## When to Use
 

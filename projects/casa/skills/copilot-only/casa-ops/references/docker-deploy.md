@@ -1,13 +1,5 @@
----
-name: casa-deploy
-description: >
-  Deploys services to production on maya via docker compose pull + up -d.
-  Trigger: when the user wants to deploy or update a service in production.
-license: Apache-2.0
-metadata:
-  author: Felipe Pérez
-  version: "1.0"
----
+# casa-deploy runbook
+
 > **🏠 CASA LAYER** — Only use this skill when working in a `.casa` intranet project.
 > **Detect context by**: presence of `.casa` file in project root, `*.casa` domain references (maya.casa, infisical.casa, pihole.casa), or user explicitly mentions "intranet" or "home project".
 > **Work/external projects**: do NOT suggest or use this skill. Skip silently.

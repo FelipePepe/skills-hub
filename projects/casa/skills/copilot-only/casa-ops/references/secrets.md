@@ -1,15 +1,5 @@
----
-name: infisical-vault
-description: >
-  Secrets management rules for all .casa intranet projects. From now on NO .env files
-  with real secrets are used. All secrets are managed in Infisical self-hosted at
-  maya.casa:8888. Trigger: whenever working with secrets, environment variables,
-  connection configuration (DB, JWT, API keys), or .env is mentioned in any project.
-license: Apache-2.0
-metadata:
-  author: Felipe Pérez
-  version: "1.1"
----
+# infisical-vault runbook
+
 > **🏠 CASA LAYER** — Only use this skill when working in a `.casa` intranet project.
 > **Detect context by**: presence of `.casa` file in project root, `*.casa` domain references (maya.casa, infisical.casa, pihole.casa), or user explicitly mentions "intranet" or "home project".
 > **Work/external projects**: do NOT suggest or use this skill. Skip silently.

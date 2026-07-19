@@ -1,13 +1,5 @@
----
-name: casa-domain
-description: >
-  Manages .casa domains on the intranet: nginx on maya, DNS on pihole1+pihole2, and
-  card in portal. Trigger: when the user wants to add, remove, or list a .casa domain.
-license: Apache-2.0
-metadata:
-  author: Felipe Pérez
-  version: "1.0"
----
+# casa-domain runbook
+
 > **🏠 CASA LAYER** — Only use this skill when working in a `.casa` intranet project.
 > **Detect context by**: presence of `.casa` file in project root, `*.casa` domain references (maya.casa, infisical.casa, pihole.casa), or user explicitly mentions "intranet" or "home project".
 > **Work/external projects**: do NOT suggest or use this skill. Skip silently.
@@ -83,6 +75,13 @@ ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain remove grafana.casa'
 ssh -o BatchMode=yes felipe@192.168.1.55 'casa domain list'
 # The new domain should appear
 ```
+
+## Manual Fallback
+
+If the `casa` CLI is unavailable or fails, follow the step-by-step manual
+procedure (DNS on both Pi-holes, nginx, /etc/hosts on maya, portal card):
+
+- `references/manual-setup.md`
 
 ## Model routing hints
 
