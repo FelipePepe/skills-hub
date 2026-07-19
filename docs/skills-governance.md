@@ -8,14 +8,7 @@
 - Portable workflow skills go in `projects/workflow/skills/common/<skill>/SKILL.md`.
 - Copilot/OpenCode-specific skills go in the selected project's `skills/copilot-only/<skill>/SKILL.md`.
 - Claude-specific skills go in the selected project's `skills/claude-only/<skill>/SKILL.md`.
-- Categories are represented by name prefixes such as `core-`, `analysis-`, `dev-`, `docs-`, `agents-`, `quality-`, and `ddia-`.
 - Do not create nested folders like `projects/workflow/skills/common/analysis/<skill>/SKILL.md`.
-
-## DDIA Skills
-
-- DDIA-derived skills are shared, platform-agnostic skills and live in `projects/workflow/skills/common/ddia-*`.
-- Keep them derivative and operational: trade-offs, workflows, review questions, and source traces only.
-- Do not store or synchronize source PDFs, long excerpts, or verbatim book passages in the canonical catalog.
 
 ## Governance Skills
 

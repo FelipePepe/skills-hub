@@ -1,10 +1,6 @@
 ---
 name: openai-docs
-description: >
-  Use official OpenAI documentation for product, API, model-selection, migration,
-  and prompt-upgrade questions. Trigger: When the user asks how to build with
-  OpenAI, asks for the latest/current model, requests citations, or needs
-  authoritative OpenAI API guidance.
+description: "Official OpenAI documentation for product, API, model-selection, migration, and prompt questions. Trigger: building with OpenAI, latest model, citations, authoritative OpenAI guidance."
 license: Apache-2.0
 metadata:
   author: OpenAI / adapted for skills-hub

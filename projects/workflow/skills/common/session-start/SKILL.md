@@ -1,10 +1,6 @@
 ---
 name: session-start
-description: >
-  Always-active session initialization protocol. Reads Atlas and engram memory
-  (Atlas-first), checks codebase graph freshness, verifies GitFlow branch state,
-  and checks SDD context at the start of every session.
-  Trigger: Always active — load in every session automatically.
+description: "Session resumption briefing: detects project, git state, last journal, active spec, Engram/Atlas context, and codebase graph. Trigger: 'start session', 'resuming', 'where did we leave off', 'project state', 'bring me up to speed'."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez (Sandman_owl)
