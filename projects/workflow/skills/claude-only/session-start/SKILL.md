@@ -1,14 +1,6 @@
 ---
 name: session-start
-description: >
-  Activates the session workflow: detects the active project, checks git state,
-  reads the last journal and state docs, detects the active spec with pending
-  tasks, queries context in Engram and Atlas (Atlas-first), checks codebase
-  graph freshness via codebase-memory-mcp, and optionally runs quick
-  tests/benchmarks. Returns a resumption briefing — or an onboarding briefing
-  on first contact with a project — with next-step suggestions. Trigger: user
-  says "start session", "session start", "resuming", "where did we leave off",
-  "project state", "bring me up to speed", "session start".
+description: "Session resumption briefing: detects project, git state, last journal, active spec, Engram/Atlas context, and codebase graph. Trigger: 'start session', 'resuming', 'where did we leave off', 'project state', 'bring me up to speed'."
 license: Apache-2.0
 metadata:
   author: Felipe Perez

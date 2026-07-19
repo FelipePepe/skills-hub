@@ -1,11 +1,6 @@
 ---
 name: atlas-docs
-description: >
-  Creates and updates documents in the Atlas (Obsidian) vault on the .casa intranet.
-  Ensures all documents have bidirectional wikilinks for the knowledge graph.
-  Trigger: when the user asks to create or update documents in atlas.casa, the
-  Obsidian vault, or when something new is implemented on the intranet that needs
-  to be documented.
+description: "Create or update documents in the Atlas (Obsidian) vault with bidirectional wikilinks. Trigger: document something in atlas.casa, the vault, or new intranet work."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez

@@ -1,10 +1,6 @@
 ---
 name: poc-init
-description: >
-  Initializes a new PoC project with the standard stack: Angular 21 +
-  Express/TypeScript + Drizzle ORM + OpenAPI + GitFlow + CLAUDE.md + structure
-  ready for deploy-casa. Trigger: "create a new poc", "new project",
-  "initialize project X", "scaffolding for X".
+description: "Scaffold a new PoC: Angular 21 + Express/TypeScript + Drizzle + OpenAPI + GitFlow + CLAUDE.md, ready for casa-ops web deploy. Trigger: 'create a new poc', 'new project', 'initialize project X'."
 license: Apache-2.0
 metadata:
   author: Felipe Perez
@@ -28,7 +24,7 @@ metadata:
 | API | OpenAPI 3.0 |
 | Tests | Vitest |
 | Quality | ESLint + Prettier + Lefthook |
-| Deploy | compatible with `deploy-casa` |
+| Deploy | compatible with `casa-ops` (web-deploy runbook) |
 
 ## Quick Protocol
 

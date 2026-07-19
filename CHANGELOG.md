@@ -7,6 +7,18 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Eliminado
+
+- Pack DDIA completo (15 skills `ddia-*`), pack genérico (`agents-*`, `analysis-*`, `core-*`, `dev-*`, `docs-*`, `quality-skill-quality-gate`, `security-skill-security-gate`), suite HyperFrames/animación, y skills muertas o redundantes (`casa-atlas`, `casa-vault`, `skill-installer`, `infisical-admin-mcp`, `sdd-proposal`, `branch-pr`, `nueva-casa`) de `common`/`claude-only`; las variantes `copilot-only` no se tocan.
+
+### Cambiado
+
+- Runbooks casa consolidados en una única skill router `casa-ops` (dominios, deploys docker/web, secretos Infisical, Trello, workflow) con carga bajo demanda desde `references/`.
+- `gitflow-casa` absorbe el flujo de creación de PRs (`references/pr-workflow.md`).
+- Descripciones de frontmatter recortadas a una línea (~250 caracteres máx.) manteniendo los triggers; ahorra ~7k tokens de contexto por sesión en Claude.
+- Catálogo `copilot-only` alineado con la limpieza: 8 skills redundantes o muertas sustituidas por `casa-ops` + `atlas-docs`.
+- `behavior/claude/CLAUDE.md` reconciliado con la versión compactada instalada (tablas de skills sustituidas por regla de triggers); añadido `output-styles/neutral.md` para que sync no lo borre.
+
 ## [3.0.0] - 2026-07-15
 
 ### Cambiado (breaking)

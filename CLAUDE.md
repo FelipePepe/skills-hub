@@ -68,7 +68,7 @@ Direct script invocation:
 - All Bash scripts must use `set -euo pipefail`
 - `SYNC_PAIRS` format: `"<rel_path>::<abs_path>"` — destination must be absolute
 - Naming: use `atlas`/`atlas.casa`, never `mente`/`mente.casa`
-- Naming: use `sdd-propose` as canonical, `sdd-proposal` is legacy alias only
+- Naming: use `sdd-propose` as canonical; the legacy `sdd-proposal` alias was removed
 - ONLY use `pnpm` — `npm` and `npx` are FORBIDDEN. Use `pnpm` and `pnpm dlx` instead. This applies to skill examples, scripts, and all commands in this repo.
 - Use `pnpm` in JS/TS skill examples; document `minimumReleaseAge: 10080` for bootstrap/setup skills
 - Place `.casa` skills in `projects/casa/skills/common` and portable skills in `projects/workflow/skills/common`; use the selected project's `copilot-only`/`claude-only` only when it truly depends on that platform

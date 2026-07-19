@@ -1,10 +1,6 @@
 ---
 name: redis-cache
-description: >
-  Redis caching specialist for Node.js/TypeScript applications. Covers strategy
-  selection, key design, TTL policy, TypeScript integration, and failure handling.
-  Trigger: when adding caching, reviewing cache logic, choosing a Redis client,
-  or debugging stale/missing cache data.
+description: "Redis caching for Node/TypeScript: strategy, key design, TTL, client choice, failure handling. Trigger: adding caching, reviewing cache logic, stale or missing cache data."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez

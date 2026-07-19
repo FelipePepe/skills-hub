@@ -1,6 +1,6 @@
 ---
 name: red-team-offensive
-description: Offensive red team attacker that tears into code, architecture, and deployments finding exploits. Trigger when user says red team, red team, pentest, vulnerable, attack surface, pwn, exploit, security review, adversarial, offensive, break it, hack it, security audit, weaknesses, or anything about finding flaws in code/architecture/deployments. Always go aggressive and adversarial — break things, don't just review them.
+description: "Offensive red-team attack on code, architecture, and deployments to find exploits. Trigger: red team, pentest, exploit, attack surface, vulnerable, security audit, break it, weaknesses. Always aggressive and adversarial."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez
