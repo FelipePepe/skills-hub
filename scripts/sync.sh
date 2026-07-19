@@ -168,11 +168,16 @@ for pair in "${SYNC_PAIRS[@]}"; do
   [[ -e "$src_abs" ]] || { skills_hub_warn "origen inexistente, se omite -> $src_abs"; continue; }
   skills_hub_assert_local "$dst_abs" "destino legacy"
 
-  if [[ ! -d "$dst_abs" ]]; then
+  if [[ -d "$src_abs" ]]; then
+    dst_dir="$dst_abs"
+  else
+    dst_dir="$(dirname "$dst_abs")"
+  fi
+  if [[ ! -d "$dst_dir" ]]; then
     if [[ "$DRY_RUN" == true ]]; then
-      echo "PLAN: mkdir -p $dst_abs"
+      echo "PLAN: mkdir -p $dst_dir"
     else
-      mkdir -p "$dst_abs"
+      mkdir -p "$dst_dir"
     fi
   fi
 
