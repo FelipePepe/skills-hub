@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Añadido
+
+- `scripts/sync.sh`: poda de skills huérfanas — al sincronizar cada app, elimina del destino los directorios de skills que ya no existen en ninguna fuente (se preservan `_*`/`.*` como `_shared`). Antes, las skills borradas de la fuente persistían para siempre en los targets (~100 huérfanas acumuladas en `~/.copilot/skills`).
+- 8 skills autoradas localmente portadas a `projects/workflow/skills/claude-only` para cumplir el invariante "los targets no son lugares de autoría": `chained-pr`, `codebase-memory`, `cognitive-doc-design`, `comment-writer`, `headroom`, `issue-creation`, `skill-registry`, `work-unit-commits`.
+
 ### Corregido
 
 - `atlas-docs` (variantes `common` y `copilot-only`) referenciaba la carpeta inexistente `Projects/` del vault Atlas; corregido a `Proyectos/` (convención real del vault y de `session-start`/`session-end` v1.5).
