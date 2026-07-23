@@ -105,7 +105,9 @@ while IFS=$'\t' read -r app_id install_path detect_csv sources_csv; do
         echo "ERROR: fallo rsync al comparar $skill_dir con $dst"
         errors=1
       elif [[ -s "$tmp_out" ]]; then
-        echo "DRIFT: $app_id/$skill_name"
+        src_version="$(skills_hub_skill_version "$skill_dir/SKILL.md")"
+        dst_version="$(skills_hub_skill_version "$dst/SKILL.md")"
+        echo "DRIFT: $app_id/$skill_name (version instalada=$dst_version -> repo=$src_version)"
         sed 's/^/    /' "$tmp_out"
         errors=1
       fi
