@@ -1,10 +1,10 @@
 ---
 name: sdd-init
-description: "Initialize SDD in a project: detect stack, conventions, testing; bootstrap the persistence backend and skill registry. Trigger: 'sdd init', 'iniciar sdd', 'openspec init'."
+description: "Initialize SDD in a project: detect stack, conventions, testing; bootstrap the real OpenSpec CLI and the skill registry. Trigger: 'sdd init', 'iniciar sdd', 'openspec init'."
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "3.1"
+  version: "5.0"
 ---
 
 ## Purpose
@@ -12,21 +12,14 @@ metadata:
 You initialize SDD context in a project:
 - detect stack and conventions
 - detect testing capabilities
-- resolve Strict TDD mode
-- bootstrap the active persistence backend
+- confirm Strict TDD is enforceable
+- bootstrap the real OpenSpec CLI
 
 You are an executor for this phase. Do the initialization work yourself.
 
-## Execution and Persistence Contract
-
-Mode behavior:
-- **engram** → do not create `openspec/`; persist project context and capabilities to Engram
-- **openspec** → bootstrap filesystem under `openspec/`
-- **hybrid** → do both
-- **none** → detect and return, but do not write files
+## Execution Contract
 
 Use:
-- `skills/_shared/engram-convention.md`
 - `skills/_shared/openspec-convention.md`
 
 ## What to Do
@@ -56,53 +49,45 @@ Detection sources include:
 Persist results using the format in:
 - `references/testing-capabilities-template.md`
 
-### Step 3: Resolve Strict TDD Mode
+### Step 3: Confirm Strict TDD is enforceable
 
-Priority order:
-1. system prompt / agent config marker
-2. `openspec/config.yaml`
-3. default to `true` if a test runner exists
-4. force `false` if no test runner exists
+Strict TDD (red → green → refactor) is ALWAYS `true` — no exception, no config override, no interactive question.
 
-Do not ask the user interactively.
+If no test runner exists, this is a blocking gap: report it and recommend adding one before `sdd apply` runs, rather than silently downgrading to non-TDD implementation.
 
-### Step 4: Initialize persistence backend
+### Step 4: Bootstrap the real OpenSpec CLI
 
-If mode includes `openspec`, create:
+Do NOT hand-write the `openspec/` tree. Use the real CLI (`@fission-ai/openspec`, requires Node ≥20.19):
 
-```text
-openspec/
-├── config.yaml
-├── specs/
-└── changes/
-    └── archive/
+```bash
+pnpm dlx @fission-ai/openspec@latest init --tools all --force
 ```
 
-### Step 5: Generate config (openspec mode)
+`--tools all` installs the `/opsx:*` commands for every supported editor/agent (Claude Code, GitHub Copilot, Cursor, Windsurf, OpenCode, etc.), not just Claude — this repo distributes skills to multiple apps, so init must not assume Claude is the only consumer. This creates `openspec/config.yaml` (schema `spec-driven`) and, for Claude Code specifically, `.claude/skills/openspec-*` + `.claude/commands/opsx/*` (`propose`, `apply`, `archive`, `explore`, `sync`, `update`) — equivalent files are installed for the other detected tools. From this point, `sdd new`/`sdd apply`/`sdd archive` delegate artifact writing to these `/opsx:*` commands.
 
-Create `openspec/config.yaml` with:
-- concise detected context
-- `strict_tdd`
-- phase rules for proposal/specs/design/tasks/apply/verify/archive
-- testing capabilities section when mode includes filesystem persistence
+The CLI's default schema has NO `verify` artifact — `sdd-verify` (this repo's own gate) always runs, real execution, independently of the CLI.
+
+Fork the schema once to add our verify artifact so it's tracked like any other:
+
+```bash
+pnpm dlx @fission-ai/openspec@latest schema fork spec-driven sdd-verified
+```
+
+Then add to `openspec/schemas/sdd-verified/schema.yaml` a `verify` artifact (`requires: [tasks]`, `generates: verify-report.md`) whose instruction points back to the `sdd-verify` skill contract. Set `schema: sdd-verified` in `config.yaml`.
+
+### Step 5: Generate config
+
+The CLI already created `openspec/config.yaml` with `schema:` + empty `context:`/`rules:`. Fill it in — do not overwrite the file structure, edit the existing keys:
+- `context:` — concise detected stack/conventions (Step 1)
+- `rules.proposal` — require an architecture/design check before proposing if none exists yet (see `sdd/SKILL.md` gate)
+- `rules.apply` — strict TDD is ALWAYS on, no exception; if no test runner exists, this is a blocking gap to report, not a reason to disable it. Summarize the RED→GREEN→TRIANGULATE→REFACTOR cycle from `skills/_shared/strict-tdd.md` into these rules so `/opsx:apply` follows it (the CLI has no built-in TDD concept)
+- `rules.verify` — require `code-reviewer`, `judgment-day`, `security-review`, `silent-failure-hunter` using a different LLM model than the one used in `sdd apply`; for web projects, e2e tests via Playwright with a screenshot captured per test
+- `rules.archive` — require a GitFlow-compliant commit/PR (`gitflow` skill) and an EU AI Act traceability entry before archiving
+- testing capabilities section (Step 2)
 
 Keep context concise.
 
-### Step 6: Persist testing capabilities
-
-Mandatory.
-
-If mode includes Engram, save a separate observation:
-- title: `sdd/{project-name}/testing-capabilities`
-- topic_key: `sdd/{project-name}/testing-capabilities`
-- type: `config`
-
-If mode includes openspec, also include testing capabilities in `openspec/config.yaml`.
-
-Use the exact structure from:
-- `references/testing-capabilities-template.md`
-
-### Step 7: Build skill registry
+### Step 6: Build skill registry
 
 Follow the `skill-registry` logic:
 - scan user-level and project-level skills
@@ -110,26 +95,30 @@ Follow the `skill-registry` logic:
 - deduplicate by name (project-level wins)
 - scan project convention files like `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `GEMINI.md`, `copilot-instructions.md`
 - always write `.atl/skill-registry.md`
-- if Engram is available, also persist it there
 
-### Step 8: Persist project context
+### Step 7: Register in company memory (Engram)
 
-Mandatory.
+Save one observation so this project is discoverable across the whole company memory, not just locally:
 
-If mode includes Engram, save:
-- title: `sdd-init/{project-name}`
-- topic_key: `sdd-init/{project-name}`
-- type: `architecture`
+```
+mem_save(
+  title: "sdd/{project}/init",
+  topic_key: "sdd/{project}/init",
+  type: "decision",
+  project: "{project}",
+  content: "{detected stack, TDD status, openspec bootstrapped}"
+)
+```
 
-If mode includes openspec, the generated config already captures the filesystem side.
+If Engram is unavailable, skip this and continue — it never blocks init.
 
-### Step 9: Return
+### Step 8: Return
 
 Emit exactly this schema:
 ```
-INIT:{project} MODE:{mode} TDD:{true|false}
+INIT:{project} TDD:{true|false}
 STACK:{tech1,tech2} SKILLS:{n-registered}
-NEXT:{sdd-new|sdd-explore}
+NEXT:{sdd new|sdd apply}
 ```
 No headers, no prose outside the schema.
 
@@ -141,10 +130,10 @@ No headers, no prose outside the schema.
 - If `openspec/` already exists, report that and let the orchestrator decide updates
 - Keep `config.yaml` context concise
 - ALWAYS detect and persist testing capabilities
-- If Strict TDD is requested but no test runner exists, disable it and explain why
+- Strict TDD is never disabled; if no test runner exists, report it as a blocking gap to resolve before `sdd apply`
 - Return a structured envelope with `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
 
 ## Output contract
 
-Respond ONLY in the schema defined in Step 9. No preamble, no explanation,
+Respond ONLY in the schema defined in Step 8. No preamble, no explanation,
 no markdown headers or bullets outside the schema. If you add anything else, you are wrong.

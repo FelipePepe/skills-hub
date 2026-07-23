@@ -1,10 +1,10 @@
 ---
 name: sdd
-description: "Orchestrator for the full SDD cycle: phases, gates, persistence, sub-agent routing. Trigger: any SDD command - 'sdd init/new/explore/status/continue/apply/verify/archive/onboard'."
+description: "Orchestrator for the full SDD cycle: phases, gates, real OpenSpec CLI routing, and the repo's own verify gate. Trigger: any SDD command - 'sdd init/new/status/continue/apply/verify/archive/onboard'."
 license: Apache-2.0
 metadata:
   author: Felipe Pérez + gentleman-programming
-  version: "2.1"
+  version: "3.0"
 ---
 
 ## Role
@@ -12,26 +12,18 @@ metadata:
 You are the Orchestrator of the SDD cycle. Your job is to:
 1. Detect which phase the project is in
 2. Verify that gates are satisfied before advancing
-3. Invoke the correct sub-agent for each phase
-4. Maintain state (SQL + Engram/filesystem depending on mode)
+3. Route each phase to the real OpenSpec CLI (`/opsx:*`) or, for `sdd verify` (no CLI equivalent), to the `sdd-verify` sub-agent
+4. Maintain state in the local SQL cycle table
 5. Never allow the agent to skip steps
-6. Inject `## Project Standards` into each sub-agent (see `skills/_shared/skill-resolver.md`)
-7. Decide if `sdd-apply` runs inline or in `git worktree` per task
+6. Inject `## Project Standards` into `sdd-verify` (see `skills/_shared/skill-resolver.md`)
 
-## Persistence Modes
+## Persistence
 
-| Mode | Where artifacts are stored | When to use |
-|------|---------------------------|-------------|
-| `engram` | Engram (persistent memory) | Solo dev, fast iteration |
-| `openspec` | `openspec/` on the filesystem (git-friendly) | Teams, audit trail, serious projects |
-| `hybrid` | Both: Engram + openspec/ | Best of both worlds |
-| `none` | No persistence (ephemeral) | Quick exploration, no commitment |
-
-**Default**: `engram`. If the user does not specify, use `engram`.
+There is a single mode: `openspec`. Artifacts live under `openspec/` on the filesystem (git-friendly, team-shareable, full audit trail via `openspec/changes/archive/`) — see `skills/_shared/openspec-convention.md`.
 
 ## Worktrees per Task (optional)
 
-`git worktree` is a workspace isolation layer, not a persistence mode. Use it primarily in `sdd-apply` to implement tasks without polluting the main checkout.
+`git worktree` is a workspace isolation layer, independent of persistence. Use it primarily around `/opsx:apply` to implement tasks without polluting the main checkout.
 
 Read `skills/_shared/sdd-worktree.md` when:
 - The user explicitly requests worktrees
@@ -39,39 +31,72 @@ Read `skills/_shared/sdd-worktree.md` when:
 - The current checkout has unrelated in-progress work
 - A server or test runner must stay running on another branch
 
-Default strategy: `inline`. If a worktree is used, the prompt to `sdd-apply` MUST include `worktree_strategy`, `worktree_path`, `branch`, `base_branch`, and task IDs.
+Default strategy: `inline`.
+
+## Company Memory (Engram)
+
+`openspec/` is per-project, filesystem, git-tracked — the source of truth for that repo. It is NOT cross-project. Engram is a separate, global memory: every phase transition ALSO saves a compact observation to Engram, so decisions and changes across every project the user works on are searchable company-wide. This is additive, not a persistence mode — `openspec/` stays the only artifact backend; Engram never stores the artifacts themselves, only a journal entry pointing at them.
+
+At every phase transition (`sdd init`, `sdd new`, `sdd apply`, `sdd verify`, `sdd archive`):
+
+```
+mem_save(
+  title: "sdd/{project}/{change-name}/{phase}",
+  topic_key: "sdd/{project}/{change-name}/{phase}",
+  type: "decision",
+  project: "{project}",
+  content: "{one-paragraph summary: what changed, why, artifact path under openspec/, result}"
+)
+```
+
+If Engram is unavailable this session, proceed without it — it is never a blocker for the SDD cycle, only a cross-project journal on top of it.
 
 ## Cycle Map
 
 ```
-  sdd init    → detects stack, bootstraps persistence
+  sdd init         → sdd-init bootstraps the real OpenSpec CLI
+                     (`@fission-ai/openspec`, ≥1.6) and our forked schema
        ↓
-  sdd explore → investigates codebase before committing
+  sdd compliance   → GATE: eu-gdpr + compliance-ops, only if the change touches
+                     personal data or a regulated domain
        ↓
-  sdd new     → sdd-propose + sdd-spec + sdd-design + sdd-tasks
+  sdd architecture → GATE: if no architecture/design spec exists yet, run
+                     `/opsx:explore` first to produce one
        ↓
-  sdd apply   → implements tasks (sdd-apply)
+  sdd new          → `/opsx:propose` (proposal → specs → design → tasks,
+                     one pipeline via the real CLI)
        ↓
-  sdd verify  → GATE: sdd-verify (tests + build + spec compliance)
-                      + red-team-offensive (adversarial review)
+  sdd apply        → `/opsx:apply`. Strict TDD (red→green→refactor) ALWAYS
+                     on, no exception. `work-unit-commits` plans the
+                     commit/PR split.
        ↓
-  sdd archive → closes the cycle (sdd-archive)
+  sdd verify       → GATE: sdd-verify (tests + build + spec compliance,
+                     e2e via Playwright with a screenshot per test)
+                     + red-team-offensive + code-reviewer + judgment-day
+                     + security-review + silent-failure-hunter, run on a
+                     DIFFERENT LLM model than the one used in sdd apply
+       ↓
+  sdd archive      → `/opsx:archive`. Gated on a GitFlow commit/PR
+                     (`gitflow` skill) and an EU AI Act traceability entry.
+                     Closes with session-end: updates app docs
+                     (`cognitive-doc-design`), reindexes `skill-registry`
+                     if a skill was touched.
 ```
+
+The CLI's default schema has no `verify` artifact — `sdd-verify` is this repo's own gate and always runs; it is the only sub-agent this orchestrator still invokes directly.
 
 ## Commands
 
-| Command | Skill invoked | Description |
-|---------|--------------|-------------|
-| `sdd init` | `sdd-init` | Detects stack and bootstraps persistence |
+| Command | Routed to | Description |
+|---------|-----------|--------------|
+| `sdd init` | `sdd-init` (bootstraps `/opsx:*`) | Detects stack, installs OpenSpec CLI + schema |
 | `sdd onboard` | `sdd-onboard` | Full guided walkthrough of the first real cycle |
-| `sdd explore <topic>` | `sdd-explore` | Investigates before proposing |
-| `sdd new <change>` | sdd-propose → sdd-spec → sdd-design → sdd-tasks | Full planning cycle |
+| `sdd new <change>` | `/opsx:propose` | Full planning cycle |
 | `sdd status` | (direct) | Current state, progress, gates |
-| `sdd continue` | (gate check + next skill) | Advances to the next phase |
-| `sdd apply` | `sdd-apply` | Implements the next pending task |
-| `sdd apply <task-id>` | `sdd-apply` | Implements a specific task |
-| `sdd verify` | `sdd-verify` + `red-team-offensive` | Full quality gate |
-| `sdd archive` | `sdd-archive` | Closes and archives the cycle |
+| `sdd continue` | (gate check + next command) | Advances to the next phase |
+| `sdd apply` / `sdd apply <task-id>` | `/opsx:apply` | Implements task(s), strict TDD always |
+| `sdd verify` | `sdd-verify` + `red-team-offensive` + `code-reviewer` + `judgment-day` + `security-review` + `silent-failure-hunter` (different LLM model) | Full quality gate |
+| `sdd archive` | `/opsx:archive`, then `gitflow` + session-end | Closes and archives the cycle |
 
 ## State — SQL
 
@@ -80,14 +105,13 @@ Default strategy: `inline`. If a worktree is used, the prompt to `sdd-apply` MUS
 CREATE TABLE IF NOT EXISTS sdd_cycle (
   feature      TEXT NOT NULL PRIMARY KEY,
   phase        TEXT NOT NULL DEFAULT 'propose',
-  artifact_mode TEXT NOT NULL DEFAULT 'engram',
   started_at   INTEGER NOT NULL DEFAULT (unixepoch('now') * 1000),
   updated_at   INTEGER NOT NULL DEFAULT (unixepoch('now') * 1000),
   verify_pass  INTEGER NOT NULL DEFAULT 0  -- 0=no, 1=yes
 );
 
 -- Valid phases (in order):
--- init → explore → propose → spec → design → tasks → apply → verify → archive → done
+-- init → propose → apply → verify → archive → done
 ```
 
 ## Process per Command
@@ -96,11 +120,11 @@ CREATE TABLE IF NOT EXISTS sdd_cycle (
 
 ### `sdd init`
 
-Invoke skill **`sdd-init`** with the persistence mode (default: `engram`).
+Invoke skill **`sdd-init`**. It runs `pnpm dlx @fission-ai/openspec@latest init --tools claude` and forks the schema to add our `verify` artifact.
 
 ```sql
-INSERT OR IGNORE INTO sdd_cycle (feature, phase, artifact_mode)
-VALUES ('<project-name>', 'init', '<mode>');
+INSERT OR IGNORE INTO sdd_cycle (feature, phase)
+VALUES ('<project-name>', 'init');
 ```
 
 ---
@@ -111,30 +135,19 @@ Invoke skill **`sdd-onboard`**. Guides the user through a complete real cycle.
 
 ---
 
-### `sdd explore <topic>`
-
-Invoke skill **`sdd-explore`** with the topic and persistence mode.
-
-```sql
-UPDATE sdd_cycle SET phase = 'explore', updated_at = unixepoch('now') * 1000
-WHERE feature = '<feature>';
-```
-
----
-
 ### `sdd new <change>`
 
+**Gate before anything else:**
+- If the change touches personal data or a regulated domain: run `eu-gdpr` + `compliance-ops` first.
+- If no architecture/design spec exists for the project yet: run `/opsx:explore` first.
+- If the change description is vague/terse: ask the user to be more explicit — do NOT invoke `enrich-us` here.
+
 ```sql
--- 1. Register new cycle
-INSERT OR REPLACE INTO sdd_cycle (feature, phase, artifact_mode)
-VALUES ('<change>', 'propose', '<mode>');
+INSERT OR REPLACE INTO sdd_cycle (feature, phase)
+VALUES ('<change>', 'propose');
 ```
 
-Invoke in sequence (waiting for each result):
-1. Skill **`sdd-propose`** → produces proposal
-2. Skill **`sdd-spec`** → produces delta specs
-3. Skill **`sdd-design`** → produces design.md
-4. Skill **`sdd-tasks`** → produces tasks.md
+Run `/opsx:propose "<change>"` — the real OpenSpec CLI walks proposal → specs → design → tasks in one pipeline per its schema. `work-unit-commits` then plans the commit/PR split for the resulting tasks.
 
 ```sql
 UPDATE sdd_cycle SET phase = 'tasks', updated_at = unixepoch('now') * 1000
@@ -146,7 +159,7 @@ WHERE feature = '<change>';
 ### `sdd status`
 
 ```sql
-SELECT feature, phase, artifact_mode, verify_pass,
+SELECT feature, phase, verify_pass,
        datetime(started_at/1000, 'unixepoch') as started,
        datetime(updated_at/1000, 'unixepoch') as updated
 FROM sdd_cycle ORDER BY updated_at DESC LIMIT 1;
@@ -154,7 +167,7 @@ FROM sdd_cycle ORDER BY updated_at DESC LIMIT 1;
 
 Output schema:
 ```
-STATUS:{feature} PHASE:{phase} MODE:{mode}
+STATUS:{feature} PHASE:{phase}
 TASKS:{done}/{total} PENDING:{n}
 ARTIFACTS:{proposal:ok|spec:ok|design:missing|tasks:missing}
 NEXT:{sdd apply|sdd verify|sdd archive|none}
@@ -168,10 +181,7 @@ NEXT:{sdd apply|sdd verify|sdd archive|none}
 
 | Current phase | Gate |
 |---------------|------|
-| `propose`     | `proposal` artifact exists in active mode |
-| `spec`        | `spec` artifact exists with Requirements |
-| `design`      | `design` artifact exists with File Changes |
-| `tasks`       | Tasks generated and persisted |
+| `propose`     | `proposal` + `specs` + `design` + `tasks` exist under `openspec/changes/{change}/` |
 | `apply`       | 0 tasks pending or in_progress |
 | `verify`      | verify_pass = 1 |
 
@@ -179,7 +189,7 @@ NEXT:{sdd apply|sdd verify|sdd archive|none}
 
 ### `sdd apply` / `sdd apply <task-id>`
 
-Invoke skill **`sdd-apply`** with the change name, task(s) to implement, and mode.
+Run `/opsx:apply` for the change (specific task IDs if given). Strict TDD (red → green → refactor) is ALWAYS on.
 
 ```sql
 UPDATE sdd_cycle SET phase = 'apply', updated_at = unixepoch('now') * 1000
@@ -192,14 +202,19 @@ WHERE feature = '<feature>';
 
 **Gate: all tasks must be done.**
 
-Invoke **`sdd-verify`** with the change name and mode. The sdd-verify skill:
-1. Runs tests and build (real execution)
+Invoke **`sdd-verify`** with the change name. The sdd-verify skill:
+1. Runs tests and build (real execution) — including Playwright e2e for web projects, one screenshot captured per e2e test
 2. Generates spec compliance matrix
-3. Detects if strict TDD mode applies
+3. Confirms strict TDD evidence (always required, no exception)
 
-After sdd-verify, invoke **`red-team-offensive`** as an additional adversarial review.
+After sdd-verify, invoke as independent second-opinion reviewers, on a **different LLM model** than the one used in `sdd apply`:
+- **`red-team-offensive`** (adversarial review)
+- **`code-reviewer`**
+- **`judgment-day`**
+- **`security-review`**
+- **`silent-failure-hunter`**
 
-Only if sdd-verify passes AND red-team finds no CRITICALs:
+Only if sdd-verify passes AND none of the above find CRITICALs:
 ```sql
 UPDATE sdd_cycle SET phase = 'verify', verify_pass = 1,
                      updated_at = unixepoch('now') * 1000
@@ -217,7 +232,12 @@ SELECT verify_pass FROM sdd_cycle WHERE feature = '<feature>';
 -- If 0: STOP — cannot archive without a green verify
 ```
 
-Invoke skill **`sdd-archive`** with the change name and mode.
+Run `/opsx:archive` (real CLI — merges deltas into main specs and moves the change to `openspec/changes/archive/`).
+
+Then, before closing:
+1. **`gitflow`** — commit/merge/PR for the change, respecting the `work-unit-commits` split.
+2. **EU AI Act traceability** — append an entry logging every agent action taken across the cycle.
+3. **session-end** — update the app's documentation (`cognitive-doc-design`), document tasks and tests performed (including e2e screenshots), and reindex `skill-registry` if any skill was created or modified.
 
 ```sql
 UPDATE sdd_cycle SET phase = 'done', updated_at = unixepoch('now') * 1000
@@ -228,8 +248,8 @@ WHERE feature = '<feature>';
 
 ## Skill Injection (MANDATORY)
 
-Before invoking ANY sub-agent, follow the protocol in `skills/_shared/skill-resolver.md`:
-1. Obtain the skill registry (engram → `.atl/skill-registry.md`)
+Before invoking `sdd-verify`, follow the protocol in `skills/_shared/skill-resolver.md`:
+1. Obtain the skill registry (`.atl/skill-registry.md`)
 2. Match relevant skills by code context and task context
 3. Inject a `## Project Standards (auto-resolved)` block into the sub-agent prompt
 
@@ -241,8 +261,11 @@ Before invoking ANY sub-agent, follow the protocol in `skills/_shared/skill-reso
 2. **One task at a time in apply** — do not implement in parallel without confirmation
 3. **SQL state is the source of truth** — do not assume the phase from the filesystem
 4. **If a gate fails**, report exactly what is missing and how to resolve it
-5. **`red-team-offensive` is mandatory in verify** — not optional
-6. **Inject Project Standards** into all sub-agents — never launch without context
+5. **`red-team-offensive`, `code-reviewer`, `judgment-day`, `security-review`, `silent-failure-hunter` are mandatory in verify** — not optional, and run on a different LLM model than `sdd apply`
+6. **Inject Project Standards** into `sdd-verify` — never launch without context
+7. **Strict TDD is always on** — no config flag disables it; a missing test runner is a blocking gap, not an opt-out
+8. **`sdd archive` requires a GitFlow-compliant commit/PR** (`gitflow` skill) and an EU AI Act traceability entry before closing
+9. **Save a company-memory observation to Engram at every phase transition** — additive to `openspec/`, never a replacement; skip only if Engram is unavailable this session
 
 ## Output contract
 

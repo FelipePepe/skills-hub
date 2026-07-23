@@ -16,55 +16,11 @@ Executor boundary: every SDD phase agent is an EXECUTOR, not an orchestrator. Do
 
 NOTE: the preferred path is (1) — compact rules pre-injected by the orchestrator. Paths (2) and (3) are fallbacks for backwards compatibility. Searching the registry is SKILL LOADING, not delegation. If `## Project Standards` is present, IGNORE any `SKILL: Load` instructions — they are redundant.
 
-## B. Artifact Retrieval (Engram Mode)
+## B. Artifact Persistence
 
-**CRITICAL**: `mem_search` returns 300-char PREVIEWS, not full content. You MUST call `mem_get_observation(id)` for EVERY artifact. **Skipping this produces wrong output.**
+Every phase that produces an artifact writes it directly to `openspec/changes/{change-name}/{artifact}` as part of its main step — see `skills/_shared/openspec-convention.md`. There is no separate persistence step: the file is the artifact.
 
-**Run all searches in parallel** — do NOT search sequentially.
-
-```
-mem_search(query: "sdd/{change-name}/{artifact-type}", project: "{project}") → save ID
-```
-
-Then **run all retrievals in parallel**:
-
-```
-mem_get_observation(id: {saved_id}) → full content (REQUIRED)
-```
-
-Do NOT use search previews as source material.
-
-## C. Artifact Persistence
-
-Every phase that produces an artifact MUST persist it. Skipping this BREAKS the pipeline — downstream phases will not find your output.
-
-### Engram mode
-
-```
-mem_save(
-  title: "sdd/{change-name}/{artifact-type}",
-  topic_key: "sdd/{change-name}/{artifact-type}",
-  type: "architecture",
-  project: "{project}",
-  content: "{your full artifact markdown}"
-)
-```
-
-`topic_key` enables upserts — saving again updates, not duplicates.
-
-### OpenSpec mode
-
-File was already written during the phase's main step. No additional action needed.
-
-### Hybrid mode
-
-Do BOTH: write the file to the filesystem AND call `mem_save` as above.
-
-### None mode
-
-Return result inline only. Do not write any files or call `mem_save`.
-
-## D. Return Envelope
+## C. Return Envelope
 
 Every phase MUST return a structured envelope to the orchestrator:
 
@@ -80,9 +36,9 @@ Example:
 
 ```markdown
 **Status**: success
-**Summary**: Proposal created for `{change-name}`. Defined scope, approach, and rollback plan.
-**Artifacts**: Engram `sdd/{change-name}/proposal` | `openspec/changes/{change-name}/proposal.md`
-**Next**: sdd-spec or sdd-design
+**Summary**: Verification passed for `{change-name}`. No CRITICALs found.
+**Artifacts**: `openspec/changes/{change-name}/verify-report.md`
+**Next**: sdd archive
 **Risks**: None
 **Skill Resolution**: injected — 3 skills (react-19, typescript, tailwind-4)
 (other values: `fallback-registry`, `fallback-path`, or `none — no registry found`)
