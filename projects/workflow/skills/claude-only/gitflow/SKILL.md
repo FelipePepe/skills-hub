@@ -1,5 +1,5 @@
 ---
-name: gitflow-casa
+name: gitflow
 description: "Apply GitFlow (feature/* -> develop -> release -> main): branch checks, commits, merges, tags, lefthook, PR creation. Trigger: commit, merge, release, hooks, creating a pull request, 'which branch', 'am I following gitflow?'."
 license: Apache-2.0
 metadata:

@@ -1,7 +1,7 @@
 # Full Protocol
 
 ---
-name: gitflow-casa
+name: gitflow
 description: >
   Applies GitFlow correctly in any repository: feature/* → develop → release → main.
   Checks the current git state, detects flow violations, guides every step (branch,
