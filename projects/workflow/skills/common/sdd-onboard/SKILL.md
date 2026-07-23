@@ -187,7 +187,7 @@ NEXT: /sdd-new for your next feature
 - If anything blocks the cycle (tests fail, design is unclear, codebase is too complex), STOP and explain — don't push through.
 - Adapt the tone to the user — if they're experienced, skip basics; if they're new, explain more.
 - Follow the real OpenSpec CLI output for propose/apply/archive, and the `sdd-verify` skill's format for verification.
-- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
+- Return envelope per **Section C** from `skills/_shared/sdd-phase-common.md`.
 
 ## Output contract
 

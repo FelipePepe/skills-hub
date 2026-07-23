@@ -33,6 +33,24 @@ Read `skills/_shared/sdd-worktree.md` when:
 
 Default strategy: `inline`.
 
+## Company Memory (Engram)
+
+`openspec/` is per-project, filesystem, git-tracked — the source of truth for that repo. It is NOT cross-project. Engram is a separate, global memory: every phase transition ALSO saves a compact observation to Engram, so decisions and changes across every project the user works on are searchable company-wide. This is additive, not a persistence mode — `openspec/` stays the only artifact backend; Engram never stores the artifacts themselves, only a journal entry pointing at them.
+
+At every phase transition (`sdd init`, `sdd new`, `sdd apply`, `sdd verify`, `sdd archive`):
+
+```
+mem_save(
+  title: "sdd/{project}/{change-name}/{phase}",
+  topic_key: "sdd/{project}/{change-name}/{phase}",
+  type: "decision",
+  project: "{project}",
+  content: "{one-paragraph summary: what changed, why, artifact path under openspec/, result}"
+)
+```
+
+If Engram is unavailable this session, proceed without it — it is never a blocker for the SDD cycle, only a cross-project journal on top of it.
+
 ## Cycle Map
 
 ```
@@ -247,6 +265,7 @@ Before invoking `sdd-verify`, follow the protocol in `skills/_shared/skill-resol
 6. **Inject Project Standards** into `sdd-verify` — never launch without context
 7. **Strict TDD is always on** — no config flag disables it; a missing test runner is a blocking gap, not an opt-out
 8. **`sdd archive` requires a GitFlow-compliant commit/PR** (`gitflow` skill) and an EU AI Act traceability entry before closing
+9. **Save a company-memory observation to Engram at every phase transition** — additive to `openspec/`, never a replacement; skip only if Engram is unavailable this session
 
 ## Output contract
 

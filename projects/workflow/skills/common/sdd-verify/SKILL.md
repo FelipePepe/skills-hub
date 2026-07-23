@@ -23,7 +23,7 @@ From the orchestrator:
 ## Execution and Persistence Contract
 
 Follow:
-- **Section A** (skill loading) and **Section D** (return envelope) from `skills/_shared/sdd-phase-common.md`
+- **Section A** (skill loading) and **Section C** (return envelope) from `skills/_shared/sdd-phase-common.md`
 - `skills/_shared/openspec-convention.md` for file paths
 
 Write `openspec/changes/{change-name}/verify-report.md`.
@@ -174,7 +174,19 @@ Classify findings using the same severity model as Step 7b. A CRITICAL from any 
 
 ### Step 8: Persist verification report
 
-Write `openspec/changes/{change-name}/verify-report.md`.
+Write `openspec/changes/{change-name}/verify-report.md`. Also save a company-memory observation (additive, not a replacement — see `sdd/SKILL.md`):
+
+```
+mem_save(
+  title: "sdd/{project}/{change-name}/verify",
+  topic_key: "sdd/{project}/{change-name}/verify",
+  type: "decision",
+  project: "{project}",
+  content: "{result: pass|fail, criticals, warnings, path to verify-report.md}"
+)
+```
+
+If Engram is unavailable, skip this and continue.
 
 ### Step 9: Return
 
@@ -204,7 +216,7 @@ No prose, no tables, no headers outside the schema.
 - For web projects, ALWAYS run e2e via Playwright and capture a screenshot per test
 - ALWAYS load `strict-tdd-verify.md` and execute all extra checks
 - Reuse cached testing capabilities whenever possible
-- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`
+- Return envelope per **Section C** from `skills/_shared/sdd-phase-common.md`
 
 ## Output contract
 

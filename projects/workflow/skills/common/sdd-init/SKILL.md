@@ -4,7 +4,7 @@ description: "Initialize SDD in a project: detect stack, conventions, testing; b
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "4.1"
+  version: "5.0"
 ---
 
 ## Purpose
@@ -96,7 +96,23 @@ Follow the `skill-registry` logic:
 - scan project convention files like `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `GEMINI.md`, `copilot-instructions.md`
 - always write `.atl/skill-registry.md`
 
-### Step 7: Return
+### Step 7: Register in company memory (Engram)
+
+Save one observation so this project is discoverable across the whole company memory, not just locally:
+
+```
+mem_save(
+  title: "sdd/{project}/init",
+  topic_key: "sdd/{project}/init",
+  type: "decision",
+  project: "{project}",
+  content: "{detected stack, TDD status, openspec bootstrapped}"
+)
+```
+
+If Engram is unavailable, skip this and continue — it never blocks init.
+
+### Step 8: Return
 
 Emit exactly this schema:
 ```
@@ -119,5 +135,5 @@ No headers, no prose outside the schema.
 
 ## Output contract
 
-Respond ONLY in the schema defined in Step 7. No preamble, no explanation,
+Respond ONLY in the schema defined in Step 8. No preamble, no explanation,
 no markdown headers or bullets outside the schema. If you add anything else, you are wrong.
