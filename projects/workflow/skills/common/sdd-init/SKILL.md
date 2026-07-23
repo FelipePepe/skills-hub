@@ -4,7 +4,7 @@ description: "Initialize SDD in a project: detect stack, conventions, testing; b
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "4.0"
+  version: "4.1"
 ---
 
 ## Purpose
@@ -60,10 +60,10 @@ If no test runner exists, this is a blocking gap: report it and recommend adding
 Do NOT hand-write the `openspec/` tree. Use the real CLI (`@fission-ai/openspec`, requires Node ≥20.19):
 
 ```bash
-pnpm dlx @fission-ai/openspec@latest init --tools claude --force
+pnpm dlx @fission-ai/openspec@latest init --tools all --force
 ```
 
-This creates `openspec/config.yaml` (schema `spec-driven`) and installs `.claude/skills/openspec-*` + `.claude/commands/opsx/*` (`propose`, `apply`, `archive`, `explore`, `sync`, `update`). From this point, `sdd new`/`sdd apply`/`sdd archive` delegate artifact writing to these `/opsx:*` commands.
+`--tools all` installs the `/opsx:*` commands for every supported editor/agent (Claude Code, GitHub Copilot, Cursor, Windsurf, OpenCode, etc.), not just Claude — this repo distributes skills to multiple apps, so init must not assume Claude is the only consumer. This creates `openspec/config.yaml` (schema `spec-driven`) and, for Claude Code specifically, `.claude/skills/openspec-*` + `.claude/commands/opsx/*` (`propose`, `apply`, `archive`, `explore`, `sync`, `update`) — equivalent files are installed for the other detected tools. From this point, `sdd new`/`sdd apply`/`sdd archive` delegate artifact writing to these `/opsx:*` commands.
 
 The CLI's default schema has NO `verify` artifact — `sdd-verify` (this repo's own gate) always runs, real execution, independently of the CLI.
 
