@@ -1,11 +1,10 @@
 # Skills Reduction Plan
 
 Working log from the token-reduction discussion (see `docs/skills-token-audit.md`
-for the baseline measurements this plan acts on). Nothing here is executed
-until the discussion is closed and each item is confirmed — this is a plan
-document, not a changelog.
+for the baseline measurements this plan acts on). **Status: closed** — all
+agreed items and open threads have been executed or reviewed.
 
-## Agreed items (pending execution)
+## Agreed items
 
 1. **`session-start` (claude-only) — extract "Example Output" block**
    - Location: `projects/workflow/skills/claude-only/session-start/SKILL.md`,
@@ -18,15 +17,25 @@ document, not a changelog.
      skimming for an example.
    - Status: **executed** — moved to `references/example-output.md`, SKILL.md now has a one-line pointer (v1.7).
 
-## Open threads
+## Open threads — resolved
 
 - Whether the same "worked example → references/" pattern applies to other
-  skills beyond `session-start` (not yet checked).
-- `session-end`'s own equivalent bulk (2216 tokens, second-heaviest file) not
-  yet reviewed for the same kind of extractable block.
-- `sdd-*` shared-boilerplate review (candidate #3 from the audit) not yet
-  started.
+  skills beyond `session-start`: **checked, applied where it existed.**
+  `session-start` was the only skill with this pattern.
+- `session-end`'s own equivalent bulk (2216 tokens, second-heaviest file):
+  **reviewed, no action.** Unlike `session-start`, it has no large
+  decorative example block — its size comes from load-bearing content
+  (classification table, Engram/Atlas heuristics, canonical save format),
+  not from something extractable to `references/`.
+- `sdd-*` shared-boilerplate review (candidate #3 from the audit):
+  **done.** `sdd-init` restated the executor-boundary line and the
+  structured-envelope return format inline instead of referencing
+  `_shared/sdd-phase-common.md` — fixed to reference Section A/C like
+  `sdd-verify` already did. Also removed a stale rule that contradicted
+  `sdd-init`'s own compact Step 8 output contract.
 
-## Execution order
+## Outcome
 
-To be filled in once the discussion closes.
+Only one skill (`session-start`) had genuine extractable bulk; the rest of
+the catalog's size is load-bearing. No further reduction work identified
+from this audit.
