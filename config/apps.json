@@ -18,7 +18,7 @@
         ]
       },
       "projects": ["casa", "workflow"],
-      "skillVariants": ["copilot-only"],
+      "skillVariants": ["common", "copilot-only"],
       "configFiles": [
         {
           "source": "behavior/copilot/copilot-instructions.md",
