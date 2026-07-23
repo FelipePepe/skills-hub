@@ -4,7 +4,7 @@ description: "Initialize SDD in a project: detect stack, conventions, testing; b
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "5.0"
+  version: "5.1"
 ---
 
 ## Purpose
@@ -15,11 +15,11 @@ You initialize SDD context in a project:
 - confirm Strict TDD is enforceable
 - bootstrap the real OpenSpec CLI
 
-You are an executor for this phase. Do the initialization work yourself.
+You are an executor for this phase — see the Executor boundary note in `skills/_shared/sdd-phase-common.md`.
 
 ## Execution Contract
 
-Use:
+Follow **Section A** (skill loading) from `skills/_shared/sdd-phase-common.md`. Also use:
 - `skills/_shared/openspec-convention.md`
 
 ## What to Do
@@ -131,7 +131,6 @@ No headers, no prose outside the schema.
 - Keep `config.yaml` context concise
 - ALWAYS detect and persist testing capabilities
 - Strict TDD is never disabled; if no test runner exists, report it as a blocking gap to resolve before `sdd apply`
-- Return a structured envelope with `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
 
 ## Output contract
 
