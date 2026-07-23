@@ -69,6 +69,26 @@
       ]
     },
     {
+      "id": "codex",
+      "description": "OpenAI Codex CLI local skills directory",
+      "installPath": {
+        "linux": "~/.codex/skills",
+        "windows": "%USERPROFILE%/.codex/skills"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.codex",
+          "~/.codex/skills"
+        ],
+        "windows": [
+          "%USERPROFILE%/.codex",
+          "%USERPROFILE%/.codex/skills"
+        ]
+      },
+      "projects": ["workflow"],
+      "skillVariants": ["common"]
+    },
+    {
       "id": "agents",
       "description": "Generic agents local skills directory",
       "installPath": {
