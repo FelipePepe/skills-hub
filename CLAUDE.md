@@ -8,7 +8,6 @@ Single source of truth (a GitHub repo) for managing AI assistant skills and dist
 
 ## Architecture
 
-- `projects/casa/` - skills bound to the `.casa` intranet and home infrastructure
 - `projects/workflow/` - portable development, agent, SDD, analysis, and documentation skills
 - Each project keeps `skills/common`, `skills/copilot-only`, and `skills/claude-only`
 - `agents/common` - cross-platform sub-agent definitions (installed to `~/.claude/agents/`)
@@ -68,10 +67,10 @@ Direct script invocation:
 - All Bash scripts must use `set -euo pipefail`
 - `SYNC_PAIRS` format: `"<rel_path>::<abs_path>"` — destination must be absolute
 - Naming: use `atlas`/`atlas.casa`, never `mente`/`mente.casa`
-- Naming: use `sdd-propose` as canonical; the legacy `sdd-proposal` alias was removed
+- SDD `propose`/`spec`/`design`/`tasks`/`apply`/`archive`/`explore` run via the real OpenSpec CLI (`/opsx:*`), bootstrapped by `sdd-init`; only `sdd` (orchestrator), `sdd-init`, `sdd-verify`, and `sdd-onboard` remain as bespoke skills
 - ONLY use `pnpm` — `npm` and `npx` are FORBIDDEN. Use `pnpm` and `pnpm dlx` instead. This applies to skill examples, scripts, and all commands in this repo.
 - Use `pnpm` in JS/TS skill examples; document `minimumReleaseAge: 10080` for bootstrap/setup skills
-- Place `.casa` skills in `projects/casa/skills/common` and portable skills in `projects/workflow/skills/common`; use the selected project's `copilot-only`/`claude-only` only when it truly depends on that platform
+- Place portable skills in `projects/workflow/skills/common`; use `copilot-only`/`claude-only` only when a skill truly depends on that platform
 - Skills are installed by COPY (rsync), never symlinks; after editing a skill, re-run `pnpm skills-hub sync` to propagate
 - Never let the clone or any install target live on a network filesystem (NAS); `skills_hub_assert_local` enforces this
 - If changing installer logic, keep `bin/skills-hub.js` and `scripts/sync.sh` aligned

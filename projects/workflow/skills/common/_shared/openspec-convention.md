@@ -1,5 +1,7 @@
 # OpenSpec File Convention (shared across all SDD skills)
 
+`openspec` mode is backed by the real OpenSpec CLI (`@fission-ai/openspec`, ≥1.6, Node ≥20.19). `sdd-init` bootstraps it with `pnpm dlx @fission-ai/openspec@latest init --tools claude`; `sdd new`/`sdd apply`/`sdd archive` then delegate to its `/opsx:propose`, `/opsx:apply`, `/opsx:archive` commands instead of hand-writing these files. The layout below is what the CLI produces — read it to know where artifacts live, not as something to write by hand. `sdd-verify` has no CLI equivalent (the default schema has no `verify` artifact) and keeps writing `verify-report.md` itself.
+
 ## Directory Structure
 
 ```

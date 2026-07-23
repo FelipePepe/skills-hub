@@ -1,6 +1,6 @@
 # SDD Git Worktree Policy
 
-Use worktrees as an optional workspace-isolation layer for SDD tasks. This does not replace artifact persistence (`engram`, `openspec`, or `hybrid`). It only controls where code changes are made.
+Use worktrees as an optional workspace-isolation layer for SDD tasks. This does not replace `openspec` artifact persistence. It only controls where code changes are made.
 
 ## When to use
 
@@ -34,7 +34,7 @@ If the branch already exists, omit `-b` and check it out by name.
 
 ## Orchestrator responsibilities
 
-Before launching `sdd-apply`, the orchestrator decides one of:
+Before launching `/opsx:apply`, the orchestrator decides one of:
 
 | Strategy | Use when | Launch prompt must include |
 |----------|----------|----------------------------|
@@ -42,7 +42,7 @@ Before launching `sdd-apply`, the orchestrator decides one of:
 | `task-worktree` | isolated task implementation | worktree path, branch, base branch, task IDs |
 | `batch-worktree` | small dependent task batch | worktree path, branch, base branch, task IDs |
 
-The orchestrator should record the chosen strategy in `state.yaml` when using `openspec`/`hybrid`, or in the cycle state/progress artifact when using `engram`.
+The orchestrator should record the chosen strategy in `openspec/changes/{change-name}/state.yaml`.
 
 ## Executor rules
 

@@ -10,53 +10,11 @@
       "agent": "architect",
       "reason": "Equilibrio entre razonamiento y eficiencia para detección de stack y testing capabilities"
     },
-    "sdd-explore": {
-      "model": "qwen3.6:35b",
-      "vram_gb": 23,
-      "agent": "architect",
-      "reason": "Razonamiento sólido para análisis de código base sin alucinaciones"
-    },
-    "sdd-propose": {
-      "model": "qwen3.6:35b",
-      "vram_gb": 23,
-      "agent": "architect",
-      "reason": "Redacción estructurada con alta fidelidad al contexto del proyecto"
-    },
-    "sdd-spec": {
-      "model": "qwen3.6:35b",
-      "vram_gb": 23,
-      "agent": "architect",
-      "reason": "Precisión crítica en requisitos y escenarios (RFC 2119, Given/When/Then)"
-    },
-    "sdd-design": {
-      "model": "deepseek-coder-v2:16b",
-      "vram_gb": 8.9,
-      "agent": "architect",
-      "reason": "Especialista en arquitectura de software, patrones de diseño y decisiones técnicas"
-    },
-    "sdd-tasks": {
-      "model": "qwen3.6:35b",
-      "vram_gb": 23,
-      "agent": "architect",
-      "reason": "Descomposición lógica confiable con dependency-aware ordering"
-    },
-    "sdd-apply": {
-      "model": "deepseek-coder-v2:16b",
-      "vram_gb": 8.9,
-      "agent": "coder",
-      "reason": "Especialista en implementación TDD, generación de código limpio y seguridad"
-    },
     "sdd-verify": {
       "model": "qwen3.5:122b-a10b",
       "vram_gb": 81,
       "agent": "tester",
-      "reason": "Máximo poder de razonamiento para validación exhaustiva de specs + auditoría red-team"
-    },
-    "sdd-archive": {
-      "model": "qwen3.6:35b",
-      "vram_gb": 23,
-      "agent": "architect",
-      "reason": "Merge seguro de specs y cierre de ciclo sin pérdida de datos"
+      "reason": "Máximo poder de razonamiento para validación exhaustiva de specs + auditoría red-team; también el modelo usado para el segundo punto de vista (code-reviewer, judgment-day, security-review, silent-failure-hunter), siempre distinto al usado en apply"
     },
     "session-start": {
       "model": "qwen3.6:35b",
@@ -85,8 +43,8 @@
   },
   "notes": {
     "vram_check": "qwen3.5:122b (81GB) + 1GB headroom = 82GB, dentro del límite de 120GB",
-    "deepseek_usage": "deepseek-coder-v2:16b se usa solo en diseño e implementación para optimización",
-    "qwen3.6_usage": "qwen3.6:35b es el backbone para todas las fases de planificación y razonamiento",
-    "qwen3.5_usage": "qwen3.5:122b se usa SOLO en verify y archive cuando se necesitan recursos máximos de verificación"
+    "qwen3.6_usage": "qwen3.6:35b es el backbone para init y sesiones",
+    "qwen3.5_usage": "qwen3.5:122b se usa SOLO en verify (incluye la segunda opinión con modelo distinto)",
+    "opsx_note": "propose/apply/archive/explore ahora los ejecuta el CLI real de OpenSpec (/opsx:*), fuera de este model routing local"
   }
 }
