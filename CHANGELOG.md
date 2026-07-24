@@ -7,6 +7,36 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [5.0.0] - 2026-07-24
+
+### Añadido
+
+- Soporte para el CLI real de OpenSpec (`@fission-ai/openspec` ≥1.6): `sdd-init` ahora ejecuta `openspec init --tools all` y bifurca el schema por defecto para añadir un artefacto `verify` propio; `sdd new`/`apply`/`archive` delegan en `/opsx:propose`/`apply`/`archive` en vez de sub-agentes propios.
+- `sdd-verify` gana una segunda opinión obligatoria (`code-reviewer`, `judgment-day`, `security-review`, `silent-failure-hunter`) en un modelo LLM distinto al usado en `sdd apply`, más e2e con Playwright y captura de pantalla por test.
+- Engram vuelve como memoria de empresa aditiva (no como modo de persistencia): `sdd`, `sdd-init` y `sdd-verify` guardan una observación en cada transición de fase, sin sustituir a `openspec/` ni bloquear el ciclo si Engram no está disponible.
+- `enrich-us`: modo Service Now (incidencias/peticiones/evolutivos por número de ticket vía MCP, con escritura de vuelta opcional) y modo Proyecto (entrevista al usuario cuando no hay ticket).
+- `sdd-init` bootstrapea el CLI con `--tools all`, y `copilot` gana la variante `common` en `config/apps.json` — las skills ahora llegan a Copilot/VS Code, no solo a Claude.
+- Detección e instalación de skills en OpenAI Codex CLI (`~/.codex/skills`).
+- `check.sh` muestra la versión del frontmatter (instalada vs. repo) en cada drift detectado.
+- `session-start` (claude-only) lee el grafo de código (`get_architecture`/`search_graph`) al principio de verdad, no solo como chequeo de frescura al final.
+- Ciclo SDD completo verificado end-to-end contra el CLI real (init → propose → apply con TDD real → verify → archive).
+
+### Cambiado
+
+- TDD estricto (red→green→refactor) pasa a ser siempre obligatorio en el ciclo SDD, sin flag de configuración que lo desactive.
+- Modo de persistencia único `openspec` — se retiran los modos `engram`/`hybrid`/`none` como backends alternativos de artefactos.
+- Renombrada la skill `gitflow-casa` a `gitflow`.
+
+### Eliminado
+
+- Retiradas las skills bespoke `sdd-propose`, `sdd-spec`, `sdd-design`, `sdd-tasks`, `sdd-apply`, `sdd-archive`, `sdd-explore` (y sus 7 agentes en `agents/common/`) — su función la cubre ahora el CLI real de OpenSpec. Solo quedan `sdd` (orquestador), `sdd-init`, `sdd-verify` y `sdd-onboard`.
+- Eliminado el proyecto `projects/casa/` por completo (`casa-ops`, `atlas-docs`, `mcp-builder`, `openai-docs`, `poc-init`, `skills-catalog-maintainer`); `react-doctor` y `red-team-offensive` se reubican en `projects/workflow` por ser dependencias reales de `sdd-verify`.
+- `_shared/engram-convention.md` y `_shared/persistence-contract.md`, obsoletos tras el modo único `openspec`.
+
+### Corregido
+
+- `sdd-init` repetía a mano el texto del "executor boundary" y el formato de "structured envelope" en vez de referenciar `_shared/sdd-phase-common.md`; la regla duplicada además contradecía el propio contrato de salida compacto de la skill.
+
 ## [4.0.0] - 2026-07-19
 
 ### Añadido
@@ -201,12 +231,9 @@ changelog en su momento; ver
 
 - `README.md` ahora incluye flujo profesional recomendado y seccion de calidad automatizada.
 
-<<<<<<< HEAD
-[Sin publicar]: https://github.com/FelipePepe/skills-hub/compare/v3.0.0...HEAD
-=======
-[Sin publicar]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v4.0.0...HEAD
+[Sin publicar]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v4.0.0...v5.0.0
 [4.0.0]: https://github.com/felipepepe-ai-labs/skills-hub/compare/v3.0.0...v4.0.0
->>>>>>> origin/main
 [3.0.0]: https://github.com/FelipePepe/skills-hub/compare/v2.8.0...v3.0.0
 [2.8.0]: https://github.com/FelipePepe/skills-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/FelipePepe/skills-hub/compare/v2.6.0...v2.7.0
