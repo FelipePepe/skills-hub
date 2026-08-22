@@ -42,6 +42,19 @@ skills_hub_validate_json() {
     >/dev/null 2>&1 || skills_hub_die "JSON invalido en $file"
 }
 
+# Extrae metadata.version del frontmatter YAML de un SKILL.md. Devuelve "?"
+# si el fichero no existe o no tiene ese campo.
+skills_hub_skill_version() {
+  local file="${1:?missing SKILL.md path}"
+  local version=""
+  if [[ -f "$file" ]]; then
+    version="$(awk '/^---[[:space:]]*$/{c++; next} c==1' "$file" \
+      | grep -m1 -E '^[[:space:]]*version:' \
+      | sed -E 's/^[[:space:]]*version:[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/')"
+  fi
+  echo "${version:-?}"
+}
+
 skills_hub_source_sync_map() {
   local map_file="${1:?missing sync map path}"
   # shellcheck disable=SC1090

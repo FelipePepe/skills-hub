@@ -4,7 +4,7 @@ description: "Session resumption briefing: detects project, git state, last jour
 license: Apache-2.0
 metadata:
   author: Felipe Perez
-  version: "1.5"
+  version: "1.7"
 ---
 
 ## When to Use This Skill
@@ -22,7 +22,7 @@ Do NOT use if:
 
 ## Startup Protocol
 
-Execute steps in this order. **Parallelize** independent calls in the same turn (git + reads + mem_context + atlas_search are all independent).
+Execute steps in this order. Codebase Graph (Step 2) runs right after project detection, genuinely reading the project's structure — not gated behind git/docs/memory. **Parallelize** independent calls in the same turn where order doesn't matter (git + reads + mem_context + atlas_search are all independent of each other).
 
 ### Step 1 — Detect the Active Project
 
@@ -31,7 +31,18 @@ Execute steps in this order. **Parallelize** independent calls in the same turn 
 - If there is a `CLAUDE.md` in `~/.claude/`: already loaded automatically — do not re-read
 - Canonical project name = directory name or `package.json::name`/`pyproject.toml::project.name`
 
-### Step 2 — Git State
+### Step 2 — Codebase Graph (codebase-memory-mcp), read FIRST
+
+Do this right after project detection, unconditionally when the `codebase-memory` MCP is available — do not gate it behind "the user asked something structural."
+
+- `list_projects` — check whether the current repo is indexed.
+- If NOT indexed → note "Codebase graph not indexed for this project" and continue with the rest of the protocol (do not index here — that's `session-end`/explicit-request work).
+- If indexed → call `get_architecture` (project structure, layers, entry points) and, if useful for this project's shape, `search_graph`/`trace_path` for the hotspots. Use this to genuinely understand the codebase's real structure before reading docs or Engram — not just to check staleness.
+- Separately, call `index_status` and compare the indexed commit against the HEAD commit from Step 3 → if behind, flag "Codebase graph stale, N commits behind" in the briefing. Staleness does not block using `get_architecture` — a few commits behind is still far more useful than skipping it.
+
+CAUTION: if the `codebase-memory` MCP is not connected this session, skip this step silently — do not block the briefing on it.
+
+### Step 3 — Git State
 
 Run in parallel in a single turn:
 
@@ -41,7 +52,7 @@ Run in parallel in a single turn:
 
 If there are uncommitted changes or stashes → flag them in the briefing.
 
-### Step 3 — State Documentation
+### Step 4 — State Documentation
 
 Read if they exist (in order, without failing if any is missing):
 
@@ -50,7 +61,7 @@ Read if they exist (in order, without failing if any is missing):
 3. `IMPLEMENTATION_SUMMARY.md` — capabilities and spec state
 4. `README.md` — only if the above do not exist
 
-### Step 4 — Active Spec (if the project follows SDD)
+### Step 5 — Active Spec (if the project follows SDD)
 
 - Look for `specs/NNN-*/tasks.md` (descending numeric order — the last is usually the active one)
 - For each spec, count `- [ ]` checkboxes (pending) vs `- [x]` (closed)
@@ -58,7 +69,7 @@ Read if they exist (in order, without failing if any is missing):
 
 CAUTION: unchecked checkboxes may be stale. Cross-reference with `IMPLEMENTATION_SUMMARY.md` or the journal before stating "spec X has Y pending tasks". If the summary says "closed" and checkboxes are unchecked → report the conflict, do not assume it is open.
 
-### Step 5 — Persistent Memory (Atlas-first)
+### Step 6 — Persistent Memory (Atlas-first)
 
 Fetch in parallel, but treat **Atlas as the primary source of truth** — it's where `session-end` now saves by default:
 
@@ -72,18 +83,6 @@ If Atlas and Engram disagree on the same fact, **Atlas wins** — it's the later
 Cross-check dates:
 - If `Proyectos/<name>.md` has `Last updated:` earlier than the project's last journal → flag Atlas drift in the briefing (reconciliation is `session-end` work).
 - If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift" (lower priority than Atlas drift).
-
-### Step 6 — Codebase Graph (codebase-memory-mcp)
-
-Run in parallel with Step 5 when the `codebase-memory` MCP tools are available in this session.
-
-- `list_projects` — check whether the current repo is indexed.
-- If indexed: `index_status` — compare the indexed commit against the HEAD commit from Step 2.
-  - Index behind HEAD → flag "Codebase graph stale, N commits behind" in the briefing. Do **not** re-index automatically (that is `session-end` work, and can take minutes on large repos).
-- If NOT indexed → note "Codebase graph not indexed for this project" in the briefing. Do not offer to index unless the user's request in this turn is explicitly structural.
-- If the user's opening request is structural ("what changed", "who calls X", "show me the architecture") → use `get_architecture`, `search_graph`, or `detect_changes` to enrich the briefing instead of grep/Explore.
-
-CAUTION: if the `codebase-memory` MCP is not connected this session, skip this step silently — do not block the briefing on it.
 
 ### Step 7 — Tests/Benchmark (optional, ask first)
 
@@ -111,6 +110,7 @@ Return a structured summary:
 ### Project state
 - <bullet with key metrics from STATE/IMPLEMENTATION_SUMMARY>
 - <bullet with active spec if any>
+- <bullet with architecture/entry-points summary from `get_architecture` when the codebase graph is indexed — layers, entry points, where symbols concentrate>
 
 ### Prioritized debt (top 3)
 - <from STATE.md §debt or IMPLEMENTATION_SUMMARY>
@@ -205,44 +205,12 @@ STOP after showing the intake. Do not assume answers, propose code, or begin any
 - For small personal projects without an entity page, skip.
 
 **Is the codebase graph stale?**
-- `index_status` commit older than the HEAD commit from Step 2 → stale, report the gap in commits.
+- `index_status` commit older than the HEAD commit from Step 3 (Git State) → stale, report the gap in commits.
 - Not indexed at all is normal for a first session on a project — do not treat it as an error, just report it.
 - Never call `index_repository` during session-start — indexing is a write/compute action reserved for `session-end` (with confirmation) or an explicit user request.
 
 ---
 
-## Example Output (vi-sdd, simulated)
+## Example Output
 
-```
-## Resumption point — vi-sdd
-
-**Branch:** main · **Last commit:** abc1234 chore: close spec 006
-**Uncommitted changes:** 12 untracked files (.artifacts/, .claude/, CLAUDE.md, docs/, specs/, src/, tests/)
-**Last session:** 2026-05-21 — Closed spec 006 (OWASP coverage). Macro F1 0.998, 317 tests.
-**Codebase graph:** stale (3 commits behind HEAD)
-
-### Project state
-- 6 specs closed (001→006). 6-stage pipeline: prepare→scan→validate→dedup→prove→report.
-- Macro F1 0.998, 0 FPs, 7 OWASP categories covered. Latest metric is a record.
-- No active spec with pending phases.
-
-### Prioritized debt (top 3)
-- Calibrate LLM auditor (qwen2.5-coder:7b hallucinates; F1 with auditor drops to 0.76)
-- Real CVE OSS fixtures (Heartbleed, getaddrinfo) — spec 004 phase 10.1
-- A01 Django/Spring handler collectors (framework detected, handlers not collected)
-
-### Suggested next step
-If you want to continue: open spec 007 extending A07/A10 to Java/C#/Go/Rust, or an iterative auditor calibration session (1-2h). If the goal is to consolidate: commit current state (there are docs/, specs/, src/ untracked).
-
-⚠ Engram was outdated as of 2026-05-18 — synced in the previous session. OK.
-
-### Before we start — a few questions:
-
-1. **Goal** — What do you want to accomplish today?
-2. **Constraints** — Any deadline, scope limit, or thing to avoid?
-3. **Approach** — Should I propose a plan first, or dive straight in?
-   - Need SDD cycle? (spec, tasks, phases)
-   - Architecture decision that warrants DDIA tradeoff analysis?
-   - Something else I should load before starting?
-4. **Blockers** — Anything waiting on a PR, external dependency, or another person?
-```
+See `references/example-output.md` for a fully worked example (vi-sdd, simulated) — the format itself is already specified by the templates in Step 8.

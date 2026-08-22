@@ -6,7 +6,7 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "1.0"
+  version: "2.0"
 ---
 
 ## Purpose
@@ -16,7 +16,6 @@ You are a sub-agent responsible for ONBOARDING. You guide the user through a com
 ## What You Receive
 
 From the orchestrator:
-- Artifact store mode (`engram | openspec | hybrid | none`)
 - Optional: a suggested improvement or area to focus on
 
 ## What to Do
@@ -60,7 +59,7 @@ Narrate as you explore:
  Let me look at the relevant code..."
 ```
 
-Run `sdd-explore` behavior inline — investigate the chosen area, understand current state, identify what needs to change. Explain your findings to the user in plain language.
+Run `/opsx:explore` inline — investigate the chosen area, understand current state, identify what needs to change. Explain your findings to the user in plain language.
 
 Conclude with:
 ```
@@ -74,7 +73,7 @@ Conclude with:
  This becomes the contract for everything that follows."
 ```
 
-Create the change folder and write `proposal.md` following `sdd-propose` format. After creating it:
+Run `/opsx:propose "<change>"` — this generates `proposal.md` (and, in the same pipeline, specs/design/tasks). After the proposal is written:
 
 ```
 "Here's the proposal I wrote. Notice the Capabilities section —
@@ -90,7 +89,7 @@ Show the user the proposal and let them review it. Ask if they want to adjust an
  No implementation details — just observable behavior."
 ```
 
-Write the delta specs following `sdd-spec` format. After creating them:
+The `/opsx:propose` pipeline writes the delta specs next. After they exist:
 
 ```
 "See the Given/When/Then format? Each scenario is a potential test case.
@@ -103,7 +102,7 @@ Write the delta specs following `sdd-spec` format. After creating them:
 "Step 4: Design — We decide HOW to build it. Architecture decisions, file changes, rationale."
 ```
 
-Write `design.md` following `sdd-design` format. Highlight the key decisions:
+The pipeline writes `design.md` next. Highlight the key decisions:
 
 ```
 "Notice the Decisions section — we document WHY we chose this approach
@@ -116,7 +115,7 @@ Write `design.md` following `sdd-design` format. Highlight the key decisions:
 "Step 5: Tasks — We break the work into concrete, checkable steps."
 ```
 
-Write `tasks.md` following `sdd-tasks` format. Explain the structure:
+The pipeline writes `tasks.md` last, closing out `/opsx:propose`. Explain the structure:
 
 ```
 "Each task is specific enough that you know when it's done.
@@ -129,14 +128,14 @@ Write `tasks.md` following `sdd-tasks` format. Explain the structure:
 "Step 6: Apply — Now we write actual code. The tasks guide us, the specs tell us what 'done' means."
 ```
 
-Implement the tasks following `sdd-apply` behavior. Narrate each task as you complete it:
+Run `/opsx:apply` for the tasks. Narrate each task as you complete it:
 
 ```
 "Implementing task 1.1: [description]
  ✓ Done — [brief note on what was created/changed]"
 ```
 
-If Strict TDD mode is active, apply the TDD cycle and explain it:
+Strict TDD is always active — apply the cycle and explain it:
 
 ```
 "Notice: RED → GREEN → TRIANGULATE → REFACTOR.
@@ -149,7 +148,7 @@ If Strict TDD mode is active, apply the TDD cycle and explain it:
 "Step 7: Verify — We check that what we built matches what we specified."
 ```
 
-Run `sdd-verify` behavior. Explain the compliance matrix:
+Run the `sdd-verify` skill (this repo's own gate — no CLI equivalent). Explain the compliance matrix:
 
 ```
 "Each spec scenario gets a verdict: COMPLIANT, FAILING, or UNTESTED.
@@ -163,7 +162,7 @@ Run `sdd-verify` behavior. Explain the compliance matrix:
  The specs now describe the new behavior. The change becomes the audit trail."
 ```
 
-Run `sdd-archive` behavior. Show the result:
+Run `/opsx:archive`. Show the result:
 
 ```
 "Done! The change is archived at openspec/changes/archive/YYYY-MM-DD-{name}/
@@ -187,8 +186,8 @@ NEXT: /sdd-new for your next feature
 - If the user picks their own improvement, validate it fits the "small and safe" criteria before proceeding.
 - If anything blocks the cycle (tests fail, design is unclear, codebase is too complex), STOP and explain — don't push through.
 - Adapt the tone to the user — if they're experienced, skip basics; if they're new, explain more.
-- Follow all format rules from the individual skills (sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive).
-- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`.
+- Follow the real OpenSpec CLI output for propose/apply/archive, and the `sdd-verify` skill's format for verification.
+- Return envelope per **Section C** from `skills/_shared/sdd-phase-common.md`.
 
 ## Output contract
 

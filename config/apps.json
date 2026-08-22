@@ -17,8 +17,8 @@
           "%USERPROFILE%/.copilot/skills"
         ]
       },
-      "projects": ["casa", "workflow"],
-      "skillVariants": ["copilot-only"],
+      "projects": ["workflow"],
+      "skillVariants": ["common", "copilot-only"],
       "configFiles": [
         {
           "source": "behavior/copilot/copilot-instructions.md",
@@ -51,7 +51,7 @@
           "%USERPROFILE%/.claude/skills"
         ]
       },
-      "projects": ["casa", "workflow"],
+      "projects": ["workflow"],
       "skillVariants": ["common", "claude-only"],
       "agentSources": [
         "agents/common",
@@ -67,6 +67,26 @@
           "strategy": "copy"
         }
       ]
+    },
+    {
+      "id": "codex",
+      "description": "OpenAI Codex CLI local skills directory",
+      "installPath": {
+        "linux": "~/.codex/skills",
+        "windows": "%USERPROFILE%/.codex/skills"
+      },
+      "detectPaths": {
+        "linux": [
+          "~/.codex",
+          "~/.codex/skills"
+        ],
+        "windows": [
+          "%USERPROFILE%/.codex",
+          "%USERPROFILE%/.codex/skills"
+        ]
+      },
+      "projects": ["workflow"],
+      "skillVariants": ["common"]
     },
     {
       "id": "agents",
@@ -85,7 +105,7 @@
           "%USERPROFILE%/.agents/skills"
         ]
       },
-      "projects": ["casa", "workflow"],
+      "projects": ["workflow"],
       "skillVariants": ["common"]
     },
     {

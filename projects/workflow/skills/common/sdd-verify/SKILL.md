@@ -6,7 +6,7 @@ description: >
 license: MIT
 metadata:
   author: gentleman-programming
-  version: "3.2"
+  version: "4.0"
 ---
 
 ## Purpose
@@ -19,19 +19,14 @@ Static analysis alone is NOT enough. You must execute the code.
 
 From the orchestrator:
 - change name
-- artifact store mode (`engram | openspec | hybrid | none`)
 
 ## Execution and Persistence Contract
 
 Follow:
-- **Section B** (retrieval) and **Section C** (persistence) from `skills/_shared/sdd-phase-common.md`
-- `openspec` conventions from `skills/_shared/openspec-convention.md` when mode requires it
+- **Section A** (skill loading) and **Section C** (return envelope) from `skills/_shared/sdd-phase-common.md`
+- `skills/_shared/openspec-convention.md` for file paths
 
-Persistence targets:
-- **engram** → save `sdd/{change-name}/verify-report`
-- **openspec** → write `openspec/changes/{change-name}/verify-report.md`
-- **hybrid** → do both
-- **none** → return inline only
+Write `openspec/changes/{change-name}/verify-report.md`.
 
 ## What to Do
 
@@ -43,16 +38,11 @@ If the project is React (for example `react`, `next`, `vite` + React, or React N
 - apply its diagnostic checklist during verification
 - include its findings in the verification report
 
-### Step 2: Resolve TDD mode from testing capabilities
+### Step 2: Load Strict TDD verification
 
-Read cached testing capabilities and decide:
-- if `strict_tdd: true` **and** a test runner exists → load `strict-tdd-verify.md`
-- otherwise use standard verification only
+Strict TDD is always active. Load `strict-tdd-verify.md`.
 
-Read sources in this order:
-- engram → `sdd/{change-name}/testing-capabilities`
-- openspec → `openspec/config.yaml`
-- fallback → inspect project files directly
+Read testing capabilities from `openspec/config.yaml`, falling back to inspecting project files directly.
 
 ### Step 3: Check completeness
 
@@ -104,6 +94,9 @@ Capture:
 
 Any failed test is **CRITICAL**.
 
+#### 6b-2 — e2e (web projects)
+If the project has a web UI, e2e tests run with Playwright and cover every use case (happy paths and edge cases). For each e2e test executed, capture a screenshot and persist it alongside the verify report. Missing e2e coverage for a spec scenario with a UI is **CRITICAL**.
+
 #### 6c — Build and type check
 Detect and execute build/type-check commands using cached capabilities first.
 
@@ -115,7 +108,7 @@ Flag:
 If coverage is available:
 - run it
 - compare against configured threshold if any
-- if Strict TDD is active, also apply the expanded changed-file checks from `strict-tdd-verify.md`
+- always apply the expanded changed-file checks from `strict-tdd-verify.md`
 
 If not available, report it cleanly.
 
@@ -134,7 +127,7 @@ A scenario is only COMPLIANT if a real test passed proving the behavior at runti
 
 ### Step 7a: Strict TDD additions
 
-If Strict TDD is active, execute the extra checks from:
+Always execute the extra checks from:
 - `strict-tdd-verify.md`
 - `references/strict-tdd-tables.md`
 
@@ -169,10 +162,31 @@ If the project is React:
 - classify `react-doctor` findings using the same severity model as this verify phase
 - treat real React correctness or runtime risks as verification failures until they are corrected in apply
 
+### Step 7d: Independent second-opinion review
+
+Mandatory, run on a **different LLM model** than the one used in `sdd-apply` (the orchestrator selects it):
+- `code-reviewer`
+- `judgment-day`
+- `security-review`
+- `silent-failure-hunter`
+
+Classify findings using the same severity model as Step 7b. A CRITICAL from any of these blocks archive exactly like a CRITICAL from the red-team review.
+
 ### Step 8: Persist verification report
 
-Persist artifact `verify-report` using the mode rules above.
-Use topic key `sdd/{change-name}/verify-report` when Engram applies.
+Write `openspec/changes/{change-name}/verify-report.md`. Also save a company-memory observation (additive, not a replacement — see `sdd/SKILL.md`):
+
+```
+mem_save(
+  title: "sdd/{project}/{change-name}/verify",
+  topic_key: "sdd/{project}/{change-name}/verify",
+  type: "decision",
+  project: "{project}",
+  content: "{result: pass|fail, criticals, warnings, path to verify-report.md}"
+)
+```
+
+If Engram is unavailable, skip this and continue.
 
 ### Step 9: Return
 
@@ -183,7 +197,7 @@ TESTS:{passed}/{total} BUILD:{ok|fail}
 COVERAGE:{percent%|n/a}
 BLOCKING:{description of first critical|none}
 ```
-If Strict TDD active, append one line: `TDD:{evidence:ok|missing}`
+Append one line: `TDD:{evidence:ok|missing}`
 No prose, no tables, no headers outside the schema.
 
 ## Rules
@@ -198,10 +212,11 @@ No prose, no tables, no headers outside the schema.
 - SUGGESTIONS are non-blocking improvements
 - DO NOT fix issues here — only report them
 - If `react-doctor` finds real issues, mark them clearly so they are corrected in `sdd-apply` before archive
-- If Strict TDD is active, load `strict-tdd-verify.md` and execute all extra checks
-- If Strict TDD is not active, do not load that module
+- ALWAYS run `code-reviewer`, `judgment-day`, `security-review`, and `silent-failure-hunter` on a different LLM model than `sdd-apply` used
+- For web projects, ALWAYS run e2e via Playwright and capture a screenshot per test
+- ALWAYS load `strict-tdd-verify.md` and execute all extra checks
 - Reuse cached testing capabilities whenever possible
-- Return envelope per **Section D** from `skills/_shared/sdd-phase-common.md`
+- Return envelope per **Section C** from `skills/_shared/sdd-phase-common.md`
 
 ## Output contract
 
