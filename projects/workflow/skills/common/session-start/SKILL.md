@@ -3,78 +3,214 @@ name: session-start
 description: "Session resumption briefing: detects project, git state, last journal, active spec, Engram/Atlas context, and codebase graph. Trigger: 'start session', 'resuming', 'where did we leave off', 'project state', 'bring me up to speed'."
 license: Apache-2.0
 metadata:
-  author: Felipe Pérez (Sandman_owl)
-  version: "1.4"
+  author: Felipe Perez
+  version: "1.7"
 ---
 
-## When to Use
+## When to Use This Skill
 
-ALWAYS ACTIVE — execute this at the very beginning of every session, before any other action.
+- The user opens a new session on a project and wants to resume context
+- The user says "where did we leave off", "bring me up to speed", "project state"
+- After several days away from a project, when returning to it
+- Before starting to code in a non-trivial repo
 
-## Protocol
+Do NOT use if:
+- The user asks something specific that does NOT require reloading project context
+- session-start has already been run in this same session
 
-At session start, run ALL steps in this exact order:
+---
 
-### Step 1 — Collect session context
-```bash
-git rev-parse --show-toplevel 2>/dev/null && git branch --show-current && git log --oneline -5 && git status --short
+## Startup Protocol
+
+Execute steps in this order. Codebase Graph (Step 2) runs right after project detection, genuinely reading the project's structure — not gated behind git/docs/memory. **Parallelize** independent calls in the same turn where order doesn't matter (git + reads + mem_context + atlas_search are all independent of each other).
+
+### Step 1 — Detect the Active Project
+
+- `pwd` and look for project markers: `.git`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `composer.json`
+- If there is a `CLAUDE.md` in the directory: read it (policies, conventions, venv, commands)
+- If there is a `CLAUDE.md` in `~/.claude/`: already loaded automatically — do not re-read
+- Canonical project name = directory name or `package.json::name`/`pyproject.toml::project.name`
+
+### Step 2 — Codebase Graph (codebase-memory-mcp), read FIRST
+
+Do this right after project detection, unconditionally when the `codebase-memory` MCP is available — do not gate it behind "the user asked something structural."
+
+- `list_projects` — check whether the current repo is indexed.
+- If NOT indexed → note "Codebase graph not indexed for this project" and continue with the rest of the protocol (do not index here — that's `session-end`/explicit-request work).
+- If indexed → call `get_architecture` (project structure, layers, entry points) and, if useful for this project's shape, `search_graph`/`trace_path` for the hotspots. Use this to genuinely understand the codebase's real structure before reading docs or Engram — not just to check staleness.
+- Separately, call `index_status` and compare the indexed commit against the HEAD commit from Step 3 → if behind, flag "Codebase graph stale, N commits behind" in the briefing. Staleness does not block using `get_architecture` — a few commits behind is still far more useful than skipping it.
+
+CAUTION: if the `codebase-memory` MCP is not connected this session, skip this step silently — do not block the briefing on it.
+
+### Step 3 — Git State
+
+Run in parallel in a single turn:
+
+- `git status --short` (uncommitted changes)
+- `git branch --show-current` + `git log --oneline -5` (branch + last 5 commits)
+- `git stash list` (pending stashes)
+
+If there are uncommitted changes or stashes → flag them in the briefing.
+
+### Step 4 — State Documentation
+
+Read if they exist (in order, without failing if any is missing):
+
+1. `docs/journal/sessions/` — most recent entry by date
+2. `docs/STATE.md` — executive snapshot
+3. `IMPLEMENTATION_SUMMARY.md` — capabilities and spec state
+4. `README.md` — only if the above do not exist
+
+### Step 5 — Active Spec (if the project follows SDD)
+
+- Look for `specs/NNN-*/tasks.md` (descending numeric order — the last is usually the active one)
+- For each spec, count `- [ ]` checkboxes (pending) vs `- [x]` (closed)
+- Active spec = the last one whose pending ratio > 0 AND whose last edit is recent
+
+CAUTION: unchecked checkboxes may be stale. Cross-reference with `IMPLEMENTATION_SUMMARY.md` or the journal before stating "spec X has Y pending tasks". If the summary says "closed" and checkboxes are unchecked → report the conflict, do not assume it is open.
+
+### Step 6 — Persistent Memory (Atlas-first)
+
+Fetch in parallel, but treat **Atlas as the primary source of truth** — it's where `session-end` now saves by default:
+
+- Direct read of the **Atlas (Obsidian)** vault at `/mnt/nas/Obsidian/`:
+  - `Proyectos/<name>.md` — project entity page, if it exists (architectural state).
+  - If the `atlas_search` MCP is available, also use it. If not, use `grep`/`find` in the vault.
+- `mem_context(project=<name>, limit=20)` — recent observations in Engram, for temporal/tactical detail Atlas doesn't carry (bugfixes, spec snapshots, in-progress state).
+
+If Atlas and Engram disagree on the same fact, **Atlas wins** — it's the later, more deliberate write. Use Engram to fill gaps (what happened recently) rather than to override Atlas's architectural state.
+
+Cross-check dates:
+- If `Proyectos/<name>.md` has `Last updated:` earlier than the project's last journal → flag Atlas drift in the briefing (reconciliation is `session-end` work).
+- If the last Engram observation is older than the last journal → flag "Engram outdated, N days of drift" (lower priority than Atlas drift).
+
+### Step 7 — Tests/Benchmark (optional, ask first)
+
+Do NOT run automatically. Ask the user:
+
+> "Shall I run tests + benchmark as a sanity check? (may take ~30s-2min)"
+
+If they say yes:
+- Detect the test command from the project's `CLAUDE.md` or conventions (`pytest`, `pnpm test`, `go test ./...`, `cargo test`, `unittest discover -s tests`)
+- Respect venvs and paths documented in `CLAUDE.md` (e.g. vi-sdd uses `/home/sandman/.venvs/vi-sdd/bin/python`)
+- Report green/red + number of tests; if red, do NOT attempt to fix — only flag it
+
+### Step 8 — Briefing to User
+
+Return a structured summary:
+
 ```
-- `PROJECT` = basename of the repo root (or `pwd` if no git)
-- `BRANCH` = current branch (or `no-git` if no repository)
-- Call `engram-mem_session_start` with `id="{PROJECT}-{YYYYMMDD-HHMM}"` and `directory="{pwd}"`.
+## Resumption point — <project>
 
-### Step 2 — Check GitFlow branch (MANDATORY before any code change)
-```bash
-git branch --show-current 2>/dev/null || echo "no-git"
+**Branch:** <branch> · **Last commit:** <hash> <msg>
+**Uncommitted changes:** <N files> | <none>
+**Last session:** <journal date> — <title or first line>
+**Codebase graph:** indexed as of <commit/date> | stale (N behind) | not indexed | unavailable
+
+### Project state
+- <bullet with key metrics from STATE/IMPLEMENTATION_SUMMARY>
+- <bullet with active spec if any>
+- <bullet with architecture/entry-points summary from `get_architecture` when the codebase graph is indexed — layers, entry points, where symbols concentrate>
+
+### Prioritized debt (top 3)
+- <from STATE.md §debt or IMPLEMENTATION_SUMMARY>
+
+### Suggested next step
+<1-2 concrete sentences based on the last journal and pending tasks>
 ```
-- If no git repo: **initialize git first** (`git init`), then create `main` + `develop` + `feature/<name>` before writing any code.
-- If branch is `main`, `master`, or `develop`: **STOP**. Create a working branch first:
-  ```bash
-  git checkout develop && git checkout -b feature/<descriptive-name>
-  ```
-- If branch does not match `^(feature|fix|hotfix|chore|release|docs|test|refactor)/`: **STOP**. Rename or create a compliant branch. Valid types: `feature | fix | hotfix | chore | release | docs | test | refactor`.
-- If ✓ OK: proceed.
 
-### Step 3 — Check SDD context (MANDATORY before implementing any feature)
-Check if the project uses SDD by looking for an `openspec/` directory:
-```bash
-ls openspec/config.yaml 2>/dev/null && cat openspec/config.yaml || echo "No SDD config found"
+**Onboarding variant — first contact.** When the first-contact heuristic fires (see
+Heuristics), the resumption template above makes no sense ("last session: none").
+Replace it with an onboarding briefing that teaches the project instead:
+
 ```
-- If `openspec/` exists: **SDD is active for this project.**
-  - Check for an active change: `ls openspec/changes/` — if there's a change without `archived_at`, resume it with `sdd status`.
-  - If there is NO active change and the user asks to implement a feature: **run `sdd new "<feature>"` BEFORE writing any code.**
-  - Remind the user: *"This project uses SDD — should I start with `sdd new` or is there an active change?"*
-- If no `openspec/`: SDD is not configured, skip this step.
+## First contact — <project>
 
-### Step 4 — Read Atlas + engram context (Atlas-first)
-**Only run if** Step 1 returned a valid project id OR Step 3 found an active change. Otherwise skip.
-- Read `/mnt/nas/Obsidian/Proyectos/{current-project}.md` if it exists (Atlas entity page) — this is the primary source of truth.
-- Call `engram-mem_context project="{current-project}"` for temporal/tactical detail Atlas doesn't carry.
-- If Atlas and Engram disagree, Atlas wins.
-- `ATLAS` status for Step 6: `synced` (page exists, read OK), `none` (no entity page).
+### What it is
+<README/CLAUDE.md: purpose in 2-3 lines>
 
-### Step 5 — Codebase graph freshness (codebase-memory-mcp)
-**Only if** the `codebase-memory` MCP tools are available this session.
-- `list_projects` — check if this repo is indexed.
-- If indexed: `index_status`, compare against the HEAD commit from Step 1.
-- Never index here — only report the state.
-- `GRAPH` status for Step 6: `fresh`, `stale(N)` (N commits behind), `none` (not indexed), or `na` (MCP unavailable).
+### Stack & conventions
+<manifests: language, framework, package manager, test runner>
+<CLAUDE.md rules that constrain how work is done here>
 
-### Step 6 — Report to user
-Emit exactly this schema, then ask what to do next in one sentence:
+### Structure
+<directory tree / README description: layers and where symbols concentrate>
+
+### Entry points & hotspots
+<main/server/app + top fan-in symbols — where to start reading>
+
+### How to run / test
+<build, test, dev commands — from CLAUDE.md or package scripts>
+
+### Health signals
+<tests present?, CI?, uncommitted work?>
 ```
-BRANCH:{name} SDD:{change@phase|none} ATLAS:{synced|none} GRAPH:{fresh|stale(N)|none|na} PENDING:{item|none}
+
+If conflicts are detected (outdated engram, checkboxes vs IMPLEMENTATION_SUMMARY, red tests), add an **⚠ Attention** section with the detail.
+
+After the briefing, always end with a **session intake** — ask these questions to collect everything needed before starting work. Present them as a compact block, not a wall of text:
+
 ```
-No headers, no bullets, no explanation. Omit PENDING if none.
+### Before we start — a few questions:
 
-## Critical Rules
+1. **Goal** — What do you want to accomplish today?
+2. **Constraints** — Any deadline, scope limit, or thing to avoid?
+3. **Approach** — Should I propose a plan first, or dive straight in?
+   - Need SDD cycle? (spec, tasks, phases)
+   - Architecture decision that warrants DDIA tradeoff analysis?
+   - Something else I should load before starting?
+4. **Blockers** — Anything waiting on a PR, external dependency, or another person?
+```
 
-- **Never skip any step**, even for quick requests
-- Step 2 is the gate — no file edit before GitFlow check passes
-- Atlas/Engram unavailability is not a blocker — skip Step 4 gracefully and continue
-- Codebase graph unavailability is not a blocker — skip Step 5 gracefully and continue
+**Onboarding intake**: on first contact, prepend one extra question — "Is this your
+first time in this repo, or are you resuming work started elsewhere (no memory
+recorded on this machine)?" Engram-first-contact is not always user-first-contact;
+if they are resuming, keep the onboarding structure but skip the teaching tone.
 
-## Output contract
+STOP after showing the intake. Do not assume answers, propose code, or begin any task until the user replies. Questions 2–4 are optional — if the user only answers question 1, that is enough to proceed.
 
-Respond ONLY in the schema defined in Step 6. No preamble, no markdown headers,
-no explanation of what you did. One schema line + one question sentence. Nothing else.
+---
+
+## Operational Rules
+
+- **Write nothing to disk** during session-start. Read only.
+- **Do not modify memories** (engram/atlas) in start — that is `session-end` work.
+- **Parallelize reads** whenever possible. Bash + Read + mem_context + atlas_search can go in the same turn.
+- **Fail gracefully**: if engram, atlas, codebase-memory-mcp, or any file does not respond/exist → omit that section from the briefing, do not break the flow.
+- **Respect project language**: if CLAUDE.md specifies Spanish (like vi-sdd, homelab), the briefing goes in Spanish. English by default.
+- **Do not suggest code changes** in the briefing. The next-step suggestion is "which task to tackle", not "which line to edit".
+
+---
+
+## Heuristics
+
+**Is this first contact? (onboarding mode)**
+- ALL of these → first contact: mem_context has no observations for the project,
+  no journal/STATE/IMPLEMENTATION_SUMMARY, no Atlas entity page. Use the onboarding
+  briefing variant (Step 8) and prepend the first-time intake question.
+- Only SOME signals missing (e.g. journal exists but Engram is empty) → resumption
+  briefing; flag the missing store as drift instead of switching template.
+
+**Is there an active spec?**
+- `specs/NNN-*/tasks.md` exists with `- [ ]` pending AND the journal/STATE does not explicitly say "closed" → yes
+- If `IMPLEMENTATION_SUMMARY.md` says "closed on <date>" and checkboxes are unchecked → stale checkboxes, NO active spec
+
+**Is Engram outdated?**
+- Last observation with `project=<X>` > 7 days before the last journal → outdated
+- Suggest at the end of the briefing: "Consider running `/session-end` at the end of today to sync Engram"
+
+**Is Atlas relevant?**
+- The Atlas vault lives in `/mnt/nas/Obsidian/`. Structure: `Proyectos/<project>.md` (entity page), `Stack/<category>/<tech>.md` (tech catalog with `_INDEX.md`), `Setup/` (infra), `AI/`, `Temp/`.
+- If `Proyectos/<project>.md` exists → always read it: it has stable architectural state + backlinks to relevant Stack technologies.
+- For small personal projects without an entity page, skip.
+
+**Is the codebase graph stale?**
+- `index_status` commit older than the HEAD commit from Step 3 (Git State) → stale, report the gap in commits.
+- Not indexed at all is normal for a first session on a project — do not treat it as an error, just report it.
+- Never call `index_repository` during session-start — indexing is a write/compute action reserved for `session-end` (with confirmation) or an explicit user request.
+
+---
+
+## Example Output
+
+See `references/example-output.md` for a fully worked example (vi-sdd, simulated) — the format itself is already specified by the templates in Step 8.
