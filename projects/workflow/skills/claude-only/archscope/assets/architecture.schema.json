@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local/archscope/architecture.schema.json",
+  "title": "archscope architecture.json",
+  "type": "object",
+  "required": ["nodes", "edges", "flows", "unresolved", "stats"],
+  "additionalProperties": false,
+  "properties": {
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+    "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } },
+    "flows": { "type": "array", "items": { "$ref": "#/$defs/flow" } },
+    "unresolved": { "type": "array", "items": { "$ref": "#/$defs/unresolved" } },
+    "stats": { "$ref": "#/$defs/stats" },
+    "meta": { "$ref": "#/$defs/meta" }
+  },
+  "$defs": {
+    "lane": {
+      "enum": ["client", "frontend", "backend", "infra", "data", "external"]
+    },
+    "kind": {
+      "enum": [
+        "app", "service", "function", "worker", "ci", "queue", "storage",
+        "table", "view", "package", "procedure", "job", "external-api"
+      ]
+    },
+    "access": {
+      "enum": ["read", "write", "call", "http", "publish", "consume"]
+    },
+    "reason": {
+      "description": "Why the element could not be resolved statically.",
+      "enum": [
+        "dynamic-sql",
+        "dynamic-import",
+        "dynamic-dispatch",
+        "sql-parse-error",
+        "no-sql-parser",
+        "no-db-credentials",
+        "engine-exposes-no-logic",
+        "external-binary",
+        "generated-code",
+        "unindexed-language"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["file", "symbol"],
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "symbol": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "column": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "type": "string" },
+        "nullable": { "type": "boolean" }
+      }
+    },
+    "fk": {
+      "description": "Foreign key declared on this node. FKs live on the node, not in edges: an edge means a code path actually traverses the relationship.",
+      "type": "object",
+      "required": ["column", "references"],
+      "additionalProperties": false,
+      "properties": {
+        "column": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "references": {
+          "type": "object",
+          "required": ["node"],
+          "additionalProperties": false,
+          "properties": {
+            "node": { "type": "string", "minLength": 1 },
+            "column": { "type": "string" }
+          }
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "label", "lane", "kind", "files"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "subtitle": { "type": "string" },
+        "lane": { "$ref": "#/$defs/lane" },
+        "kind": { "$ref": "#/$defs/kind" },
+        "files": { "type": "array", "items": { "type": "string" } },
+        "columns": {
+          "description": "lane:data nodes only — from DataExtractor.tables().",
+          "type": "array",
+          "items": { "$ref": "#/$defs/column" }
+        },
+        "fks": {
+          "description": "lane:data nodes only — from DataExtractor.constraints().",
+          "type": "array",
+          "items": { "$ref": "#/$defs/fk" }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["id", "from", "to", "call", "access", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "call": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Real function name, endpoint or routine. Never a description."
+        },
+        "access": { "$ref": "#/$defs/access" },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": ["n", "from", "to", "call", "description", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "n": { "type": "integer", "minimum": 1 },
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "call": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "branch": {
+          "type": "boolean",
+          "description": "True when this step deliberately forks from a step other than n-1."
+        },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "required": ["id", "title", "entrypoint", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "subtitle": { "type": "string" },
+        "entrypoint": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id where the flow starts."
+        },
+        "trigger": {
+          "description": "How the flow is initiated. At least one flow must be 'job' and one 'webhook'.",
+          "enum": ["ui", "api", "job", "webhook", "queue", "cli"]
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/step" }
+        }
+      }
+    },
+    "unresolved": {
+      "type": "object",
+      "required": ["file", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "symbol": { "type": "string" },
+        "reason": { "$ref": "#/$defs/reason" },
+        "detail": { "type": "string" }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["nodes_by_lane", "edges_by_access", "data_access"],
+      "additionalProperties": false,
+      "properties": {
+        "nodes_by_lane": { "type": "object", "additionalProperties": { "type": "integer" } },
+        "edges_by_access": { "type": "object", "additionalProperties": { "type": "integer" } },
+        "data_access": {
+          "type": "object",
+          "required": ["resolved", "dynamic", "pct_resolved"],
+          "additionalProperties": false,
+          "properties": {
+            "resolved": { "type": "integer", "minimum": 0 },
+            "dynamic": { "type": "integer", "minimum": 0 },
+            "pct_resolved": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "flows": { "type": "integer", "minimum": 0 },
+        "flows_discarded": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "generated_at": { "type": "string" },
+        "repo": { "type": "string" },
+        "commit": { "type": "string" },
+        "dirty": { "type": "boolean" },
+        "db_engine": { "type": "string" }
+      }
+    }
+  }
+}
